@@ -4,6 +4,7 @@ members = [
     "crypto/derive-secret",
     "crypto/hkdf",
     "crypto/tbs",
+    "downstream-sandbox",
     "gateway/ln-gateway",
     "gateway/cli",
     "fedimintd",
