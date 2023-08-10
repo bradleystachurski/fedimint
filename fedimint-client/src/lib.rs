@@ -509,6 +509,10 @@ impl Client {
     }
 
     pub async fn start_executor(&self, mut tg: TaskGroup) {
+        debug!(
+            "Starting fedimint client executor (version: {})",
+            env!("FEDIMINT_BUILD_CODE_VERSION")
+        );
         self.inner
             .executor
             .start_executor(&mut tg, self.inner.context_gen())
