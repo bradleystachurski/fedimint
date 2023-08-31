@@ -8,7 +8,9 @@ use fedimint_core::config::{
     ConfigGenModuleParams, DkgResult, ServerModuleConfig, ServerModuleConsensusConfig,
     TypedServerModuleConfig, TypedServerModuleConsensusConfig,
 };
-use fedimint_core::db::{Database, DatabaseVersion, ModuleDatabaseTransaction};
+use fedimint_core::db::{
+    Database, DatabaseTransaction, DatabaseVersion, ModuleDatabaseTransaction,
+};
 use fedimint_core::encoding::{Decodable, Encodable};
 use fedimint_core::module::audit::Audit;
 use fedimint_core::module::{
@@ -17,7 +19,8 @@ use fedimint_core::module::{
     PeerHandle, ServerModuleInit, SupportedModuleApiVersions, TransactionItemAmount,
 };
 use fedimint_core::server::DynServerModule;
-use fedimint_core::task::{sleep, TaskGroup};
+use fedimint_core::task::{sleep, TaskGroup, TaskHandle};
+use fedimint_core::timing::TimeReporter;
 use fedimint_core::{
     apply, async_trait_maybe_send, push_db_pair_items, Amount, NumPeers, OutPoint, PeerId,
     ServerModule,
@@ -36,9 +39,9 @@ use fedimint_ln_common::db::{
     AgreedDecryptionShareContractIdPrefix, AgreedDecryptionShareKey,
     AgreedDecryptionShareKeyPrefix, BlockCountVoteKey, BlockCountVotePrefix, ContractKey,
     ContractKeyPrefix, ContractUpdateKey, ContractUpdateKeyPrefix, DbKeyPrefix,
-    EncryptedPreimageIndexKey, EncryptedPreimageIndexKeyPrefix, LightningGatewayKey,
-    LightningGatewayKeyPrefix, OfferKey, OfferKeyPrefix, ProposeDecryptionShareKey,
-    ProposeDecryptionShareKeyPrefix,
+    EncryptedPreimageIndexKey, EncryptedPreimageIndexKeyPrefix, LightningAuditItemKey,
+    LightningAuditItemKeyPrefix, LightningGatewayKey, LightningGatewayKeyPrefix, OfferKey,
+    OfferKeyPrefix, ProposeDecryptionShareKey, ProposeDecryptionShareKeyPrefix,
 };
 use fedimint_ln_common::{
     ContractAccount, LightningCommonGen, LightningConsensusItem, LightningError, LightningGateway,
@@ -53,7 +56,7 @@ use futures::StreamExt;
 use rand::rngs::OsRng;
 use serde::{Deserialize, Serialize};
 use strum::IntoEnumIterator;
-use tracing::{debug, error, info_span, trace};
+use tracing::{debug, error, info_span, trace, warn};
 
 lazy_static! {
     pub static ref LN_INCOMING_OFFER: IntCounter = register_int_counter!(opts!(
@@ -125,14 +128,16 @@ impl ServerModuleInit for LightningGen {
     async fn init(
         &self,
         cfg: ServerModuleConfig,
-        _db: Database,
+        db: Database,
         task_group: &mut TaskGroup,
     ) -> anyhow::Result<DynServerModule> {
         // Ensure all metrics are initialized
         for metric in ALL_METRICS.iter() {
             metric.collect();
         }
-        Ok(Lightning::new(cfg.to_typed()?, task_group)?.into())
+        Ok(Lightning::new(cfg.to_typed()?, db, task_group)
+            .await?
+            .into())
     }
 
     fn trusted_dealer_gen(
@@ -316,6 +321,16 @@ impl ServerModuleInit for LightningGen {
                         "Encrypted Preimage Hashes"
                     );
                 }
+                DbKeyPrefix::LightningAuditItem => {
+                    push_db_pair_items!(
+                        dbtx,
+                        LightningAuditItemKeyPrefix,
+                        LightningAuditItemKey,
+                        Amount,
+                        lightning,
+                        "Lightning Audit Items"
+                    );
+                }
             }
         }
 
@@ -324,7 +339,7 @@ impl ServerModuleInit for LightningGen {
 }
 /// The lightning module implements an account system. It does not have the
 /// privacy guarantees of the e-cash mint module but instead allows for smart
-/// contracting. There exist three contract types that can be used to "lock"
+/// contracting. There exist two contract types that can be used to "lock"
 /// accounts:
 ///
 ///   * [Outgoing]: an account locked with an HTLC-like contract allowing to
@@ -337,7 +352,7 @@ impl ServerModuleInit for LightningGen {
 ///     the contract's funds are now accessible to the creator of the offer, if
 ///     not they are accessible to the funder.
 ///
-/// These three primitives allow to integrate the federation with the wider
+/// These two primitives allow to integrate the federation with the wider
 /// Lightning network through a centralized but untrusted (except for
 /// availability) Lightning gateway server.
 ///
@@ -507,7 +522,7 @@ impl ServerModule for Lightning {
                         outcome: ContractOutcome::Incoming(decryption_outcome),
                         ..
                     } => decryption_outcome,
-                    _ => panic!("We are expeccting an incoming contract"),
+                    _ => panic!("We are expecting an incoming contract"),
                 };
                 *incoming_contract_outcome_preimage = decrypted_preimage.clone();
                 dbtx.insert_entry(&ContractUpdateKey(out_point), &outcome)
@@ -611,6 +626,12 @@ impl ServerModule for Lightning {
         dbtx.insert_entry(&ContractKey(input.contract_id), &account)
             .await;
 
+        dbtx.insert_entry(
+            &LightningAuditItemKey::from_funded_contract(&account.contract),
+            &account.amount,
+        )
+        .await;
+
         Ok(InputMeta {
             amount: TransactionItemAmount {
                 amount: input.amount,
@@ -663,6 +684,14 @@ impl ServerModule for Lightning {
                         amount: contract.amount,
                         contract: contract.contract.clone().to_funded(out_point),
                     });
+
+                dbtx.insert_entry(
+                    &LightningAuditItemKey::from_funded_contract(
+                        &updated_contract_account.contract,
+                    ),
+                    &updated_contract_account.amount,
+                )
+                .await;
 
                 if dbtx
                     .insert_entry(&contract_db_key, &updated_contract_account)
@@ -821,9 +850,17 @@ impl ServerModule for Lightning {
 
     async fn audit(&self, dbtx: &mut ModuleDatabaseTransaction<'_>, audit: &mut Audit) {
         audit
-            .add_items(dbtx, common::KIND.as_str(), &ContractKeyPrefix, |_, v| {
-                -(v.amount.msats as i64)
-            })
+            .add_items(
+                dbtx,
+                common::KIND.as_str(),
+                &LightningAuditItemKeyPrefix,
+                |k, v| match k {
+                    // both incoming and outgoing contracts represent liabilities since they
+                    // are future obligations to issue notes
+                    LightningAuditItemKey::Incoming(_) => -(v.msats as i64),
+                    LightningAuditItemKey::Outgoing(_) => -(v.msats as i64),
+                },
+            )
             .await;
     }
 
@@ -885,9 +922,53 @@ impl ServerModule for Lightning {
 }
 
 impl Lightning {
-    pub fn new(cfg: LightningConfig, task_group: &mut TaskGroup) -> anyhow::Result<Self> {
+    pub async fn new(
+        cfg: LightningConfig,
+        db: Database,
+        task_group: &mut TaskGroup,
+    ) -> anyhow::Result<Self> {
         let btc_rpc = create_bitcoind(&cfg.local.bitcoin_rpc, task_group.make_handle())?;
+        task_group
+            .spawn("compact audit keys", |handle| async move {
+                Self::compact_audit_keys_task(db, &handle).await;
+            })
+            .await;
         Ok(Lightning { cfg, btc_rpc })
+    }
+
+    async fn compact_audit_keys_task(db: Database, tg_handle: &TaskHandle) {
+        let interval = Duration::from_secs(60 * 5);
+        while !tg_handle.is_shutting_down() {
+            let mut dbtx = db.begin_transaction().await;
+            Self::compact_audit_keys(&mut dbtx).await;
+            if let Err(_) = dbtx.commit_tx_result().await {
+                warn!(
+                    "conflict while compacting audit keys, retrying in {} seconds",
+                    interval.as_secs()
+                );
+            }
+            sleep(interval).await;
+        }
+    }
+
+    async fn compact_audit_keys(dbtx: &mut DatabaseTransaction<'_>) {
+        let _timing /* logs on drop */ = TimeReporter::new("compact_audit_keys");
+        let remove_audit_keys = dbtx
+            .find_by_prefix(&LightningAuditItemKeyPrefix)
+            .await
+            .filter_map(|(key, amount)| async move {
+                if amount.msats == 0u64 {
+                    Some(key)
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<_>>()
+            .await;
+
+        for key in remove_audit_keys {
+            dbtx.remove_entry(&key).await;
+        }
     }
 
     pub async fn block_count(&self) -> u64 {
@@ -1011,7 +1092,10 @@ impl fedimint_core::server::VerificationCache for LightningVerificationCache {}
 
 #[cfg(test)]
 mod tests {
+    use std::str::FromStr;
+
     use assert_matches::assert_matches;
+    use bitcoin_hashes::hex::ToHex;
     use bitcoin_hashes::Hash as BitcoinHash;
     use fedimint_core::bitcoinrpc::BitcoinRpcConfig;
     use fedimint_core::config::ConfigGenModuleParams;
@@ -1026,8 +1110,11 @@ mod tests {
         LightningGenParamsLocal, Network,
     };
     use fedimint_ln_common::contracts::incoming::IncomingContractOffer;
-    use fedimint_ln_common::contracts::EncryptedPreimage;
+    use fedimint_ln_common::contracts::{ContractId, EncryptedPreimage};
+    use fedimint_ln_common::db::{LightningAuditItemKey, LightningAuditItemKeyPrefix};
     use fedimint_ln_common::LightningOutput;
+    use futures::StreamExt;
+    use rand::Rng;
 
     use crate::{Lightning, LightningGen};
 
@@ -1073,8 +1160,11 @@ mod tests {
     #[test_log::test(tokio::test)]
     async fn encrypted_preimage_only_usable_once() {
         let (server_cfg, client_cfg) = build_configs();
+        let db = Database::new(MemDatabase::new(), Default::default());
         let mut tg = TaskGroup::new();
-        let server = Lightning::new(server_cfg[0].clone(), &mut tg).unwrap();
+        let server = Lightning::new(server_cfg[0].clone(), db.clone(), &mut tg)
+            .await
+            .unwrap();
 
         let preimage = [42u8; 32];
         let encrypted_preimage = EncryptedPreimage(client_cfg.threshold_pub_key.encrypt([42; 32]));
@@ -1092,7 +1182,6 @@ mod tests {
             out_idx: 0,
         };
 
-        let db = Database::new(MemDatabase::new(), Default::default());
         let mut dbtx = db.begin_transaction().await;
 
         server
@@ -1120,6 +1209,49 @@ mod tests {
             Err(_)
         );
     }
+
+    fn random_contract_id() -> ContractId {
+        let mut rng = rand::thread_rng();
+        let random_bytes: [u8; 32] = rng.gen();
+        ContractId::from_str(&random_bytes.to_hex().to_string()).unwrap()
+    }
+
+    #[test_log::test(tokio::test)]
+    async fn compacts_audit_keys() {
+        let db = Database::new(MemDatabase::new(), Default::default());
+        let completed_amount = Amount::ZERO;
+        let pending_amount = Amount::from_msats(1000);
+
+        let completed_keys = vec![
+            LightningAuditItemKey::Incoming(random_contract_id()),
+            LightningAuditItemKey::Outgoing(random_contract_id()),
+        ];
+        let pending_keys = vec![
+            LightningAuditItemKey::Incoming(random_contract_id()),
+            LightningAuditItemKey::Outgoing(random_contract_id()),
+        ];
+
+        let mut dbtx = db.begin_transaction().await;
+        for key in completed_keys {
+            dbtx.insert_entry(&key, &completed_amount).await;
+        }
+        for key in &pending_keys {
+            dbtx.insert_entry(key, &pending_amount).await;
+        }
+
+        Lightning::compact_audit_keys(&mut dbtx).await;
+        let compacted_audit_keys = dbtx
+            .find_by_prefix(&LightningAuditItemKeyPrefix)
+            .await
+            .collect::<Vec<_>>()
+            .await;
+
+        assert_matches!(compacted_audit_keys.len(), 2);
+        compacted_audit_keys.iter().for_each(|(key, amount)| {
+            assert!(pending_keys.contains(&key));
+            assert_eq!(&pending_amount, amount)
+        })
+    }
 }
 
 #[cfg(test)]
@@ -1144,8 +1276,9 @@ mod fedimint_migration_tests {
     use fedimint_ln_common::db::{
         AgreedDecryptionShareKey, AgreedDecryptionShareKeyPrefix, ContractKey, ContractKeyPrefix,
         ContractUpdateKey, ContractUpdateKeyPrefix, DbKeyPrefix, EncryptedPreimageIndexKey,
-        EncryptedPreimageIndexKeyPrefix, LightningGatewayKey, LightningGatewayKeyPrefix, OfferKey,
-        OfferKeyPrefix, ProposeDecryptionShareKey, ProposeDecryptionShareKeyPrefix,
+        EncryptedPreimageIndexKeyPrefix, LightningAuditItemKey, LightningAuditItemKeyPrefix,
+        LightningGatewayKey, LightningGatewayKeyPrefix, OfferKey, OfferKeyPrefix,
+        ProposeDecryptionShareKey, ProposeDecryptionShareKeyPrefix,
     };
     use fedimint_ln_common::LightningCommonGen;
     use fedimint_testing::db::{
@@ -1194,7 +1327,7 @@ mod fedimint_migration_tests {
             &ContractKey(contract_id),
             &ContractAccount {
                 amount,
-                contract: incoming_contract,
+                contract: incoming_contract.clone(),
             },
         )
         .await;
@@ -1211,7 +1344,7 @@ mod fedimint_migration_tests {
             &ContractKey(contract_id),
             &ContractAccount {
                 amount,
-                contract: outgoing_contract,
+                contract: outgoing_contract.clone(),
             },
         )
         .await;
@@ -1267,6 +1400,18 @@ mod fedimint_migration_tests {
 
         dbtx.insert_new_entry(&EncryptedPreimageIndexKey("foobar".consensus_hash()), &())
             .await;
+
+        dbtx.insert_new_entry(
+            &LightningAuditItemKey::from_funded_contract(&incoming_contract),
+            &amount,
+        )
+        .await;
+
+        dbtx.insert_new_entry(
+            &LightningAuditItemKey::from_funded_contract(&outgoing_contract),
+            &amount,
+        )
+        .await;
 
         dbtx.commit_tx().await;
     }
@@ -1394,6 +1539,19 @@ mod fedimint_migration_tests {
                             ensure!(
                                 num_shares > 0,
                                 "validate_migrations was not able to read any EncryptedPreimageIndexKeys"
+                            );
+                        }
+                        DbKeyPrefix::LightningAuditItem => {
+                            let audit_keys = dbtx
+                                .find_by_prefix(&LightningAuditItemKeyPrefix)
+                                .await
+                                .collect::<Vec<_>>()
+                                .await;
+
+                            let num_audit_items = audit_keys.len();
+                            ensure!(
+                                num_audit_items == 2,
+                                "validate_migrations was not able to read any LightningAuditItemKeys"
                             );
                         }
                     }

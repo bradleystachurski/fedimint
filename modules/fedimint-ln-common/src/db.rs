@@ -1,11 +1,11 @@
 use fedimint_core::encoding::{Decodable, Encodable};
-use fedimint_core::{impl_db_lookup, impl_db_record, OutPoint, PeerId};
+use fedimint_core::{impl_db_lookup, impl_db_record, Amount, OutPoint, PeerId};
 use secp256k1::PublicKey;
 use serde::Serialize;
 use strum_macros::EnumIter;
 
 use crate::contracts::incoming::IncomingContractOffer;
-use crate::contracts::{ContractId, PreimageDecryptionShare};
+use crate::contracts::{ContractId, FundedContract, IdentifiableContract, PreimageDecryptionShare};
 use crate::{ContractAccount, LightningGateway, LightningOutputOutcome};
 
 #[repr(u8)]
@@ -19,6 +19,7 @@ pub enum DbKeyPrefix {
     LightningGateway = 0x45,
     BlockCountVote = 0x46,
     EncryptedPreimageIndex = 0x47,
+    LightningAuditItem = 0x48,
 }
 
 impl std::fmt::Display for DbKeyPrefix {
@@ -55,6 +56,41 @@ impl_db_record!(
 impl_db_lookup!(
     key = ContractUpdateKey,
     query_prefix = ContractUpdateKeyPrefix
+);
+
+/// We keep a separate mapping of incoming and outgoing ContractIds to Amounts,
+/// which allows us to quickly audit the total liabilities in the Lightning
+/// module
+#[derive(Debug, Clone, Encodable, Decodable, Serialize, PartialEq)]
+pub enum LightningAuditItemKey {
+    Incoming(ContractId),
+    Outgoing(ContractId),
+}
+
+impl LightningAuditItemKey {
+    pub fn from_funded_contract(contract: &FundedContract) -> Self {
+        match contract {
+            FundedContract::Outgoing(outgoing) => {
+                LightningAuditItemKey::Outgoing(outgoing.contract_id())
+            }
+            FundedContract::Incoming(incoming) => {
+                LightningAuditItemKey::Incoming(incoming.contract.contract_id())
+            }
+        }
+    }
+}
+
+#[derive(Debug, Encodable, Decodable)]
+pub struct LightningAuditItemKeyPrefix;
+
+impl_db_record!(
+    key = LightningAuditItemKey,
+    value = Amount,
+    db_prefix = DbKeyPrefix::LightningAuditItem,
+);
+impl_db_lookup!(
+    key = LightningAuditItemKey,
+    query_prefix = LightningAuditItemKeyPrefix
 );
 
 /// We save the hash of the encrypted preimage from each accepted offer so that

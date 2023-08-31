@@ -52,7 +52,7 @@ use rand::{CryptoRng, Rng, RngCore};
 use secp256k1_zkp::{All, Secp256k1};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
-use tracing::{debug, error};
+use tracing::{debug, error, info};
 
 use crate::pay::{
     GatewayPayError, LightningPayCommon, LightningPayCreatedOutgoingLnContract,
