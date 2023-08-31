@@ -148,6 +148,21 @@ pub async fn write_overwrite_async<P: AsRef<Path>, C: AsRef<[u8]>>(
 }
 
 #[cfg(not(target_family = "wasm"))]
+pub async fn write_append_async<P: AsRef<Path>, C: AsRef<[u8]>>(
+    path: P,
+    contents: C,
+) -> io::Result<()> {
+    tokio::fs::OpenOptions::new()
+        .write(true)
+        .create(true)
+        .append(true)
+        .open(path)
+        .await?
+        .write_all(contents.as_ref())
+        .await
+}
+
+#[cfg(not(target_family = "wasm"))]
 pub async fn write_new_async<P: AsRef<Path>, C: AsRef<[u8]>>(
     path: P,
     contents: C,
