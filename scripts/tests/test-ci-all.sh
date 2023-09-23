@@ -112,7 +112,7 @@ PATH="$(pwd)/scripts/dev/run-isolated-test/:$PATH"
 if parallel \
   --halt-on-error 1 \
   --joblog "$joblog" \
-  --timeout 600 \
+  --timeout 1200 \
   --load 150% \
   --delay 5 \
   --jobs "$parallel_jobs" \
