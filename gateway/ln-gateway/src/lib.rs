@@ -413,7 +413,8 @@ impl Gateway {
         ln_client: Arc<dyn ILnRpcClient>,
         parent_task_group: TaskHandle,
         mut htlc_task_group: TaskGroup,
-    ) -> Result<()> {
+    ) -> Result<HtlcStreamOutcome> {
+        // TODO: update comment
         // Successful calls to route_htlcs establish a connection
         self.set_gateway_state(GatewayState::Connected).await;
         info!("Established HTLC stream");
@@ -442,18 +443,18 @@ impl Gateway {
                 tokio::select! {
                     _ = self.handle_htlc_stream(stream, parent_task_group.clone()) => {
                         warn!("HTLC Stream Lightning connection broken. Gateway is disconnected");
-                        Ok(())
+                        Ok(HtlcStreamOutcome::Broken)
                     },
                     _ = parent_task_group.make_shutdown_rx().await => {
                         info!("Received shutdown signal");
                         self.handle_disconnect(htlc_task_group).await;
-                        Err(GatewayError::Disconnected)
+                        Ok(HtlcStreamOutcome::ShutdownSignal)
                     }
                 }
             }
             Err(e) => {
                 error!("Failed to retrieve Lightning info: {e:?}");
-                Ok(())
+                Err(e)
             }
         }
     }
@@ -476,7 +477,7 @@ impl Gateway {
                         // Re-create the HTLC stream if the connection breaks
                         match lnrpc_route.route_htlcs(&mut htlc_task_group).await {
                             Ok((stream, ln_client)) => {
-                                if let Err(_) = self
+                                if let Ok(HtlcStreamOutcome::ShutdownSignal) = self
                                     .clone()
                                     .handle_route_htlc_stream(
                                         stream,
@@ -1171,4 +1172,9 @@ impl IntoResponse for GatewayError {
         *err.status_mut() = status_code;
         err
     }
+}
+
+enum HtlcStreamOutcome {
+    ShutdownSignal,
+    Broken,
 }
