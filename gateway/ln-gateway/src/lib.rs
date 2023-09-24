@@ -439,17 +439,8 @@ impl Gateway {
 
                 // Blocks until the connection to the lightning node breaks or we receive the
                 // shutdown signal
-                tokio::select! {
-                    _ = self.handle_htlc_stream(stream, htlc_task_group.make_handle()) => {
-                        warn!("HTLC Stream Lightning connection broken. Gateway is disconnected");
-                        Ok(HtlcStreamOutcome::Broken)
-                    },
-                    _ = htlc_task_group.make_handle().make_shutdown_rx().await => {
-                        info!("Received shutdown signal");
-                        self.handle_disconnect(htlc_task_group).await;
-                        Ok(HtlcStreamOutcome::ShutdownSignal)
-                    }
-                }
+                self.handle_htlc_stream(stream, htlc_task_group.make_handle())
+                    .await
             }
             Err(e) => {
                 error!("Failed to retrieve Lightning info: {e:?}");
@@ -485,6 +476,7 @@ impl Gateway {
                                     )
                                     .await
                                 {
+                                    self.handle_disconnect(htlc_task_group).await;
                                     break;
                                 }
                             }
@@ -515,7 +507,11 @@ impl Gateway {
     }
 
     // TODO: move handle shutdown to inside this method
-    pub async fn handle_htlc_stream(&self, mut stream: RouteHtlcStream<'_>, handle: TaskHandle) {
+    async fn handle_htlc_stream(
+        &self,
+        mut stream: RouteHtlcStream<'_>,
+        handle: TaskHandle,
+    ) -> Result<HtlcStreamOutcome> {
         let GatewayState::Running {
             lnrpc,
             lightning_public_key: _,
@@ -527,50 +523,56 @@ impl Gateway {
         // TODO: select! on the stream.next() or the shutdown signal, instead of handle
         // shutdown signal from the caller
         loop {
-            match stream.next().await {
-                Some(Ok(htlc_request)) => {
-                    if handle.is_shutting_down() {
-                        break;
-                    }
-                    let scid_to_feds = self.scid_to_federation.read().await;
-                    let federation_id = scid_to_feds.get(&htlc_request.short_channel_id);
-                    // Just forward the HTLC if we do not have a federation that
-                    // corresponds to the short channel id
-                    if let Some(federation_id) = federation_id {
-                        let clients = self.clients.read().await;
-                        let client = clients.get(federation_id);
-                        // Just forward the HTLC if we do not have a client that
-                        // corresponds to the federation id
-                        if let Some(client) = client {
-                            let htlc = htlc_request.clone().try_into();
-                            if let Ok(htlc) = htlc {
-                                match client.gateway_handle_intercepted_htlc(htlc).await {
-                                    Ok(_) => continue,
-                                    Err(e) => {
-                                        info!("Got error intercepting HTLC: {e:?}, will retry...")
+            tokio::select! {
+                item = stream.next() => {
+                    match item {
+                        Some(Ok(htlc_request)) => {
+                            let scid_to_feds = self.scid_to_federation.read().await;
+                            let federation_id = scid_to_feds.get(&htlc_request.short_channel_id);
+                            // Just forward the HTLC if we do not have a federation that
+                            // corresponds to the short channel id
+                            if let Some(federation_id) = federation_id {
+                                let clients = self.clients.read().await;
+                                let client = clients.get(federation_id);
+                                // Just forward the HTLC if we do not have a client that
+                                // corresponds to the federation id
+                                if let Some(client) = client {
+                                    let htlc = htlc_request.clone().try_into();
+                                    if let Ok(htlc) = htlc {
+                                        match client.gateway_handle_intercepted_htlc(htlc).await {
+                                            Ok(_) => continue,
+                                            Err(e) => {
+                                                info!("Got error intercepting HTLC: {e:?}, will retry...")
+                                            }
+                                        }
+                                    } else {
+                                        info!("Got no HTLC result")
                                     }
+                                } else {
+                                    info!("Got no client result")
                                 }
-                            } else {
-                                info!("Got no HTLC result")
                             }
-                        } else {
-                            info!("Got no client result")
+
+                            let outcome = InterceptHtlcResponse {
+                                action: Some(Action::Forward(Forward {})),
+                                incoming_chan_id: htlc_request.incoming_chan_id,
+                                htlc_id: htlc_request.htlc_id,
+                            };
+
+                            if let Err(error) = lnrpc.complete_htlc(outcome).await {
+                                error!("Error sending HTLC response to lightning node: {error:?}");
+                            }
+                        }
+                        other => {
+                            info!("Got {other:?} while handling HTLC stream, exiting from loop...");
+                            // todo: noodle on if we should return an error
+                            return Ok(HtlcStreamOutcome::UnknownMessage)
                         }
                     }
-
-                    let outcome = InterceptHtlcResponse {
-                        action: Some(Action::Forward(Forward {})),
-                        incoming_chan_id: htlc_request.incoming_chan_id,
-                        htlc_id: htlc_request.htlc_id,
-                    };
-
-                    if let Err(error) = lnrpc.complete_htlc(outcome).await {
-                        error!("Error sending HTLC response to lightning node: {error:?}");
-                    }
                 }
-                other => {
-                    info!("Got {other:?} while handling HTLC stream, exiting from loop...");
-                    break;
+                _ = handle.make_shutdown_rx().await => {
+                    info!("Received shutdown signal");
+                    return Ok(HtlcStreamOutcome::ShutdownSignal)
                 }
             }
         }
@@ -1175,4 +1177,5 @@ impl IntoResponse for GatewayError {
 enum HtlcStreamOutcome {
     ShutdownSignal,
     Broken,
+    UnknownMessage,
 }
