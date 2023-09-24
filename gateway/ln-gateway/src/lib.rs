@@ -411,7 +411,6 @@ impl Gateway {
         mut self,
         stream: RouteHtlcStream<'_>,
         ln_client: Arc<dyn ILnRpcClient>,
-        parent_task_group: TaskHandle,
         mut htlc_task_group: TaskGroup,
     ) -> Result<HtlcStreamOutcome> {
         // TODO: update comment
@@ -441,11 +440,11 @@ impl Gateway {
                 // Blocks until the connection to the lightning node breaks or we receive the
                 // shutdown signal
                 tokio::select! {
-                    _ = self.handle_htlc_stream(stream, parent_task_group.clone()) => {
+                    _ = self.handle_htlc_stream(stream, htlc_task_group.make_handle()) => {
                         warn!("HTLC Stream Lightning connection broken. Gateway is disconnected");
                         Ok(HtlcStreamOutcome::Broken)
                     },
-                    _ = parent_task_group.make_shutdown_rx().await => {
+                    _ = htlc_task_group.make_handle().make_shutdown_rx().await => {
                         info!("Received shutdown signal");
                         self.handle_disconnect(htlc_task_group).await;
                         Ok(HtlcStreamOutcome::ShutdownSignal)
@@ -482,7 +481,6 @@ impl Gateway {
                                     .handle_route_htlc_stream(
                                         stream,
                                         ln_client,
-                                        tg.make_handle(),
                                         htlc_task_group.clone(),
                                     )
                                     .await
