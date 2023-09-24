@@ -55,7 +55,7 @@ use fedimint_mint_client::{MintClientGen, MintCommonGen};
 use fedimint_wallet_client::{WalletClientExt, WalletClientGen, WalletCommonGen, WithdrawState};
 use futures::stream::StreamExt;
 use gateway_lnrpc::intercept_htlc_response::Action;
-use gateway_lnrpc::{GetNodeInfoResponse, InterceptHtlcResponse};
+use gateway_lnrpc::{GetNodeInfoResponse, InterceptHtlcRequest, InterceptHtlcResponse};
 use lightning::routing::gossip::RoutingFees;
 use lnrpc_client::{ILnRpcClient, LightningBuilder, LightningRpcError, RouteHtlcStream};
 use rand::rngs::OsRng;
@@ -506,6 +506,50 @@ impl Gateway {
         }
     }
 
+    async fn handle_htlc_request(
+        &self,
+        htlc_request: InterceptHtlcRequest,
+        lnrpc: Arc<dyn ILnRpcClient>,
+    ) -> Result<HtlcStreamOutcome> {
+        let scid_to_feds = self.scid_to_federation.read().await;
+        let federation_id = scid_to_feds.get(&htlc_request.short_channel_id);
+        // Just forward the HTLC if we do not have a federation that
+        // corresponds to the short channel id
+        if let Some(federation_id) = federation_id {
+            let clients = self.clients.read().await;
+            let client = clients.get(federation_id);
+            // Just forward the HTLC if we do not have a client that
+            // corresponds to the federation id
+            if let Some(client) = client {
+                let htlc = htlc_request.clone().try_into();
+                if let Ok(htlc) = htlc {
+                    match client.gateway_handle_intercepted_htlc(htlc).await {
+                        Ok(_) => return Ok(HtlcStreamOutcome::InterceptedHtlc),
+                        Err(e) => {
+                            info!("Got error intercepting HTLC: {e:?}, will retry...")
+                        }
+                    }
+                } else {
+                    info!("Got no HTLC result")
+                }
+            } else {
+                info!("Got no client result")
+            }
+        }
+
+        let outcome = InterceptHtlcResponse {
+            action: Some(Action::Forward(Forward {})),
+            incoming_chan_id: htlc_request.incoming_chan_id,
+            htlc_id: htlc_request.htlc_id,
+        };
+
+        if let Err(error) = lnrpc.complete_htlc(outcome).await {
+            error!("Error sending HTLC response to lightning node: {error:?}");
+        };
+
+        Ok(HtlcStreamOutcome::Placeholder)
+    }
+
     // TODO: move handle shutdown to inside this method
     async fn handle_htlc_stream(
         &self,
@@ -527,41 +571,10 @@ impl Gateway {
                 item = stream.next() => {
                     match item {
                         Some(Ok(htlc_request)) => {
-                            let scid_to_feds = self.scid_to_federation.read().await;
-                            let federation_id = scid_to_feds.get(&htlc_request.short_channel_id);
-                            // Just forward the HTLC if we do not have a federation that
-                            // corresponds to the short channel id
-                            if let Some(federation_id) = federation_id {
-                                let clients = self.clients.read().await;
-                                let client = clients.get(federation_id);
-                                // Just forward the HTLC if we do not have a client that
-                                // corresponds to the federation id
-                                if let Some(client) = client {
-                                    let htlc = htlc_request.clone().try_into();
-                                    if let Ok(htlc) = htlc {
-                                        match client.gateway_handle_intercepted_htlc(htlc).await {
-                                            Ok(_) => continue,
-                                            Err(e) => {
-                                                info!("Got error intercepting HTLC: {e:?}, will retry...")
-                                            }
-                                        }
-                                    } else {
-                                        info!("Got no HTLC result")
-                                    }
-                                } else {
-                                    info!("Got no client result")
+                            if let Ok(HtlcStreamOutcome::InterceptedHtlc) =
+                                self.handle_htlc_request(htlc_request, lnrpc.clone()).await {
+                                    continue;
                                 }
-                            }
-
-                            let outcome = InterceptHtlcResponse {
-                                action: Some(Action::Forward(Forward {})),
-                                incoming_chan_id: htlc_request.incoming_chan_id,
-                                htlc_id: htlc_request.htlc_id,
-                            };
-
-                            if let Err(error) = lnrpc.complete_htlc(outcome).await {
-                                error!("Error sending HTLC response to lightning node: {error:?}");
-                            }
                         }
                         other => {
                             info!("Got {other:?} while handling HTLC stream, exiting from loop...");
@@ -1176,6 +1189,7 @@ impl IntoResponse for GatewayError {
 
 enum HtlcStreamOutcome {
     ShutdownSignal,
-    Broken,
+    Placeholder,
     UnknownMessage,
+    InterceptedHtlc,
 }
