@@ -3,6 +3,7 @@ on:
   pull_request_target:
     # Run on merge (close) or if label is added after merging
     types: [closed, labeled]
+  workflow_dispatch:
 jobs:
   backport:
     permissions:
@@ -30,8 +31,10 @@ jobs:
 #    if: ${{ needs.backport.outputs.was_successful }} == 'false'
     steps:
       - id: debug-step
-        run: echo needs.backport.outputs = ${{ needs.backport.outputs }}
-      - uses: actions/checkout@v4
+        run: |
+          echo needs.backport.outputs = ${{ toJson(needs.backport.outputs) }}
+          echo needs.backport.outputs.was_successful = ${{ needs.backport.outputs.was_successful }}
+#      - uses: actions/checkout@v4
 #      - name: Create issue
 #        uses: JasonEtco/create-an-issue@v2
 #        env:
