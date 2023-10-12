@@ -35,6 +35,7 @@ jobs:
           echo needs.backport.outputs = ${{ toJson(needs.backport.outputs) }}
           echo needs.backport.outputs.was_successful = ${{ needs.backport.outputs.was_successful }}
           echo needs.backport.outputs.was_successful == 'false' = ${{ needs.backport.outputs.was_successful == 'false' }}
+          echo needs.backport.outputs.was_successful == 'false' = ${{ needs.backport.outputs.was_successful }} == 'false'
 #      - uses: actions/checkout@v4
 #      - name: Create issue
 #        uses: JasonEtco/create-an-issue@v2
