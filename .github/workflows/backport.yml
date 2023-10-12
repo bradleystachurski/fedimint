@@ -28,7 +28,7 @@ jobs:
     needs: backport
     # Open an issue only if the backport job failed
     # https://github.com/korthout/backport-action/blob/e53c7b292aa9985d372c178a89d416ef2176c091/README.md#outputs
-#    if: ${{ needs.backport.outputs.was_successful }} == 'false'
+    if: ${{ needs.backport.outputs.was_successful == 'false' }}
     steps:
       - id: debug-step
         run: |
