@@ -36,11 +36,11 @@ jobs:
           echo needs.backport.outputs.was_successful = ${{ needs.backport.outputs.was_successful }}
           echo needs.backport.outputs.was_successful == 'false' = ${{ needs.backport.outputs.was_successful == 'false' }}
           echo needs.backport.outputs.was_successful == 'false' = ${{ needs.backport.outputs.was_successful }} == 'false'
-#      - uses: actions/checkout@v4
-#      - name: Create issue
-#        uses: JasonEtco/create-an-issue@v2
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#          PR_NUMBER: ${{ github.event.number }}
-#        with:
-#          filename: .github/templates/failed-backport-issue.md
+      - uses: actions/checkout@v4
+      - name: Create issue
+        uses: JasonEtco/create-an-issue@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.ISSUE_TOKEN }}
+          PR_NUMBER: ${{ github.event.number }}
+        with:
+          filename: .github/templates/failed-backport-issue.md
