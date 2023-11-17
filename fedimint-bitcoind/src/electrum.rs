@@ -68,11 +68,25 @@ impl IBitcoindRpc for ElectrumClient {
     }
 
     async fn get_fee_rate(&self, confirmation_target: u16) -> anyhow::Result<Option<Feerate>> {
+        info!("inside get_fee_rate");
         let estimate = block_in_place(|| self.0.estimate_fee(confirmation_target as usize))?;
+        info!("estimate: {:?}", &estimate);
+        // https://developer.bitcoin.org/reference/rpc/getnetworkinfo.html
+        // "relayfee" : n,                                    (numeric) minimum relay fee for transactions in BTC/kB
+        // treated like sats/vB
+        // https://electrumx.readthedocs.io/en/latest/protocol-methods.html#blockchain-relayfee
+        // Result
+        //
+        // The fee in whole coin units as a floating point number.
+        // Example Results
+        //
+        // 0.000001
         let min_fee = block_in_place(|| self.0.relay_fee())?;
+        info!("min_fee: {:?}", &min_fee);
 
         // convert fee rate estimate or min fee to sats
         let sats_per_kvb = estimate.max(min_fee) * 100_000_000f64;
+        info!("sats_per_kvb: {:?}", &sats_per_kvb);
         Ok(Some(Feerate {
             sats_per_kvb: sats_per_kvb.ceil() as u64,
         }))

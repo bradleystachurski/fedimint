@@ -65,10 +65,12 @@ impl IBitcoindRpc for BitcoinClient {
     }
 
     async fn get_fee_rate(&self, confirmation_target: u16) -> anyhow::Result<Option<Feerate>> {
+        info!("inside bitcoind get_fee_rate");
         let fee = block_in_place(|| {
             self.0
                 .estimate_smart_fee(confirmation_target, Some(EstimateMode::Conservative))
         });
+        info!("fee: {:?}", &fee);
         Ok(fee?.fee_rate.map(|per_kb| Feerate {
             sats_per_kvb: per_kb.to_sat(),
         }))

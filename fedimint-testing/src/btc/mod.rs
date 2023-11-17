@@ -4,7 +4,7 @@ pub mod real;
 use async_trait::async_trait;
 use bitcoin::{Address, Transaction, Txid};
 use fedimint_core::txoproof::TxOutProof;
-use fedimint_core::Amount;
+use fedimint_core::{Amount, Feerate};
 
 #[async_trait]
 pub trait BitcoinTest {
@@ -41,4 +41,6 @@ pub trait BitcoinTest {
 
     /// Waits till tx is found in mempool and returns the fees
     async fn get_mempool_tx_fee(&self, txid: &Txid) -> Amount;
+
+    async fn estimate_smart_fee(&self) -> Option<Feerate>;
 }

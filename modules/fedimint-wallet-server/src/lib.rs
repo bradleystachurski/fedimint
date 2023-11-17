@@ -357,8 +357,14 @@ impl ServerModule for Wallet {
         // If there's an error getting the fee rate from the node we default to the most
         // recent fee rate vote. Using an alternative fee rate may cause unwanted
         // jitter.
+        info!("inside consensus_proposal, about to get_fee_rate");
         let fee_rate_proposal = match self.get_fee_rate_opt().await {
-            Ok(fee_rate_opt) => fee_rate_opt.unwrap_or(self.cfg.consensus.default_fee),
+            Ok(fee_rate_opt) => {
+                if let Some(fee_rate) = fee_rate_opt {
+                    info!("unwrapped fee rate: {:?}", fee_rate);
+                }
+                fee_rate_opt.unwrap_or(self.cfg.consensus.default_fee)
+            }
             Err(err) => {
                 error!(
                     "Error while calling get_free_rate_opt, using most recent fee rate vote: {:?}",
@@ -527,7 +533,9 @@ impl ServerModule for Wallet {
 
         let mut tx = self.create_peg_out_tx(dbtx, output, &change_tweak).await?;
 
+        info!("inside process_output");
         let fee_rate = self.consensus_fee_rate(dbtx).await;
+        info!("process_output fee_rate: {:?}", &fee_rate);
 
         self.offline_wallet()
             .validate_tx(&tx, output, fee_rate, self.cfg.consensus.network)?;
@@ -651,8 +659,10 @@ impl ServerModule for Wallet {
             api_endpoint! {
                 PEG_OUT_FEES_ENDPOINT,
                 async |module: &Wallet, context, params: (Address, u64)| -> Option<PegOutFees> {
+                    info!("inside api_endpoint PEG_OUT_FEES_ENDPOINT");
                     let (address, sats) = params;
                     let feerate = module.consensus_fee_rate(&mut context.dbtx()).await;
+                    info!("feerate: {:?}", &feerate);
 
                     // Since we are only calculating the tx size we can use an arbitrary dummy nonce.
                     let dummy_tweak = [0; 32];
@@ -1205,6 +1215,9 @@ impl<'a> StatelessWallet<'a> {
             return Err(WalletOutputError::PegOutUnderDustLimit);
         }
 
+        info!("inside validate_tx");
+        info!("tx.fees.fee_rate: {:?}", tx.fees.fee_rate);
+        info!("consensus_fee_rate: {:?}", consensus_fee_rate);
         // Validate tx fee rate is above the consensus fee rate
         if tx.fees.fee_rate < consensus_fee_rate {
             return Err(WalletOutputError::PegOutFeeBelowConsensus(
@@ -1267,6 +1280,8 @@ impl<'a> StatelessWallet<'a> {
         // and the maximum weight per added input which we will add every time
         // we select an input.
         let change_script = self.derive_script(change_tweak);
+        let change_script_len = change_script.len();
+        info!(?change_script_len);
         let out_weight = (destination.len() * 4 + 1 + 32
             // Add change script weight, it's very likely to be needed if not we just overpay in fees
             + 1 // script len varint, 1 byte for all addresses we accept
@@ -1296,6 +1311,8 @@ impl<'a> StatelessWallet<'a> {
         let mut fees = fee_rate.calculate_fee(total_weight);
 
         while total_selected_value < peg_out_amount + change_script.dust_value() + fees {
+            info!("inside while loop for coin selection");
+            info!(?fees);
             match included_utxos.pop() {
                 Some((utxo_key, utxo)) => {
                     total_selected_value += utxo.amount;
@@ -1306,6 +1323,21 @@ impl<'a> StatelessWallet<'a> {
                 _ => return Err(WalletOutputError::NotEnoughSpendableUTXO), // Not enough UTXOs
             }
         }
+        let total_weight_times_feerate = {
+            let sats_per_vb = fee_rate.sats_per_kvb / 1000;
+            total_weight * sats_per_vb
+        };
+
+        // todo: look for existing target constant
+        // can also create a new category for target
+        info!(
+            TARGET = FEE_DBUGGING,
+            ?fees,
+            ?total_weight,
+            ?fee_rate,
+            ?total_weight_times_feerate,
+            "finished coin selection"
+        );
 
         // We always pay ourselves change back to ensure that we don't lose anything due
         // to dust

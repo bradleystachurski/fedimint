@@ -1,0 +1,1243 @@
+Setting up env variables in /tmp/nix-shell.G65Yto/fm-Kzje
+    Finished dev [unoptimized + debuginfo] target(s) in 0.22s
+### Setting up tests
+2023-11-16T00:49:49.080743Z  INFO devimint: Test setup in "/tmp/nix-shell.G65Yto/fm-Kzje/cfg"
+2023-11-16T00:49:49.082689Z  WARN devimint: Failed to create wallet ... retrying JSON-RPC error: transport error: Couldn't connect to host: Connection refused (os error 111)
+2023-11-16T00:49:51.432948Z  INFO devimint: esplora started
+2023-11-16T00:49:51.434474Z  INFO devimint: electrs started
+2023-11-16T00:49:55.512218Z  INFO devimint: block sync done
+2023-11-16T00:49:55.527801Z  INFO devimint: Sending funds from bitcoind amount=100000000 addr="bcrt1q02fzykjwepvg8rexpu7jjumj0463ye6sxqwjqn"
+2023-11-16T00:49:55.543238Z  INFO devimint: Mining bitcoin blocks block_num=10
+2023-11-16T00:49:56.724277Z  INFO devimint: Mining bitcoin blocks block_num=10
+2023-11-16T00:49:57.814156Z  WARN devimint::external: Getting chan info failed e=status: Unknown, message: "edge not found", details: [], metadata: MetadataMap { headers: {"content-type": "application/grpc"} }
+2023-11-16T00:49:58.820701Z  WARN devimint::external: Empty chan info edge=ChannelEdge { channel_id: 123145302376448, chan_point: "ebb2b67631e645530852d14c72026592078260bd6736a61f2fdd3df5673538f1:0", last_update: 1700095797, node1_pub: "0310a83b1af8914a5fac98cc7a490977a529cfa2ca904ddda051f78d507cd23f9c", node2_pub: "0371e5089dfb512c216e90dd4573a4810748564885606c7b01e9261061deee800d", capacity: 10000000, node1_policy: None, node2_policy: Some(RoutingPolicy { time_lock_delta: 80, min_htlc: 1000, fee_base_msat: 1000, fee_rate_milli_msat: 1, disabled: false, max_htlc_msat: 10000000000, last_update: 1700095797 }) }
+2023-11-16T00:49:59.876763Z  INFO devimint: starting base daemons took 10.795888925s
+### Setting up tests - complete
+### Testing against electrs
+    Finished test [unoptimized + debuginfo] target(s) in 0.23s
+    Starting 1 test across 50 binaries (5 skipped)
+       START             fedimint-wallet-tests::fedimint_wallet_tests peg_outs_must_wait_for_available_utxos
+
+running 1 test
+2023-11-16T00:50:00.565659Z  INFO test: Setting federation with peers num_peers=4
+2023-11-16T00:50:00.583744Z  INFO db: Global module db version: 0
+2023-11-16T00:50:00.583772Z  INFO core: Init module module_instance_id=0 kind=dummy
+2023-11-16T00:50:00.583831Z  INFO db: dummy module db version: 1
+2023-11-16T00:50:00.583878Z  INFO core: Init module module_instance_id=1 kind=wallet
+2023-11-16T00:50:00.583927Z  INFO db: wallet module db version: 0
+2023-11-16T00:50:00.585526Z  WARN fedimint_bitcoind::electrum: Unknown genesis hash 0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206 - assuming regtest
+2023-11-16T00:50:00.586175Z  INFO fedimint_wallet_server: Connected to bitcoind height=122
+2023-11-16T00:50:00.586192Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:00.587021Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:00.587508Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:00.587520Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:00.587528Z  INFO fedimint_wallet_server: Bitcoind feerate available feerate=1001
+2023-11-16T00:50:00.588677Z  INFO net::api: Starting api on ws://127.0.0.1:25964
+2023-11-16T00:50:00.588681Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:00.588694Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:00.589042Z  INFO consensus: Waiting for peers config 6658e974252c111db010d0b8ee706634a05065450ae78f5265e391b830d3ba70
+2023-11-16T00:50:00.589315Z  INFO db: Global module db version: 0
+2023-11-16T00:50:00.589331Z  INFO core: Init module module_instance_id=0 kind=dummy
+2023-11-16T00:50:00.589343Z  INFO connection{remote_addr=127.0.0.1:38684 conn_id=0}: jsonrpsee_server::server: Accepting new connection 1/1000
+2023-11-16T00:50:00.589367Z  INFO db: dummy module db version: 1
+2023-11-16T00:50:00.589399Z  INFO core: Init module module_instance_id=1 kind=wallet
+2023-11-16T00:50:00.589434Z  INFO db: wallet module db version: 0
+2023-11-16T00:50:00.589501Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:00.589750Z  WARN net::api: Unable to connect to peer peer_id=1 err=Networking or low-level protocol error: Error when opening the TCP socket: Connection refused (os error 111)
+2023-11-16T00:50:00.589870Z  WARN net::api: Unable to connect to peer peer_id=2 err=Networking or low-level protocol error: Error when opening the TCP socket: Connection refused (os error 111)
+2023-11-16T00:50:00.589982Z  WARN consensus: Could not check consensus config hash: Federation rpc error {general => Received errors from 2 peers: peer-1: Rpc error: Networking or low-level protocol error: Error when opening the TCP socket: Connection refused (os error 111), peer-2: Rpc error: Networking or low-level protocol error: Error when opening the TCP socket: Connection refused (os error 111)), 1 => Rpc error: Networking or low-level protocol error: Error when opening the TCP socket: Connection refused (os error 111))2 => Rpc error: Networking or low-level protocol error: Error when opening the TCP socket: Connection refused (os error 111)), }
+2023-11-16T00:50:00.590002Z ERROR connection{remote_addr=127.0.0.1:38684 conn_id=0}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Connection reset by peer (os error 104); terminate connection: 0
+2023-11-16T00:50:00.590059Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:00.590069Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:00.590080Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:00.590109Z  WARN fedimint_bitcoind::electrum: Unknown genesis hash 0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206 - assuming regtest
+2023-11-16T00:50:00.590407Z  INFO fedimint_wallet_server: Connected to bitcoind height=122
+2023-11-16T00:50:00.590426Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:00.590997Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:00.591355Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:00.591367Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:00.591374Z  INFO fedimint_wallet_server: Bitcoind feerate available feerate=1001
+2023-11-16T00:50:00.592333Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:00.592345Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:00.592363Z  INFO net::api: Starting api on ws://127.0.0.1:25966
+2023-11-16T00:50:00.592826Z  INFO consensus: Waiting for peers config 6658e974252c111db010d0b8ee706634a05065450ae78f5265e391b830d3ba70
+2023-11-16T00:50:00.592948Z  INFO db: Global module db version: 0
+2023-11-16T00:50:00.592964Z  INFO core: Init module module_instance_id=0 kind=dummy
+2023-11-16T00:50:00.592999Z  INFO db: dummy module db version: 1
+2023-11-16T00:50:00.593030Z  INFO core: Init module module_instance_id=1 kind=wallet
+2023-11-16T00:50:00.593065Z  INFO db: wallet module db version: 0
+2023-11-16T00:50:00.593164Z  INFO connection{remote_addr=127.0.0.1:38698 conn_id=1}: jsonrpsee_server::server: Accepting new connection 1/1000
+2023-11-16T00:50:00.593207Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:00.593325Z  INFO connection{remote_addr=127.0.0.1:36124 conn_id=0}: jsonrpsee_server::server: Accepting new connection 1/1000
+2023-11-16T00:50:00.593679Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:00.593689Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:00.593695Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:00.593693Z  WARN net::api: Unable to connect to peer peer_id=2 err=Networking or low-level protocol error: Error when opening the TCP socket: Connection refused (os error 111)
+2023-11-16T00:50:00.593728Z  WARN fedimint_bitcoind::electrum: Unknown genesis hash 0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206 - assuming regtest
+2023-11-16T00:50:00.593821Z  WARN net::api: Unable to connect to peer peer_id=3 err=Networking or low-level protocol error: Error when opening the TCP socket: Connection refused (os error 111)
+2023-11-16T00:50:00.593950Z  WARN consensus: Could not check consensus config hash: Federation rpc error {general => Received errors from 2 peers: peer-2: Rpc error: Networking or low-level protocol error: Error when opening the TCP socket: Connection refused (os error 111), peer-3: Rpc error: Networking or low-level protocol error: Error when opening the TCP socket: Connection refused (os error 111)), 2 => Rpc error: Networking or low-level protocol error: Error when opening the TCP socket: Connection refused (os error 111))3 => Rpc error: Networking or low-level protocol error: Error when opening the TCP socket: Connection refused (os error 111)), }
+2023-11-16T00:50:00.594041Z  INFO fedimint_wallet_server: Connected to bitcoind height=122
+2023-11-16T00:50:00.594060Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:00.594060Z ERROR connection{remote_addr=127.0.0.1:38698 conn_id=1}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Connection reset by peer (os error 104); terminate connection: 1
+2023-11-16T00:50:00.594721Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:00.595145Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:00.595156Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:00.595163Z  INFO fedimint_wallet_server: Bitcoind feerate available feerate=1001
+2023-11-16T00:50:00.596118Z  INFO net::api: Starting api on ws://127.0.0.1:25968
+2023-11-16T00:50:00.596137Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:00.596151Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:00.596438Z  INFO consensus: Waiting for peers config 6658e974252c111db010d0b8ee706634a05065450ae78f5265e391b830d3ba70
+2023-11-16T00:50:00.596652Z  INFO connection{remote_addr=127.0.0.1:38706 conn_id=2}: jsonrpsee_server::server: Accepting new connection 1/1000
+2023-11-16T00:50:00.596741Z  INFO connection{remote_addr=127.0.0.1:36140 conn_id=1}: jsonrpsee_server::server: Accepting new connection 1/1000
+2023-11-16T00:50:00.596759Z  INFO db: Global module db version: 0
+2023-11-16T00:50:00.596774Z  INFO core: Init module module_instance_id=0 kind=dummy
+2023-11-16T00:50:00.596811Z  INFO db: dummy module db version: 1
+2023-11-16T00:50:00.596828Z  INFO connection{remote_addr=127.0.0.1:54934 conn_id=0}: jsonrpsee_server::server: Accepting new connection 1/1000
+2023-11-16T00:50:00.596852Z  INFO core: Init module module_instance_id=1 kind=wallet
+2023-11-16T00:50:00.596896Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:00.596907Z  INFO db: wallet module db version: 0
+2023-11-16T00:50:00.597088Z  WARN net::api: Unable to connect to peer peer_id=3 err=Networking or low-level protocol error: Error when opening the TCP socket: Connection refused (os error 111)
+2023-11-16T00:50:00.597644Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:00.597657Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:00.597664Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:00.597722Z  WARN fedimint_bitcoind::electrum: Unknown genesis hash 0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206 - assuming regtest
+2023-11-16T00:50:00.598110Z  INFO fedimint_wallet_server: Connected to bitcoind height=122
+2023-11-16T00:50:00.598135Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:00.598458Z  INFO consensus: Confirmed peers config 6658e974252c111db010d0b8ee706634a05065450ae78f5265e391b830d3ba70
+2023-11-16T00:50:00.598654Z ERROR connection{remote_addr=127.0.0.1:36140 conn_id=1}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Transport endpoint is not connected (os error 107); terminate connection: 1
+2023-11-16T00:50:00.598672Z ERROR connection{remote_addr=127.0.0.1:38706 conn_id=2}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Transport endpoint is not connected (os error 107); terminate connection: 2
+2023-11-16T00:50:00.598745Z  INFO consensus: Loaded aleph buffer with 0 bytes
+2023-11-16T00:50:00.598786Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:00.598849Z  INFO AlephBFT-member: NodeIndex(2) Starting a new session.    
+2023-11-16T00:50:00.598918Z ERROR connection{remote_addr=127.0.0.1:54934 conn_id=0}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Transport endpoint is not connected (os error 107); terminate connection: 0
+2023-11-16T00:50:00.599003Z  INFO AlephBFT-backup-loader: Loaded 0 units from backup. Able to continue from round: 0.    
+2023-11-16T00:50:00.599023Z  INFO AlephBFT-backup-loader: Next round inferred from collection: 0    
+2023-11-16T00:50:00.599347Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:00.599359Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:00.599368Z  INFO fedimint_wallet_server: Bitcoind feerate available feerate=1001
+2023-11-16T00:50:00.600325Z  INFO net::api: Starting api on ws://127.0.0.1:25970
+2023-11-16T00:50:00.600368Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:00.600383Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:00.600695Z  INFO test: Setting new client with config
+2023-11-16T00:50:00.600704Z  INFO consensus: Waiting for peers config 6658e974252c111db010d0b8ee706634a05065450ae78f5265e391b830d3ba70
+2023-11-16T00:50:00.600932Z  INFO connection{remote_addr=127.0.0.1:38722 conn_id=3}: jsonrpsee_server::server: Accepting new connection 1/1000
+2023-11-16T00:50:00.601019Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:00.601131Z  INFO connection{remote_addr=127.0.0.1:36150 conn_id=2}: jsonrpsee_server::server: Accepting new connection 1/1000
+2023-11-16T00:50:00.601292Z  INFO connection{remote_addr=127.0.0.1:33118 conn_id=0}: jsonrpsee_server::server: Accepting new connection 1/1000
+2023-11-16T00:50:00.601383Z  INFO connection{remote_addr=127.0.0.1:54936 conn_id=1}: jsonrpsee_server::server: Accepting new connection 1/1000
+2023-11-16T00:50:00.601659Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:00.601671Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:00.601678Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:00.601781Z  INFO connection{remote_addr=127.0.0.1:38732 conn_id=4}: jsonrpsee_server::server: Accepting new connection 2/1000
+2023-11-16T00:50:00.601796Z  INFO connection{remote_addr=127.0.0.1:36166 conn_id=3}: jsonrpsee_server::server: Accepting new connection 2/1000
+2023-11-16T00:50:00.601837Z  INFO connection{remote_addr=127.0.0.1:54950 conn_id=2}: jsonrpsee_server::server: Accepting new connection 2/1000
+2023-11-16T00:50:00.601991Z  INFO connection{remote_addr=127.0.0.1:33132 conn_id=1}: jsonrpsee_server::server: Accepting new connection 2/1000
+2023-11-16T00:50:00.602820Z  INFO consensus: Confirmed peers config 6658e974252c111db010d0b8ee706634a05065450ae78f5265e391b830d3ba70
+2023-11-16T00:50:00.602999Z ERROR connection{remote_addr=127.0.0.1:36150 conn_id=2}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Transport endpoint is not connected (os error 107); terminate connection: 2
+2023-11-16T00:50:00.603008Z ERROR connection{remote_addr=127.0.0.1:38722 conn_id=3}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Transport endpoint is not connected (os error 107); terminate connection: 3
+2023-11-16T00:50:00.603059Z ERROR connection{remote_addr=127.0.0.1:54936 conn_id=1}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Transport endpoint is not connected (os error 107); terminate connection: 1
+2023-11-16T00:50:00.603180Z  INFO consensus: Loaded aleph buffer with 0 bytes
+2023-11-16T00:50:00.603270Z  INFO AlephBFT-member: NodeIndex(3) Starting a new session.    
+2023-11-16T00:50:00.603387Z ERROR connection{remote_addr=127.0.0.1:33118 conn_id=0}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Transport endpoint is not connected (os error 107); terminate connection: 0
+2023-11-16T00:50:00.603431Z  INFO AlephBFT-backup-loader: Loaded 0 units from backup. Able to continue from round: 0.    
+2023-11-16T00:50:00.603449Z  INFO AlephBFT-backup-loader: Next round inferred from collection: 0    
+2023-11-16T00:50:00.603907Z  INFO fedimint_client::sm::executor: Starting state machine executor task
+2023-11-16T00:50:00.603951Z  INFO fedimint_wallet_tests: Starting test peg_outs_must_wait_for_available_utxos
+2023-11-16T00:50:00.691397Z  INFO connection{remote_addr=127.0.0.1:54962 conn_id=3}: jsonrpsee_server::server: Accepting new connection 2/1000
+2023-11-16T00:50:00.691410Z  INFO connection{remote_addr=127.0.0.1:38748 conn_id=5}: jsonrpsee_server::server: Accepting new connection 2/1000
+2023-11-16T00:50:00.691398Z  INFO connection{remote_addr=127.0.0.1:33144 conn_id=2}: jsonrpsee_server::server: Accepting new connection 2/1000
+2023-11-16T00:50:00.691398Z  INFO connection{remote_addr=127.0.0.1:36174 conn_id=4}: jsonrpsee_server::server: Accepting new connection 2/1000
+2023-11-16T00:50:00.692777Z  INFO consensus: Confirmed peers config 6658e974252c111db010d0b8ee706634a05065450ae78f5265e391b830d3ba70
+2023-11-16T00:50:00.692946Z ERROR connection{remote_addr=127.0.0.1:38748 conn_id=5}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Transport endpoint is not connected (os error 107); terminate connection: 5
+2023-11-16T00:50:00.692953Z ERROR connection{remote_addr=127.0.0.1:36174 conn_id=4}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Transport endpoint is not connected (os error 107); terminate connection: 4
+2023-11-16T00:50:00.692983Z ERROR connection{remote_addr=127.0.0.1:54962 conn_id=3}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Transport endpoint is not connected (os error 107); terminate connection: 3
+2023-11-16T00:50:00.693173Z  INFO consensus: Loaded aleph buffer with 0 bytes
+2023-11-16T00:50:00.693310Z  INFO AlephBFT-member: NodeIndex(0) Starting a new session.    
+2023-11-16T00:50:00.693351Z ERROR connection{remote_addr=127.0.0.1:33144 conn_id=2}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Transport endpoint is not connected (os error 107); terminate connection: 2
+2023-11-16T00:50:00.693497Z  INFO AlephBFT-backup-loader: Loaded 0 units from backup. Able to continue from round: 0.    
+2023-11-16T00:50:00.693514Z  INFO AlephBFT-backup-loader: Next round inferred from collection: 0    
+2023-11-16T00:50:00.695041Z  INFO connection{remote_addr=127.0.0.1:33154 conn_id=3}: jsonrpsee_server::server: Accepting new connection 2/1000
+2023-11-16T00:50:00.695054Z  INFO connection{remote_addr=127.0.0.1:36178 conn_id=5}: jsonrpsee_server::server: Accepting new connection 2/1000
+2023-11-16T00:50:00.695069Z  INFO connection{remote_addr=127.0.0.1:38762 conn_id=6}: jsonrpsee_server::server: Accepting new connection 2/1000
+2023-11-16T00:50:00.695083Z  INFO connection{remote_addr=127.0.0.1:54968 conn_id=4}: jsonrpsee_server::server: Accepting new connection 2/1000
+2023-11-16T00:50:00.696332Z  INFO consensus: Confirmed peers config 6658e974252c111db010d0b8ee706634a05065450ae78f5265e391b830d3ba70
+2023-11-16T00:50:00.696489Z ERROR connection{remote_addr=127.0.0.1:36178 conn_id=5}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Transport endpoint is not connected (os error 107); terminate connection: 5
+2023-11-16T00:50:00.696492Z ERROR connection{remote_addr=127.0.0.1:38762 conn_id=6}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Transport endpoint is not connected (os error 107); terminate connection: 6
+2023-11-16T00:50:00.696492Z ERROR connection{remote_addr=127.0.0.1:54968 conn_id=4}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Transport endpoint is not connected (os error 107); terminate connection: 4
+2023-11-16T00:50:00.696658Z  INFO consensus: Loaded aleph buffer with 0 bytes
+2023-11-16T00:50:00.696761Z  INFO AlephBFT-member: NodeIndex(1) Starting a new session.    
+2023-11-16T00:50:00.696832Z ERROR connection{remote_addr=127.0.0.1:33154 conn_id=3}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Transport endpoint is not connected (os error 107); terminate connection: 3
+2023-11-16T00:50:00.696901Z  INFO AlephBFT-backup-loader: Loaded 0 units from backup. Able to continue from round: 0.    
+2023-11-16T00:50:00.696921Z  INFO AlephBFT-backup-loader: Next round inferred from collection: 0    
+2023-11-16T00:50:00.877450Z  INFO fedimint_wallet_tests: Current consensus block count is 0, waiting for consensus to reach block count 1
+2023-11-16T00:50:01.592204Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:01.592291Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:01.594663Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:01.596404Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:01.596441Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:01.596462Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:01.596574Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:01.596631Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:01.597686Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:01.598132Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:01.598146Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:01.598156Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:01.599461Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:01.599481Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:01.600514Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:01.601295Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:01.601312Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:01.601322Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:01.602651Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:01.602665Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:01.603422Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:01.604072Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:01.604087Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:01.604093Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:01.881223Z  INFO fedimint_wallet_tests: Current consensus block count is 0, waiting for consensus to reach block count 1
+2023-11-16T00:50:02.599319Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:02.599385Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:02.600841Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:02.600886Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:02.602198Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:02.603693Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:02.604411Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:02.604450Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:02.604485Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:02.604544Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:02.604581Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:02.605094Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:02.605128Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:02.605147Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:02.606396Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:02.606623Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:02.606663Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:02.607927Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:02.607959Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:02.607977Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:02.609111Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:02.610259Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:02.610325Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:02.610344Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:02.644246Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(0) peer=PeerId(1) disconnect_count=1
+2023-11-16T00:50:02.649503Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(1) peer=PeerId(0) disconnect_count=0
+2023-11-16T00:50:02.676825Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(2) peer=PeerId(0) disconnect_count=0
+2023-11-16T00:50:02.679960Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(0) peer=PeerId(2) disconnect_count=1
+2023-11-16T00:50:02.710610Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(1) peer=PeerId(2) disconnect_count=1
+2023-11-16T00:50:02.712027Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(2) peer=PeerId(1) disconnect_count=0
+2023-11-16T00:50:02.743671Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(3) peer=PeerId(2) disconnect_count=0
+2023-11-16T00:50:02.750201Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(2) peer=PeerId(3) disconnect_count=1
+2023-11-16T00:50:02.767062Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(0) peer=PeerId(3) disconnect_count=1
+2023-11-16T00:50:02.770240Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(3) peer=PeerId(0) disconnect_count=0
+2023-11-16T00:50:02.795789Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(1) peer=PeerId(3) disconnect_count=1
+2023-11-16T00:50:02.797914Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(3) peer=PeerId(1) disconnect_count=0
+2023-11-16T00:50:02.884199Z  INFO fedimint_wallet_tests: Current consensus block count is 0, waiting for consensus to reach block count 1
+2023-11-16T00:50:03.467290Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.467753Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.483030Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.483430Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.524717Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.525216Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.528920Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.529306Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.607079Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:03.607188Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:03.610158Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:03.610331Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:03.610404Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:03.610480Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:03.610548Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:03.612362Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:03.612408Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:03.612438Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:03.613695Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:03.614827Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:03.615024Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:03.615060Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:03.615497Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:03.615529Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:03.615547Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:03.615955Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:03.615988Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:03.616006Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:03.617136Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:03.618375Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:03.618406Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:03.618424Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:03.718455Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.719093Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.719844Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.720311Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.721067Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.738872Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.739349Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.740037Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.740451Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.741175Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.768392Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.768562Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.768791Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.768922Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.769117Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.776194Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.776341Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.776554Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.776685Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.776857Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.887775Z  INFO fedimint_wallet_tests: Current consensus block count is 112, consensus caught up
+2023-11-16T00:50:03.889704Z DEBUG timing: Operation timing name=autocmmit - commit_tx duration_ms=0
+2023-11-16T00:50:03.889727Z  INFO fedimint_wallet_tests: Peg-in address generated address=bcrt1qt7ral2szzhm0ypkhf7juv9dzw6uc9knq6sjr4fktcnm06l4y735qrfwj83
+2023-11-16T00:50:03.967364Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.967643Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.967974Z  INFO fedimint_wallet_server: New consensus height, syncing up new_height=121 block_to_go=10
+2023-11-16T00:50:03.970734Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=2
+2023-11-16T00:50:03.971046Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.971325Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.981418Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.981553Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.981697Z  INFO fedimint_wallet_server: New consensus height, syncing up new_height=121 block_to_go=10
+2023-11-16T00:50:03.984284Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=2
+2023-11-16T00:50:03.984493Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.984722Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.987264Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.987396Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.987570Z  INFO fedimint_wallet_server: New consensus height, syncing up new_height=121 block_to_go=10
+2023-11-16T00:50:03.990007Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=2
+2023-11-16T00:50:03.990266Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:03.990489Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:04.028538Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:04.028789Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:04.029114Z  INFO fedimint_wallet_server: New consensus height, syncing up new_height=121 block_to_go=10
+2023-11-16T00:50:04.032700Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=3
+2023-11-16T00:50:04.032967Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:04.033206Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:04.129532Z  INFO fedimint_wallet_tests: Peg-in transaction mined height=132 tx=Transaction { version: 2, lock_time: PackedLockTime(131), input: [TxIn { previous_output: OutPoint { txid: faeed763c30405f232cd773988acaf2999a2d3534848743e303332cad53eecc3, vout: 1 }, script_sig: Script(), sequence: Sequence(4294967293), witness: Witness { content: [71, 48, 68, 2, 32, 101, 252, 83, 32, 214, 246, 175, 13, 76, 244, 126, 98, 243, 153, 142, 188, 84, 80, 172, 114, 211, 87, 47, 42, 103, 98, 14, 160, 240, 201, 252, 205, 2, 32, 83, 231, 202, 141, 50, 2, 231, 47, 45, 123, 116, 114, 180, 176, 223, 157, 218, 186, 216, 62, 166, 218, 231, 28, 55, 205, 244, 254, 97, 52, 55, 181, 1, 33, 2, 180, 52, 94, 14, 185, 120, 96, 0, 75, 20, 29, 140, 254, 89, 255, 204, 95, 139, 132, 229, 60, 161, 35, 190, 98, 74, 166, 36, 9, 204, 41, 30], witness_elements: 2, last: 72, second_to_last: 0 } }], output: [TxOut { value: 4899982760, script_pubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 cba84b8fbca044d6e32354d1d675c2bbd1e8d53b887dd64c07d517b825011d9a) }, TxOut { value: 5000, script_pubkey: Script(OP_0 OP_PUSHBYTES_32 5f87dfaa0215f6f206d74fa5c615a276b982da60d4243aa6cbc4f6fd7ea4f468) }] }
+2023-11-16T00:50:04.613717Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:04.613746Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:04.614805Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:04.615234Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:04.615246Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:04.615255Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:04.616872Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:04.616887Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:04.616886Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:04.616900Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:04.617688Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:04.618201Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:04.618380Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:04.618391Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:04.618398Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:04.618554Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:04.618565Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:04.618572Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:04.619671Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:04.619684Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:04.620342Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:04.620965Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:04.620983Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:04.620992Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:05.000035Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(1) peer=PeerId(2) disconnect_count=1
+2023-11-16T00:50:05.000138Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(2) peer=PeerId(1) disconnect_count=1
+2023-11-16T00:50:05.471064Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:05.519148Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:05.608334Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:05.616890Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:05.616910Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:05.618061Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:05.618626Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:05.618639Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:05.618647Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:05.619995Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:05.620016Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:05.620027Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:05.620048Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:05.621001Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:05.621544Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:05.621716Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:05.621726Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:05.621732Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:05.621865Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:05.621876Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:05.621884Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:05.622284Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:05.622295Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:05.622964Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:05.623353Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:05.623367Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:05.623377Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:05.720565Z  INFO fedimint_wallet_server: New consensus height, syncing up new_height=122 block_to_go=1
+2023-11-16T00:50:05.721039Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:05.771160Z  INFO fedimint_wallet_server: New consensus height, syncing up new_height=122 block_to_go=1
+2023-11-16T00:50:05.772287Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:50:05.821840Z  INFO fedimint_wallet_server: New consensus height, syncing up new_height=122 block_to_go=1
+2023-11-16T00:50:05.823190Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=2
+2023-11-16T00:50:05.942182Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(0) peer=PeerId(1) disconnect_count=1
+2023-11-16T00:50:05.945539Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(1) peer=PeerId(0) disconnect_count=1
+2023-11-16T00:50:05.972420Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:05.973273Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:06.009832Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:06.010689Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:06.020615Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:06.021451Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:06.485386Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:06.620950Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:06.620983Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:06.622159Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:06.622677Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:06.622692Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:06.622701Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:06.622740Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:06.622756Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:06.622760Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:06.622775Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:06.623399Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:06.623842Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:06.623974Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:06.623984Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:06.623993Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:06.624146Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:06.624160Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:06.624167Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:06.624824Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:06.624840Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:06.625659Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:06.626030Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:06.626038Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:06.626044Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:06.936129Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(2) peer=PeerId(3) disconnect_count=1
+2023-11-16T00:50:06.944982Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(3) peer=PeerId(2) disconnect_count=1
+2023-11-16T00:50:07.513121Z  INFO fedimint_wallet_server: New consensus height, syncing up new_height=122 block_to_go=1
+2023-11-16T00:50:07.514343Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:50:07.601518Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(1) peer=PeerId(2) disconnect_count=1
+2023-11-16T00:50:07.607868Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(2) peer=PeerId(1) disconnect_count=1
+2023-11-16T00:50:07.622832Z DEBUG timing: Operation timing name=autocmmit - commit_tx duration_ms=0
+2023-11-16T00:50:07.623767Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:07.623798Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:07.624877Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:07.624919Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:07.624932Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:07.625629Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:07.625817Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:07.625829Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:07.625837Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:07.625962Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:07.625972Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:07.625981Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:07.626560Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:07.626559Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:07.626572Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:07.626574Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:07.627239Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:07.627643Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:07.627823Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:07.627833Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:07.627840Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:07.627954Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:07.627962Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:07.627968Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:07.802458Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:07.802789Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:08.542633Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(1) peer=PeerId(3) disconnect_count=1
+2023-11-16T00:50:08.544968Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(3) peer=PeerId(1) disconnect_count=1
+2023-11-16T00:50:08.627561Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:08.627606Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:08.627650Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:08.627674Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:08.630483Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:08.631651Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:08.631851Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:08.631888Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:08.632303Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:08.632339Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:08.632360Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:08.632410Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:08.632446Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:08.632842Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:08.632883Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:08.632913Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:08.634113Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:08.635252Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:08.635741Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:08.635777Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:08.635797Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:08.636098Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:08.636128Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:08.636144Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:09.634857Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:09.634907Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:09.634902Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:09.634952Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:09.637739Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:09.638967Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:09.639180Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:09.639202Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:09.639218Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:09.639243Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:09.639729Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:09.639766Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:09.639785Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:09.641067Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:09.641571Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:09.641607Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:09.641626Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:09.642746Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:09.643276Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:09.643312Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:09.643331Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:09.643806Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:09.643837Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:09.643855Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:09.727922Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:09.742502Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:09.748199Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:09.979961Z  INFO fedimint_wallet_server: New consensus height, syncing up new_height=132 block_to_go=10
+2023-11-16T00:50:09.990641Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=11
+2023-11-16T00:50:09.991726Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:09.994416Z  INFO fedimint_wallet_server: New consensus height, syncing up new_height=132 block_to_go=10
+2023-11-16T00:50:09.994746Z  INFO fedimint_wallet_server: New consensus height, syncing up new_height=132 block_to_go=10
+2023-11-16T00:50:10.001597Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=7
+2023-11-16T00:50:10.002303Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=8
+2023-11-16T00:50:10.002580Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:10.003254Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:10.599607Z  INFO AlephBFT-member: Member status report: task queue content: CoordRequest - 0, ParentsRequest - 0, UnitBroadcast - 111, RequestNewest - 0.    
+2023-11-16T00:50:10.600271Z  INFO AlephBFT-runway: Runway status report: healthy. DAG size - 111; DAG height - 32; DAG top row - [(0, 32), (1, 12), (2, 31), (3, 32)].    
+2023-11-16T00:50:10.603564Z  INFO AlephBFT-member: Member status report: task queue content: CoordRequest - 0, ParentsRequest - 0, UnitBroadcast - 121, RequestNewest - 0.    
+2023-11-16T00:50:10.604393Z  INFO AlephBFT-runway: Runway status report: healthy. DAG size - 121; DAG height - 32; DAG top row - [(0, 32), (1, 22), (2, 31), (3, 32)].    
+2023-11-16T00:50:10.641793Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:10.641840Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:10.644480Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:10.644652Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:10.644694Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:10.644941Z DEBUG timing: Operation timing name=autocmmit - commit_tx duration_ms=0
+2023-11-16T00:50:10.646859Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:10.647590Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:10.647648Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:10.647677Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:10.647809Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:10.647856Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:10.647885Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:10.647936Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:10.648511Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:10.648552Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:10.648580Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:10.649807Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:10.650964Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:10.651524Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:10.651557Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:10.651579Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:10.652123Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:10.652169Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:10.652201Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:10.693714Z  INFO AlephBFT-member: Member status report: task queue content: CoordRequest - 0, ParentsRequest - 0, UnitBroadcast - 121, RequestNewest - 0.    
+2023-11-16T00:50:10.694367Z  INFO AlephBFT-runway: Runway status report: healthy. DAG size - 121; DAG height - 32; DAG top row - [(0, 32), (1, 21), (2, 32), (3, 32)].    
+2023-11-16T00:50:10.697109Z  INFO AlephBFT-member: Member status report: task queue content: CoordRequest - 9, ParentsRequest - 0, UnitBroadcast - 100, RequestNewest - 0; not_resolved_coords.len() - 7.    
+2023-11-16T00:50:10.697735Z  INFO AlephBFT-runway: Runway status report: syncing - missing 7 unit(s) and behind by 3 rounds. DAG size - 104; DAG height - 28; DAG top row - [(0, 24), (1, 25), (2, 23), (3, 28)]; missing coords - {Creator 0: [25-27]}, {Creator 2: [24-27]}.    
+2023-11-16T00:50:10.940838Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(1) peer=PeerId(0) disconnect_count=1
+2023-11-16T00:50:10.944630Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(0) peer=PeerId(1) disconnect_count=1
+2023-11-16T00:50:11.128262Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(1) peer=PeerId(2) disconnect_count=1
+2023-11-16T00:50:11.131163Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(2) peer=PeerId(1) disconnect_count=1
+2023-11-16T00:50:11.650100Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:11.650169Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:11.651915Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:11.651958Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:11.653194Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:11.654612Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:11.654875Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:11.654920Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:11.655431Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:11.655468Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:11.655489Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:11.655597Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:11.655691Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:11.656056Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:11.656091Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:11.656139Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:11.657358Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:11.658589Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:11.659014Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:11.659046Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:11.659063Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:11.659410Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:11.659446Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:11.659471Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:11.736613Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=3
+2023-11-16T00:50:11.751088Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=2
+2023-11-16T00:50:11.755723Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=3
+2023-11-16T00:50:11.758305Z DEBUG timing: Operation timing name=autocmmit - commit_tx duration_ms=0
+2023-11-16T00:50:11.758680Z DEBUG timing: Operation timing name=autocmmit - commit_tx duration_ms=0
+2023-11-16T00:50:11.758903Z  INFO fedimint_wallet_tests: Peg-in transaction claimed height=132 tx=Transaction { version: 2, lock_time: PackedLockTime(131), input: [TxIn { previous_output: OutPoint { txid: faeed763c30405f232cd773988acaf2999a2d3534848743e303332cad53eecc3, vout: 1 }, script_sig: Script(), sequence: Sequence(4294967293), witness: Witness { content: [71, 48, 68, 2, 32, 101, 252, 83, 32, 214, 246, 175, 13, 76, 244, 126, 98, 243, 153, 142, 188, 84, 80, 172, 114, 211, 87, 47, 42, 103, 98, 14, 160, 240, 201, 252, 205, 2, 32, 83, 231, 202, 141, 50, 2, 231, 47, 45, 123, 116, 114, 180, 176, 223, 157, 218, 186, 216, 62, 166, 218, 231, 28, 55, 205, 244, 254, 97, 52, 55, 181, 1, 33, 2, 180, 52, 94, 14, 185, 120, 96, 0, 75, 20, 29, 140, 254, 89, 255, 204, 95, 139, 132, 229, 60, 161, 35, 190, 98, 74, 166, 36, 9, 204, 41, 30], witness_elements: 2, last: 72, second_to_last: 0 } }], output: [TxOut { value: 4899982760, script_pubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 cba84b8fbca044d6e32354d1d675c2bbd1e8d53b887dd64c07d517b825011d9a) }, TxOut { value: 5000, script_pubkey: Script(OP_0 OP_PUSHBYTES_32 5f87dfaa0215f6f206d74fa5c615a276b982da60d4243aa6cbc4f6fd7ea4f468) }] }
+2023-11-16T00:50:11.758948Z  INFO fedimint_wallet_tests: Peg-in finished for test peg_outs_must_wait_for_available_utxos
+2023-11-16T00:50:11.770753Z  INFO fedimint_wallet_tests: first address: bcrt1qxh385nrd5w0ef9k9lcw3kl4lwzx2zj24vmxffa
+2023-11-16T00:50:11.771558Z  INFO connection{remote_addr=127.0.0.1:38732 conn_id=4}: fedimint_wallet_server: inside api_endpoint PEG_OUT_FEES_ENDPOINT
+2023-11-16T00:50:11.771599Z  INFO connection{remote_addr=127.0.0.1:54950 conn_id=2}: fedimint_wallet_server: inside api_endpoint PEG_OUT_FEES_ENDPOINT
+2023-11-16T00:50:11.771668Z  INFO connection{remote_addr=127.0.0.1:38732 conn_id=4}: fedimint_wallet_server: feerate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:11.771681Z  INFO connection{remote_addr=127.0.0.1:54950 conn_id=2}: fedimint_wallet_server: feerate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:11.771707Z  INFO connection{remote_addr=127.0.0.1:36166 conn_id=3}: fedimint_wallet_server: inside api_endpoint PEG_OUT_FEES_ENDPOINT
+2023-11-16T00:50:11.771768Z  INFO connection{remote_addr=127.0.0.1:36166 conn_id=3}: fedimint_wallet_server: feerate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:11.771862Z  INFO connection{remote_addr=127.0.0.1:33132 conn_id=1}: fedimint_wallet_server: inside api_endpoint PEG_OUT_FEES_ENDPOINT
+2023-11-16T00:50:11.771887Z  INFO connection{remote_addr=127.0.0.1:38732 conn_id=4}: fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=5000 peg_out_sats=1000 fees_sats=871 fee_rate=1001 change_sats=3129
+2023-11-16T00:50:11.771888Z  INFO connection{remote_addr=127.0.0.1:54950 conn_id=2}: fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=5000 peg_out_sats=1000 fees_sats=871 fee_rate=1001 change_sats=3129
+2023-11-16T00:50:11.771920Z  INFO connection{remote_addr=127.0.0.1:38732 conn_id=4}: fedimint_wallet_server: Creating peg-out tx txid=6ea5a6531f0f0cd8292cffdd9cb33858540c37d7c59cdb975e06590d5c84368c
+2023-11-16T00:50:11.771921Z  INFO connection{remote_addr=127.0.0.1:54950 conn_id=2}: fedimint_wallet_server: Creating peg-out tx txid=6ea5a6531f0f0cd8292cffdd9cb33858540c37d7c59cdb975e06590d5c84368c
+2023-11-16T00:50:11.771918Z  INFO connection{remote_addr=127.0.0.1:33132 conn_id=1}: fedimint_wallet_server: feerate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:11.772040Z  WARN connection{remote_addr=127.0.0.1:36166 conn_id=3}: fedimint_wallet_server: Error returning peg-out fees Not enough SpendableUTXO
+2023-11-16T00:50:11.772190Z  INFO connection{remote_addr=127.0.0.1:33132 conn_id=1}: fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=5000 peg_out_sats=1000 fees_sats=871 fee_rate=1001 change_sats=3129
+2023-11-16T00:50:11.772238Z  INFO connection{remote_addr=127.0.0.1:33132 conn_id=1}: fedimint_wallet_server: Creating peg-out tx txid=6ea5a6531f0f0cd8292cffdd9cb33858540c37d7c59cdb975e06590d5c84368c
+2023-11-16T00:50:11.773530Z DEBUG timing: Operation timing name=autocmmit - commit_tx duration_ms=0
+2023-11-16T00:50:11.911339Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:50:11.912422Z  INFO fedimint_wallet_server: New consensus height, syncing up new_height=132 block_to_go=10
+2023-11-16T00:50:11.921541Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=10
+2023-11-16T00:50:11.922982Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:50:11.984208Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:50:11.985680Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:11.998459Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:12.000055Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:12.002589Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:12.003949Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:12.391715Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=2
+2023-11-16T00:50:12.602871Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:50:12.604502Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:12.658639Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:12.658646Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:12.658683Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:12.658700Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:12.661345Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:12.662634Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:12.662837Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:12.662878Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:12.663346Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:12.663383Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:12.663402Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:12.663563Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:12.663628Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:12.664084Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:12.664131Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:12.664157Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:12.665326Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:12.666615Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:12.667109Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:12.667148Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:12.667176Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:12.667530Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:12.667569Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:12.667633Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:12.765874Z  INFO connection{remote_addr=127.0.0.1:38732 conn_id=4}: fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=5000 peg_out_sats=1000 fees_sats=871 fee_rate=1001 change_sats=3129
+2023-11-16T00:50:12.765993Z  INFO connection{remote_addr=127.0.0.1:38732 conn_id=4}: fedimint_wallet_server: Creating peg-out tx txid=16513dba3bc697b813bf534d43f5983a91b58564d9ecebc6d0d44bb47a738cc3
+2023-11-16T00:50:12.766070Z  INFO connection{remote_addr=127.0.0.1:33132 conn_id=1}: fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=5000 peg_out_sats=1000 fees_sats=871 fee_rate=1001 change_sats=3129
+2023-11-16T00:50:12.766198Z  INFO connection{remote_addr=127.0.0.1:33132 conn_id=1}: fedimint_wallet_server: Creating peg-out tx txid=16513dba3bc697b813bf534d43f5983a91b58564d9ecebc6d0d44bb47a738cc3
+2023-11-16T00:50:12.766228Z  INFO connection{remote_addr=127.0.0.1:36166 conn_id=3}: fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=5000 peg_out_sats=1000 fees_sats=871 fee_rate=1001 change_sats=3129
+2023-11-16T00:50:12.766272Z  INFO connection{remote_addr=127.0.0.1:54950 conn_id=2}: fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=5000 peg_out_sats=1000 fees_sats=871 fee_rate=1001 change_sats=3129
+2023-11-16T00:50:12.766378Z  INFO connection{remote_addr=127.0.0.1:36166 conn_id=3}: fedimint_wallet_server: Creating peg-out tx txid=16513dba3bc697b813bf534d43f5983a91b58564d9ecebc6d0d44bb47a738cc3
+2023-11-16T00:50:12.766411Z  INFO connection{remote_addr=127.0.0.1:54950 conn_id=2}: fedimint_wallet_server: Creating peg-out tx txid=16513dba3bc697b813bf534d43f5983a91b58564d9ecebc6d0d44bb47a738cc3
+2023-11-16T00:50:12.767138Z  INFO connection{remote_addr=127.0.0.1:38732 conn_id=4}: fedimint_wallet_server: Signing peg out txid=16513dba3bc697b813bf534d43f5983a91b58564d9ecebc6d0d44bb47a738cc3
+2023-11-16T00:50:12.767313Z  INFO connection{remote_addr=127.0.0.1:33132 conn_id=1}: fedimint_wallet_server: Signing peg out txid=16513dba3bc697b813bf534d43f5983a91b58564d9ecebc6d0d44bb47a738cc3
+2023-11-16T00:50:12.767466Z  INFO connection{remote_addr=127.0.0.1:36166 conn_id=3}: fedimint_wallet_server: Signing peg out txid=16513dba3bc697b813bf534d43f5983a91b58564d9ecebc6d0d44bb47a738cc3
+2023-11-16T00:50:12.767486Z  INFO connection{remote_addr=127.0.0.1:54950 conn_id=2}: fedimint_wallet_server: Signing peg out txid=16513dba3bc697b813bf534d43f5983a91b58564d9ecebc6d0d44bb47a738cc3
+2023-11-16T00:50:13.665980Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:13.666073Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:13.668957Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:13.669141Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:13.669244Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:13.671564Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:13.672143Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:13.672186Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:13.672217Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:13.672335Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:13.672373Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:13.672394Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:13.672431Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:13.672872Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:13.672902Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:13.672919Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:13.674133Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:13.675287Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:13.675834Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:13.675874Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:13.675894Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:13.676239Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:13.676279Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:13.676310Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:13.736135Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(0) peer=PeerId(1) disconnect_count=1
+2023-11-16T00:50:13.737400Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(1) peer=PeerId(0) disconnect_count=1
+2023-11-16T00:50:13.987604Z  INFO fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=5000 peg_out_sats=1000 fees_sats=871 fee_rate=1001 change_sats=3129
+2023-11-16T00:50:13.987719Z  INFO fedimint_wallet_server: Creating peg-out tx txid=16513dba3bc697b813bf534d43f5983a91b58564d9ecebc6d0d44bb47a738cc3
+2023-11-16T00:50:13.988858Z  INFO fedimint_wallet_server: Signing peg out txid=16513dba3bc697b813bf534d43f5983a91b58564d9ecebc6d0d44bb47a738cc3
+2023-11-16T00:50:13.990154Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=4
+2023-11-16T00:50:13.991354Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:13.992648Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:13.999432Z  INFO fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=5000 peg_out_sats=1000 fees_sats=871 fee_rate=1001 change_sats=3129
+2023-11-16T00:50:13.999502Z  INFO fedimint_wallet_server: Creating peg-out tx txid=16513dba3bc697b813bf534d43f5983a91b58564d9ecebc6d0d44bb47a738cc3
+2023-11-16T00:50:14.000744Z  INFO fedimint_wallet_server: Signing peg out txid=16513dba3bc697b813bf534d43f5983a91b58564d9ecebc6d0d44bb47a738cc3
+2023-11-16T00:50:14.002375Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=5
+2023-11-16T00:50:14.003902Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:50:14.004112Z  INFO fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=5000 peg_out_sats=1000 fees_sats=871 fee_rate=1001 change_sats=3129
+2023-11-16T00:50:14.004179Z  INFO fedimint_wallet_server: Creating peg-out tx txid=16513dba3bc697b813bf534d43f5983a91b58564d9ecebc6d0d44bb47a738cc3
+2023-11-16T00:50:14.005241Z  INFO fedimint_wallet_server: Signing peg out txid=16513dba3bc697b813bf534d43f5983a91b58564d9ecebc6d0d44bb47a738cc3
+2023-11-16T00:50:14.005405Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:14.006533Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=4
+2023-11-16T00:50:14.007945Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:14.009185Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:14.011379Z DEBUG timing: Operation timing name=autocmmit - commit_tx duration_ms=0
+2023-11-16T00:50:14.011955Z DEBUG timing: Operation timing name=autocmmit - commit_tx duration_ms=0
+2023-11-16T00:50:14.016719Z DEBUG timing: Operation timing name=autocmmit - commit_tx duration_ms=0
+2023-11-16T00:50:14.153266Z  INFO fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=5000 peg_out_sats=1000 fees_sats=871 fee_rate=1001 change_sats=3129
+2023-11-16T00:50:14.153360Z  INFO fedimint_wallet_server: Creating peg-out tx txid=16513dba3bc697b813bf534d43f5983a91b58564d9ecebc6d0d44bb47a738cc3
+2023-11-16T00:50:14.154476Z  INFO fedimint_wallet_server: Signing peg out txid=16513dba3bc697b813bf534d43f5983a91b58564d9ecebc6d0d44bb47a738cc3
+2023-11-16T00:50:14.155880Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=4
+2023-11-16T00:50:14.157124Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:14.158331Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:14.675367Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:14.675420Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:14.678289Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:14.678505Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:14.678542Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:14.678630Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:14.678684Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:14.680837Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:14.681017Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:14.681072Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:14.682085Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:14.682506Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:14.682543Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:14.682574Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:14.683717Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:14.684176Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:14.684212Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:14.684231Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:14.684543Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:14.684574Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:14.684592Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:14.684953Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:14.684988Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:14.685011Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:15.685360Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:15.685449Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:15.688125Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:15.688320Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:15.688320Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:15.688375Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:15.688325Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:15.688386Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:15.688447Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:15.690496Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:15.691189Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:15.691262Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:15.691283Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:15.692555Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:15.693719Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:15.694187Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:15.694223Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:15.694242Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:15.694591Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:15.694626Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:15.694645Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:15.695147Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:15.695183Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:15.695202Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:15.743376Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=3
+2023-11-16T00:50:15.753002Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=2
+2023-11-16T00:50:15.756167Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=2
+2023-11-16T00:50:15.992488Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=2
+2023-11-16T00:50:15.996192Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=3
+2023-11-16T00:50:16.005988Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=2
+2023-11-16T00:50:16.006007Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=2
+2023-11-16T00:50:16.009802Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=3
+2023-11-16T00:50:16.009809Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=3
+2023-11-16T00:50:16.677484Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(1) peer=PeerId(2) disconnect_count=1
+2023-11-16T00:50:16.680256Z  WARN net::peer: Error while opening incoming connection mint=PeerId(2) err=Randomly failed
+2023-11-16T00:50:16.694452Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:16.694475Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:16.695920Z  INFO connection{remote_addr=127.0.0.1:38732 conn_id=4}: fedimint_wallet_server: inside api_endpoint PEG_OUT_FEES_ENDPOINT
+2023-11-16T00:50:16.696012Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:16.696024Z  INFO connection{remote_addr=127.0.0.1:38732 conn_id=4}: fedimint_wallet_server: feerate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:16.696039Z  INFO connection{remote_addr=127.0.0.1:54950 conn_id=2}: fedimint_wallet_server: inside api_endpoint PEG_OUT_FEES_ENDPOINT
+2023-11-16T00:50:16.696068Z  INFO connection{remote_addr=127.0.0.1:36166 conn_id=3}: fedimint_wallet_server: inside api_endpoint PEG_OUT_FEES_ENDPOINT
+2023-11-16T00:50:16.696096Z  INFO connection{remote_addr=127.0.0.1:54950 conn_id=2}: fedimint_wallet_server: feerate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:16.696116Z  INFO connection{remote_addr=127.0.0.1:33132 conn_id=1}: fedimint_wallet_server: inside api_endpoint PEG_OUT_FEES_ENDPOINT
+2023-11-16T00:50:16.696132Z  INFO connection{remote_addr=127.0.0.1:36166 conn_id=3}: fedimint_wallet_server: feerate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:16.696166Z  INFO connection{remote_addr=127.0.0.1:33132 conn_id=1}: fedimint_wallet_server: feerate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:16.696260Z  WARN connection{remote_addr=127.0.0.1:38732 conn_id=4}: fedimint_wallet_server: Error returning peg-out fees Not enough SpendableUTXO
+2023-11-16T00:50:16.696312Z  WARN connection{remote_addr=127.0.0.1:54950 conn_id=2}: fedimint_wallet_server: Error returning peg-out fees Not enough SpendableUTXO
+2023-11-16T00:50:16.696373Z  WARN connection{remote_addr=127.0.0.1:36166 conn_id=3}: fedimint_wallet_server: Error returning peg-out fees Not enough SpendableUTXO
+2023-11-16T00:50:16.696391Z  WARN connection{remote_addr=127.0.0.1:33132 conn_id=1}: fedimint_wallet_server: Error returning peg-out fees Not enough SpendableUTXO
+2023-11-16T00:50:16.696430Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:16.696443Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:16.696688Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:16.696703Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:16.696712Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:16.696735Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:16.696753Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:16.697146Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:16.697208Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:16.697222Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:16.697571Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:16.697943Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:16.698113Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:16.698126Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:16.698134Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:16.698286Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:16.698296Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:16.698302Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:16.698425Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:16.698437Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:16.698445Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:16.992489Z  INFO fedimint_wallet_tests: Current consensus block count is 133, waiting for consensus to reach block count 144
+2023-11-16T00:50:17.046770Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(1) peer=PeerId(0) disconnect_count=1
+2023-11-16T00:50:17.051160Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(0) peer=PeerId(1) disconnect_count=1
+2023-11-16T00:50:17.641248Z  INFO fedimint_bitcoind::electrum: Error broadcasting transaction error=Protocol(Object {"code": Number(2), "message": String("Transaction already in block chain")})
+2023-11-16T00:50:17.641990Z  INFO fedimint_bitcoind::electrum: Error broadcasting transaction error=Protocol(Object {"code": Number(2), "message": String("Transaction already in block chain")})
+2023-11-16T00:50:17.642806Z  INFO fedimint_bitcoind::electrum: Error broadcasting transaction error=Protocol(Object {"code": Number(2), "message": String("Transaction already in block chain")})
+2023-11-16T00:50:17.700025Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:17.700078Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:17.702857Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:17.703056Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:17.703113Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:17.703158Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:17.703158Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:17.703231Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:17.703243Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:17.705613Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:17.706949Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:17.708178Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:17.708714Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:17.708756Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:17.708786Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:17.709246Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:17.709282Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:17.709305Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:17.709719Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:17.709754Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:17.709774Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:17.710313Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:17.710349Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:17.710368Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:17.734316Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(1) peer=PeerId(3) disconnect_count=1
+2023-11-16T00:50:17.735883Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(3) peer=PeerId(1) disconnect_count=1
+2023-11-16T00:50:17.996129Z  INFO fedimint_wallet_tests: Current consensus block count is 133, waiting for consensus to reach block count 144
+2023-11-16T00:50:18.138906Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=2
+2023-11-16T00:50:18.288363Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=3
+2023-11-16T00:50:18.292033Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=3
+2023-11-16T00:50:18.621000Z  INFO fedimint_bitcoind::electrum: Error broadcasting transaction error=Protocol(Object {"code": Number(2), "message": String("Transaction already in block chain")})
+2023-11-16T00:50:18.645168Z  INFO fedimint_bitcoind::electrum: Error broadcasting transaction error=Protocol(Object {"code": Number(2), "message": String("Transaction already in block chain")})
+2023-11-16T00:50:18.647563Z  INFO fedimint_bitcoind::electrum: Error broadcasting transaction error=Protocol(Object {"code": Number(2), "message": String("Transaction already in block chain")})
+2023-11-16T00:50:18.648231Z  INFO fedimint_bitcoind::electrum: Error broadcasting transaction error=Protocol(Object {"code": Number(2), "message": String("Transaction already in block chain")})
+2023-11-16T00:50:18.707306Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(1) peer=PeerId(2) disconnect_count=2
+2023-11-16T00:50:18.711041Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(2) peer=PeerId(1) disconnect_count=1
+2023-11-16T00:50:18.711435Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:18.711476Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:18.714201Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:18.714442Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:18.714466Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:18.714482Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:18.714505Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:18.714509Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:18.714547Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:18.716977Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:18.718247Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:18.719534Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:18.720102Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:18.720138Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:18.720159Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:18.720624Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:18.720660Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:18.720680Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:18.721087Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:18.721122Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:18.721142Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:18.721611Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:18.721650Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:18.721677Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:18.855973Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(2) peer=PeerId(0) disconnect_count=1
+2023-11-16T00:50:18.857049Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(0) peer=PeerId(2) disconnect_count=1
+2023-11-16T00:50:18.998756Z  INFO fedimint_wallet_tests: Current consensus block count is 133, waiting for consensus to reach block count 144
+2023-11-16T00:50:19.625871Z  INFO fedimint_bitcoind::electrum: Error broadcasting transaction error=Protocol(Object {"code": Number(2), "message": String("Transaction already in block chain")})
+2023-11-16T00:50:19.649905Z  INFO fedimint_bitcoind::electrum: Error broadcasting transaction error=Protocol(Object {"code": Number(2), "message": String("Transaction already in block chain")})
+2023-11-16T00:50:19.652209Z  INFO fedimint_bitcoind::electrum: Error broadcasting transaction error=Protocol(Object {"code": Number(2), "message": String("Transaction already in block chain")})
+2023-11-16T00:50:19.652851Z  INFO fedimint_bitcoind::electrum: Error broadcasting transaction error=Protocol(Object {"code": Number(2), "message": String("Transaction already in block chain")})
+2023-11-16T00:50:19.723996Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:19.724063Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:19.724049Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:19.724096Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:19.724104Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:19.724141Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:19.724152Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:19.724196Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:19.726848Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:19.728272Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:19.729487Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:19.730666Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:19.731191Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:19.731234Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:19.731264Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:19.731719Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:19.731755Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:19.731775Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:19.732171Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:19.732206Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:19.732232Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:19.732712Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:19.732756Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:19.732816Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:19.808519Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(3) peer=PeerId(0) disconnect_count=1
+2023-11-16T00:50:19.814213Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(0) peer=PeerId(3) disconnect_count=1
+2023-11-16T00:50:20.002996Z  INFO fedimint_wallet_tests: Current consensus block count is 133, waiting for consensus to reach block count 144
+2023-11-16T00:50:20.599989Z  INFO AlephBFT-member: Member status report: task queue content: CoordRequest - 0, ParentsRequest - 0, UnitBroadcast - 211, RequestNewest - 0.    
+2023-11-16T00:50:20.601778Z  INFO AlephBFT-runway: Runway status report: healthy. DAG size - 230; DAG height - 63; DAG top row - [(0, 63), (1, 38), (2, 63), (3, 62)].    
+2023-11-16T00:50:20.603830Z  INFO AlephBFT-member: Member status report: task queue content: CoordRequest - 1, ParentsRequest - 0, UnitBroadcast - 243, RequestNewest - 0.    
+2023-11-16T00:50:20.605975Z  INFO AlephBFT-runway: Runway status report: healthy. DAG size - 256; DAG height - 64; DAG top row - [(0, 63), (1, 62), (2, 63), (3, 64)].    
+2023-11-16T00:50:20.631013Z  INFO fedimint_bitcoind::electrum: Error broadcasting transaction error=Protocol(Object {"code": Number(2), "message": String("Transaction already in block chain")})
+2023-11-16T00:50:20.654592Z  INFO fedimint_bitcoind::electrum: Error broadcasting transaction error=Protocol(Object {"code": Number(2), "message": String("Transaction already in block chain")})
+2023-11-16T00:50:20.656763Z  INFO fedimint_bitcoind::electrum: Error broadcasting transaction error=Protocol(Object {"code": Number(2), "message": String("Transaction already in block chain")})
+2023-11-16T00:50:20.657426Z  INFO fedimint_bitcoind::electrum: Error broadcasting transaction error=Protocol(Object {"code": Number(2), "message": String("Transaction already in block chain")})
+2023-11-16T00:50:20.694474Z  INFO AlephBFT-member: Member status report: task queue content: CoordRequest - 2, ParentsRequest - 0, UnitBroadcast - 243, RequestNewest - 0.    
+2023-11-16T00:50:20.695852Z  INFO AlephBFT-runway: Runway status report: healthy. DAG size - 257; DAG height - 64; DAG top row - [(0, 64), (1, 62), (2, 63), (3, 64)].    
+2023-11-16T00:50:20.697438Z  INFO AlephBFT-member: Member status report: task queue content: CoordRequest - 6, ParentsRequest - 0, UnitBroadcast - 238, RequestNewest - 0; not_resolved_coords.len() - 1.    
+2023-11-16T00:50:20.699377Z  INFO AlephBFT-runway: Runway status report: syncing - missing 1 unit(s). DAG size - 251; DAG height - 63; DAG top row - [(0, 61), (1, 62), (2, 61), (3, 63)]; missing coords - {Creator 2: 62}.    
+2023-11-16T00:50:20.735408Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:20.735420Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:20.735461Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:20.735472Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:20.738507Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:20.738704Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:20.738772Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:20.740036Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:20.740297Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:20.740354Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:20.741707Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:20.742386Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:20.742422Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:20.742443Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:20.743593Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:20.744132Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:20.744168Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:20.744187Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:20.744629Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:20.744663Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:20.744682Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:20.745163Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:20.745199Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:20.745218Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:21.006573Z  INFO fedimint_wallet_tests: Current consensus block count is 133, waiting for consensus to reach block count 144
+2023-11-16T00:50:21.099917Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(2) peer=PeerId(1) disconnect_count=1
+2023-11-16T00:50:21.109386Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(1) peer=PeerId(2) disconnect_count=1
+2023-11-16T00:50:21.635516Z  INFO fedimint_bitcoind::electrum: Error broadcasting transaction error=Protocol(Object {"code": Number(2), "message": String("Transaction already in block chain")})
+2023-11-16T00:50:21.659017Z  INFO fedimint_bitcoind::electrum: Error broadcasting transaction error=Protocol(Object {"code": Number(2), "message": String("Transaction already in block chain")})
+2023-11-16T00:50:21.661268Z  INFO fedimint_bitcoind::electrum: Error broadcasting transaction error=Protocol(Object {"code": Number(2), "message": String("Transaction already in block chain")})
+2023-11-16T00:50:21.662028Z  INFO fedimint_bitcoind::electrum: Error broadcasting transaction error=Protocol(Object {"code": Number(2), "message": String("Transaction already in block chain")})
+2023-11-16T00:50:21.703019Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(3) peer=PeerId(2) disconnect_count=1
+2023-11-16T00:50:21.706124Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(2) peer=PeerId(3) disconnect_count=1
+2023-11-16T00:50:21.732548Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(1) peer=PeerId(3) disconnect_count=1
+2023-11-16T00:50:21.740263Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(3) peer=PeerId(1) disconnect_count=1
+2023-11-16T00:50:21.746344Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:21.746412Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:21.747810Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:21.747848Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:21.747867Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:21.747930Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:21.749368Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:21.750710Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:21.752088Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:21.752223Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:21.752304Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:21.752725Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:21.752759Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:21.752780Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:21.753269Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:21.753305Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:21.753325Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:21.754432Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:21.754940Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:21.754978Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:21.754998Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:21.755505Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:21.755547Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:21.755576Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:21.827245Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:21.839215Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:50:21.884743Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:21.889068Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(0) peer=PeerId(1) disconnect_count=1
+2023-11-16T00:50:21.893825Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(1) peer=PeerId(0) disconnect_count=1
+2023-11-16T00:50:22.010810Z  INFO fedimint_wallet_tests: Current consensus block count is 133, waiting for consensus to reach block count 144
+2023-11-16T00:50:22.066891Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:50:22.076873Z  INFO fedimint_wallet_server: New consensus height, syncing up new_height=143 block_to_go=11
+2023-11-16T00:50:22.088535Z  INFO fedimint_wallet_server: New consensus height, syncing up new_height=143 block_to_go=11
+2023-11-16T00:50:22.111518Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=35
+2023-11-16T00:50:22.113851Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:50:22.119135Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=31
+2023-11-16T00:50:22.121001Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:50:22.196255Z  INFO fedimint_wallet_server: New consensus height, syncing up new_height=143 block_to_go=11
+2023-11-16T00:50:22.224696Z  INFO fedimint_wallet_server: New consensus height, syncing up new_height=143 block_to_go=11
+2023-11-16T00:50:22.227832Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=32
+2023-11-16T00:50:22.229993Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:50:22.253082Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=29
+2023-11-16T00:50:22.254928Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:50:22.756175Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:22.756251Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:22.758914Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:22.759106Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:22.759180Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:22.759218Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:22.759218Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:22.759273Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:22.759282Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:22.761633Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:22.762914Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:22.763507Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:22.763541Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:22.763562Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:22.764788Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:22.765310Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:22.765344Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:22.765364Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:22.765820Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:22.765854Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:22.765874Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:22.766343Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:22.766384Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:22.766410Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:23.015212Z  INFO fedimint_wallet_tests: Current consensus block count is 144, consensus caught up
+2023-11-16T00:50:23.016902Z  INFO connection{remote_addr=127.0.0.1:54950 conn_id=2}: fedimint_wallet_server: inside api_endpoint PEG_OUT_FEES_ENDPOINT
+2023-11-16T00:50:23.017044Z  INFO connection{remote_addr=127.0.0.1:54950 conn_id=2}: fedimint_wallet_server: feerate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:23.017067Z  INFO connection{remote_addr=127.0.0.1:38732 conn_id=4}: fedimint_wallet_server: inside api_endpoint PEG_OUT_FEES_ENDPOINT
+2023-11-16T00:50:23.017067Z  INFO connection{remote_addr=127.0.0.1:36166 conn_id=3}: fedimint_wallet_server: inside api_endpoint PEG_OUT_FEES_ENDPOINT
+2023-11-16T00:50:23.017165Z  INFO connection{remote_addr=127.0.0.1:33132 conn_id=1}: fedimint_wallet_server: inside api_endpoint PEG_OUT_FEES_ENDPOINT
+2023-11-16T00:50:23.017240Z  INFO connection{remote_addr=127.0.0.1:38732 conn_id=4}: fedimint_wallet_server: feerate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:23.017240Z  INFO connection{remote_addr=127.0.0.1:36166 conn_id=3}: fedimint_wallet_server: feerate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:23.017346Z  INFO connection{remote_addr=127.0.0.1:33132 conn_id=1}: fedimint_wallet_server: feerate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:23.017568Z  INFO connection{remote_addr=127.0.0.1:54950 conn_id=2}: fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=3129 peg_out_sats=1000 fees_sats=871 fee_rate=1001 change_sats=1258
+2023-11-16T00:50:23.017649Z  INFO connection{remote_addr=127.0.0.1:54950 conn_id=2}: fedimint_wallet_server: Creating peg-out tx txid=4fd1cd1c16aa57743851baf77b18583b866b6c159efd19d8d5bc4e56e6057470
+2023-11-16T00:50:23.017860Z  INFO connection{remote_addr=127.0.0.1:33132 conn_id=1}: fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=3129 peg_out_sats=1000 fees_sats=871 fee_rate=1001 change_sats=1258
+2023-11-16T00:50:23.017974Z  INFO connection{remote_addr=127.0.0.1:33132 conn_id=1}: fedimint_wallet_server: Creating peg-out tx txid=4fd1cd1c16aa57743851baf77b18583b866b6c159efd19d8d5bc4e56e6057470
+2023-11-16T00:50:23.017993Z  INFO connection{remote_addr=127.0.0.1:38732 conn_id=4}: fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=3129 peg_out_sats=1000 fees_sats=871 fee_rate=1001 change_sats=1258
+2023-11-16T00:50:23.017993Z  INFO connection{remote_addr=127.0.0.1:36166 conn_id=3}: fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=3129 peg_out_sats=1000 fees_sats=871 fee_rate=1001 change_sats=1258
+2023-11-16T00:50:23.018100Z  INFO connection{remote_addr=127.0.0.1:36166 conn_id=3}: fedimint_wallet_server: Creating peg-out tx txid=4fd1cd1c16aa57743851baf77b18583b866b6c159efd19d8d5bc4e56e6057470
+2023-11-16T00:50:23.018100Z  INFO connection{remote_addr=127.0.0.1:38732 conn_id=4}: fedimint_wallet_server: Creating peg-out tx txid=4fd1cd1c16aa57743851baf77b18583b866b6c159efd19d8d5bc4e56e6057470
+2023-11-16T00:50:23.022244Z DEBUG timing: Operation timing name=autocmmit - commit_tx duration_ms=0
+2023-11-16T00:50:23.035549Z  INFO connection{remote_addr=127.0.0.1:38732 conn_id=4}: fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=3129 peg_out_sats=1000 fees_sats=871 fee_rate=1001 change_sats=1258
+2023-11-16T00:50:23.035549Z  INFO connection{remote_addr=127.0.0.1:33132 conn_id=1}: fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=3129 peg_out_sats=1000 fees_sats=871 fee_rate=1001 change_sats=1258
+2023-11-16T00:50:23.035690Z  INFO connection{remote_addr=127.0.0.1:38732 conn_id=4}: fedimint_wallet_server: Creating peg-out tx txid=d8e3115987419f9f42a5c6938cdc255eae2ed8218665ac66199470b6671ef79a
+2023-11-16T00:50:23.035716Z  INFO connection{remote_addr=127.0.0.1:33132 conn_id=1}: fedimint_wallet_server: Creating peg-out tx txid=d8e3115987419f9f42a5c6938cdc255eae2ed8218665ac66199470b6671ef79a
+2023-11-16T00:50:23.036855Z  INFO connection{remote_addr=127.0.0.1:38732 conn_id=4}: fedimint_wallet_server: Signing peg out txid=d8e3115987419f9f42a5c6938cdc255eae2ed8218665ac66199470b6671ef79a
+2023-11-16T00:50:23.036895Z  INFO connection{remote_addr=127.0.0.1:33132 conn_id=1}: fedimint_wallet_server: Signing peg out txid=d8e3115987419f9f42a5c6938cdc255eae2ed8218665ac66199470b6671ef79a
+2023-11-16T00:50:23.037458Z  INFO connection{remote_addr=127.0.0.1:36166 conn_id=3}: fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=3129 peg_out_sats=1000 fees_sats=871 fee_rate=1001 change_sats=1258
+2023-11-16T00:50:23.037458Z  INFO connection{remote_addr=127.0.0.1:54950 conn_id=2}: fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=3129 peg_out_sats=1000 fees_sats=871 fee_rate=1001 change_sats=1258
+2023-11-16T00:50:23.037586Z  INFO connection{remote_addr=127.0.0.1:54950 conn_id=2}: fedimint_wallet_server: Creating peg-out tx txid=d8e3115987419f9f42a5c6938cdc255eae2ed8218665ac66199470b6671ef79a
+2023-11-16T00:50:23.037585Z  INFO connection{remote_addr=127.0.0.1:36166 conn_id=3}: fedimint_wallet_server: Creating peg-out tx txid=d8e3115987419f9f42a5c6938cdc255eae2ed8218665ac66199470b6671ef79a
+2023-11-16T00:50:23.039335Z  INFO connection{remote_addr=127.0.0.1:36166 conn_id=3}: fedimint_wallet_server: Signing peg out txid=d8e3115987419f9f42a5c6938cdc255eae2ed8218665ac66199470b6671ef79a
+2023-11-16T00:50:23.039326Z  INFO connection{remote_addr=127.0.0.1:54950 conn_id=2}: fedimint_wallet_server: Signing peg out txid=d8e3115987419f9f42a5c6938cdc255eae2ed8218665ac66199470b6671ef79a
+2023-11-16T00:50:23.766569Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:23.766623Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:23.769331Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:23.769606Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:23.769675Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:23.769685Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:23.769735Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:23.771645Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:23.771693Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:23.771713Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:23.771808Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:23.771845Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:23.772977Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:23.774216Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:23.774716Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:23.774759Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:23.774787Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:23.775886Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:23.776406Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:23.776442Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:23.776461Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:23.776839Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:23.776874Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:23.776894Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:23.888257Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:23.889194Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:23.890681Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:50:23.892949Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:50:23.945600Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:23.946675Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:23.947751Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:23.948967Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:50:23.955607Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:50:23.957048Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:23.957993Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:23.959195Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:24.126091Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:50:24.128434Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:50:24.130260Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:50:24.132490Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:50:24.164643Z  INFO fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=3129 peg_out_sats=1000 fees_sats=871 fee_rate=1001 change_sats=1258
+2023-11-16T00:50:24.164719Z  INFO fedimint_wallet_server: Creating peg-out tx txid=d8e3115987419f9f42a5c6938cdc255eae2ed8218665ac66199470b6671ef79a
+2023-11-16T00:50:24.166009Z  INFO fedimint_wallet_server: Signing peg out txid=d8e3115987419f9f42a5c6938cdc255eae2ed8218665ac66199470b6671ef79a
+2023-11-16T00:50:24.167414Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=4
+2023-11-16T00:50:24.221483Z  INFO fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=3129 peg_out_sats=1000 fees_sats=871 fee_rate=1001 change_sats=1258
+2023-11-16T00:50:24.221571Z  INFO fedimint_wallet_server: Creating peg-out tx txid=d8e3115987419f9f42a5c6938cdc255eae2ed8218665ac66199470b6671ef79a
+2023-11-16T00:50:24.222866Z  INFO fedimint_wallet_server: Signing peg out txid=d8e3115987419f9f42a5c6938cdc255eae2ed8218665ac66199470b6671ef79a
+2023-11-16T00:50:24.224451Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=5
+2023-11-16T00:50:24.229438Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(3) peer=PeerId(0) disconnect_count=1
+2023-11-16T00:50:24.231848Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(0) peer=PeerId(3) disconnect_count=1
+2023-11-16T00:50:24.336758Z  INFO fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=3129 peg_out_sats=1000 fees_sats=871 fee_rate=1001 change_sats=1258
+2023-11-16T00:50:24.336846Z  INFO fedimint_wallet_server: Creating peg-out tx txid=d8e3115987419f9f42a5c6938cdc255eae2ed8218665ac66199470b6671ef79a
+2023-11-16T00:50:24.337935Z  INFO fedimint_wallet_server: Signing peg out txid=d8e3115987419f9f42a5c6938cdc255eae2ed8218665ac66199470b6671ef79a
+2023-11-16T00:50:24.339365Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=4
+2023-11-16T00:50:24.340931Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(2) peer=PeerId(3) disconnect_count=1
+2023-11-16T00:50:24.340990Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(3) peer=PeerId(2) disconnect_count=1
+2023-11-16T00:50:24.342497Z DEBUG timing: Operation timing name=autocmmit - commit_tx duration_ms=0
+2023-11-16T00:50:24.343036Z DEBUG timing: Operation timing name=autocmmit - commit_tx duration_ms=0
+2023-11-16T00:50:24.348338Z DEBUG timing: Operation timing name=autocmmit - commit_tx duration_ms=0
+2023-11-16T00:50:24.360537Z  INFO fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=3129 peg_out_sats=1000 fees_sats=871 fee_rate=1001 change_sats=1258
+2023-11-16T00:50:24.360630Z  INFO fedimint_wallet_server: Creating peg-out tx txid=d8e3115987419f9f42a5c6938cdc255eae2ed8218665ac66199470b6671ef79a
+2023-11-16T00:50:24.362262Z  INFO fedimint_wallet_server: Signing peg out txid=d8e3115987419f9f42a5c6938cdc255eae2ed8218665ac66199470b6671ef79a
+2023-11-16T00:50:24.364221Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=6
+2023-11-16T00:50:24.415743Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=2
+2023-11-16T00:50:24.416849Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:24.417623Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:24.463036Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(1) peer=PeerId(2) disconnect_count=1
+2023-11-16T00:50:24.463657Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:24.464761Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:24.465584Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:24.467720Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(2) peer=PeerId(1) disconnect_count=1
+2023-11-16T00:50:24.509676Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:24.510637Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:24.511593Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:24.620142Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:50:24.621782Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:50:24.623467Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:50:24.774331Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:24.774381Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:24.776826Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:24.778352Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:24.778398Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:24.778421Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:24.778530Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:24.778617Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:24.780948Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:24.781158Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:24.781197Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:24.781204Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:24.781236Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:24.783239Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:24.783739Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:24.783782Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:24.783813Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:24.784932Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:24.785337Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:24.785367Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:24.785384Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:24.785758Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:24.785794Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:24.785813Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:25.782554Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:25.782609Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:25.785361Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:25.787630Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:25.787677Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:25.787722Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:25.787756Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:25.787789Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:25.789752Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:25.789942Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:25.789961Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:25.789984Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:25.790025Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:25.791741Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:25.792928Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:25.793393Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:25.793427Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:25.793454Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:25.793760Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:25.793790Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:25.793807Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:25.794207Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:25.794243Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:25.794263Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:26.544853Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(3) peer=PeerId(0) disconnect_count=1
+2023-11-16T00:50:26.552073Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(0) peer=PeerId(3) disconnect_count=1
+2023-11-16T00:50:26.791542Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:26.791636Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:26.794439Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:26.796058Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:26.796129Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:26.796148Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:26.797057Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:26.797095Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:26.797099Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:26.797138Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:26.799182Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:26.799321Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:26.799397Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:26.800469Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:26.801111Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:26.801147Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:26.801166Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:26.802344Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:26.802779Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:26.802813Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:26.802833Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:26.803142Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:26.803177Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:26.803206Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:27.173176Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(1) peer=PeerId(3) disconnect_count=1
+2023-11-16T00:50:27.176681Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(3) peer=PeerId(1) disconnect_count=1
+2023-11-16T00:50:27.726009Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(1) peer=PeerId(0) disconnect_count=1
+2023-11-16T00:50:27.729453Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(0) peer=PeerId(1) disconnect_count=1
+2023-11-16T00:50:27.799744Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:27.799810Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:27.802864Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:27.804532Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:27.804571Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:27.804590Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:27.804705Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:27.804746Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:27.805651Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:27.805689Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:27.806787Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:27.808080Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:27.808247Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:50:27.808284Z  INFO fedimint_bitcoind::electrum: inside get_fee_rate
+2023-11-16T00:50:27.808646Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:27.808682Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:27.808710Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:27.809266Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:27.809304Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:27.809328Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:27.810613Z  INFO fedimint_bitcoind::electrum: estimate: -1.0
+2023-11-16T00:50:27.811843Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=3
+2023-11-16T00:50:27.811980Z  INFO fedimint_bitcoind::electrum: min_fee: 1e-5
+2023-11-16T00:50:27.812016Z  INFO fedimint_bitcoind::electrum: sats_per_kvb: 1000.0000000000001
+2023-11-16T00:50:27.812034Z  INFO fedimint_wallet_server: unwrapped fee rate: Feerate { sats_per_kvb: 1001 }
+2023-11-16T00:50:27.814949Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=2
+2023-11-16T00:50:27.819166Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=3
+2023-11-16T00:50:27.854734Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=3
+2023-11-16T00:50:27.856159Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=3
+2023-11-16T00:50:27.857901Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=2
+2023-11-16T00:50:27.859281Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=2
+2023-11-16T00:50:27.862070Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=3
+2023-11-16T00:50:27.863754Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=3
+2023-11-16T00:50:28.058129Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:28.091056Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:28.102678Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:50:28.122347Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:50:28.123575Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:50:28.125495Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:50:28.160699Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:50:28.496023Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(3) peer=PeerId(2) disconnect_count=1
+2023-11-16T00:50:28.497581Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(2) peer=PeerId(3) disconnect_count=1
+2023-11-16T00:50:28.745678Z  INFO fedimint_client: Last client reference dropped, shutting down client task group
+2023-11-16T00:50:28.745914Z  INFO fedimint_client::sm::executor: Shutting down state machine executor runner due to shutdown signal
+2023-11-16T00:50:28.747290Z ERROR connection{remote_addr=127.0.0.1:33132 conn_id=1}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Transport endpoint is not connected (os error 107); terminate connection: 1
+test peg_outs_must_wait_for_available_utxos ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 28.20s
+
+        PASS [  28.206s] fedimint-wallet-tests::fedimint_wallet_tests peg_outs_must_wait_for_available_utxos
+------------
+     Summary [  28.206s] 1 test run: 1 passed, 5 skipped
+### Testing against electrs - complete
+fm success: rust-tests
+Auto-killing external-daemons(PID: 435329) and waiting it to finish...
+2023-11-16T00:50:28.764445Z  INFO task: signal received, starting graceful shutdown
+2023-11-16T00:50:28.772601Z  INFO devimint: sending SIGTERM to lightningd and waiting for it to exit
+2023-11-16T00:50:28.774172Z  INFO devimint: sending SIGKILL to lnd and waiting for it to exit
+2023-11-16T00:50:28.780404Z  INFO devimint: sending SIGKILL to electrs and waiting for it to exit
+2023-11-16T00:50:28.782391Z  INFO devimint: sending SIGKILL to esplora and waiting for it to exit
+2023-11-16T00:50:28.784856Z  INFO devimint: sending SIGKILL to bitcoind and waiting for it to exit

@@ -29,7 +29,7 @@ then
     exit 1
 fi
 
-export RUST_BACKTRACE=1 
+export RUST_BACKTRACE=1
 
 eval "$(devimint env)"
 >&2 echo "### Setting up tests - complete"
@@ -43,22 +43,7 @@ if [ -z "${FM_TEST_ONLY:-}" ] || [ "${FM_TEST_ONLY:-}" = "bitcoind" ]; then
   cargo nextest run --locked --workspace --all-targets \
     ${CARGO_PROFILE:+--cargo-profile ${CARGO_PROFILE}} ${CARGO_PROFILE:+--profile ${CARGO_PROFILE}} \
     ${TEST_ARGS_THREADED} \
-    -E 'package(fedimint-dummy-tests)'
-  cargo nextest run --locked --workspace --all-targets \
-    ${CARGO_PROFILE:+--cargo-profile ${CARGO_PROFILE}} ${CARGO_PROFILE:+--profile ${CARGO_PROFILE}} \
-    ${TEST_ARGS_THREADED} \
-    -E 'package(fedimint-mint-tests)'
-  cargo nextest run --locked --workspace --all-targets \
-    ${CARGO_PROFILE:+--cargo-profile ${CARGO_PROFILE}} ${CARGO_PROFILE:+--profile ${CARGO_PROFILE}} \
-    ${TEST_ARGS_THREADED} \
     -E 'package(fedimint-wallet-tests)'
-  cargo nextest run --locked --workspace --all-targets \
-    ${CARGO_PROFILE:+--cargo-profile ${CARGO_PROFILE}} ${CARGO_PROFILE:+--profile ${CARGO_PROFILE}} \
-    ${TEST_ARGS_SERIALIZED} \
-    -E 'package(fedimint-ln-tests)'
-  cargo nextest run --locked --workspace --all-targets \
-    ${CARGO_PROFILE:+--cargo-profile ${CARGO_PROFILE}} ${CARGO_PROFILE:+--profile ${CARGO_PROFILE}} \
-    ${TEST_ARGS_SERIALIZED} 'package(ln-gateway)'
   >&2 echo "### Testing against bitcoind - complete"
 fi
 

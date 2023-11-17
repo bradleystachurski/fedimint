@@ -1,0 +1,726 @@
+Setting up env variables in /tmp/nix-shell.G65Yto/fm-07gS
+   Compiling fedimint-bitcoind v0.2.0-alpha (/home/nix/fedimint/fedimint-bitcoind)
+   Compiling fedimint-wallet-client v0.2.0-alpha (/home/nix/fedimint/modules/fedimint-wallet-client)
+   Compiling fedimint-ln-server v0.2.0-alpha (/home/nix/fedimint/modules/fedimint-ln-server)
+   Compiling fedimint-wallet-server v0.2.0-alpha (/home/nix/fedimint/modules/fedimint-wallet-server)
+   Compiling ln-gateway v0.2.0-alpha (/home/nix/fedimint/gateway/ln-gateway)
+   Compiling fedimint-cli v0.2.0-alpha (/home/nix/fedimint/fedimint-cli)
+   Compiling fedimint-wasm-tests v0.0.0 (/home/nix/fedimint/fedimint-wasm-tests)
+   Compiling fedimintd v0.2.0-alpha (/home/nix/fedimint/fedimintd)
+   Compiling recoverytool v0.2.0-alpha (/home/nix/fedimint/recoverytool)
+   Compiling fedimint-testing v0.2.0-alpha (/home/nix/fedimint/fedimint-testing)
+   Compiling fedimint-dbtool v0.2.0-alpha (/home/nix/fedimint/fedimint-dbtool)
+   Compiling gateway-cli v0.2.0-alpha (/home/nix/fedimint/gateway/cli)
+   Compiling devimint v0.2.0-alpha (/home/nix/fedimint/devimint)
+   Compiling fedimint-ln-tests v0.2.0-alpha (/home/nix/fedimint/modules/fedimint-ln-tests)
+   Compiling fedimint-server v0.2.0-alpha (/home/nix/fedimint/fedimint-server)
+   Compiling fedimint-mint-server v0.2.0-alpha (/home/nix/fedimint/modules/fedimint-mint-server)
+   Compiling fedimint-mint-tests v0.2.0-alpha (/home/nix/fedimint/modules/fedimint-mint-tests)
+   Compiling fedimint-load-test-tool v0.2.0-alpha (/home/nix/fedimint/fedimint-load-test-tool)
+   Compiling fedimint-wallet-tests v0.2.0-alpha (/home/nix/fedimint/modules/fedimint-wallet-tests)
+   Compiling fedimint-dummy-tests v0.2.0-alpha (/home/nix/fedimint/modules/fedimint-dummy-tests)
+    Finished dev [unoptimized + debuginfo] target(s) in 34.01s
+### Setting up tests
+2023-11-16T00:46:41.076195Z  INFO devimint: Test setup in "/tmp/nix-shell.G65Yto/fm-07gS/cfg"
+2023-11-16T00:46:41.078030Z  WARN devimint: Failed to create wallet ... retrying JSON-RPC error: transport error: Couldn't connect to host: Connection refused (os error 111)
+2023-11-16T00:46:56.313494Z  INFO devimint: esplora started
+2023-11-16T00:46:56.316796Z  INFO devimint: electrs started
+2023-11-16T00:47:00.391434Z  INFO devimint: block sync done
+2023-11-16T00:47:00.407120Z  INFO devimint: Sending funds from bitcoind amount=100000000 addr="bcrt1qvgacksws2fpgw8w0qfmv930p0ghgdu7p59nkj8"
+2023-11-16T00:47:00.421817Z  INFO devimint: Mining bitcoin blocks block_num=10
+2023-11-16T00:47:01.595030Z  INFO devimint: Mining bitcoin blocks block_num=10
+2023-11-16T00:47:02.679572Z  WARN devimint::external: Getting chan info failed e=status: Unknown, message: "edge not found", details: [], metadata: MetadataMap { headers: {"content-type": "application/grpc"} }
+2023-11-16T00:47:03.686732Z  WARN devimint::external: Empty chan info edge=ChannelEdge { channel_id: 123145302376449, chan_point: "ec2439802e959b88233b6c8a6cef95b14ea27ba0741b1c7c8713f9ed44d3c123:1", last_update: 1700095622, node1_pub: "0274109155286240148080aa54eb17347b2aa15022f35f68145cfaaf4a6c4102fa", node2_pub: "03cc80cd4a69c8d153351aa5e5d8640c073018e5ea0d44b3e48c3bb91ce444b46e", capacity: 10000000, node1_policy: None, node2_policy: Some(RoutingPolicy { time_lock_delta: 80, min_htlc: 1000, fee_base_msat: 1000, fee_rate_milli_msat: 1, disabled: false, max_htlc_msat: 10000000000, last_update: 1700095622 }) }
+2023-11-16T00:47:04.751397Z  INFO devimint: starting base daemons took 23.675074813s
+### Setting up tests - complete
+### Testing against bitcoind
+    Finished test [unoptimized + debuginfo] target(s) in 0.23s
+    Starting 1 test across 50 binaries (5 skipped)
+       START             fedimint-wallet-tests::fedimint_wallet_tests peg_outs_must_wait_for_available_utxos
+
+running 1 test
+2023-11-16T00:47:05.662613Z  INFO test: Setting federation with peers num_peers=4
+2023-11-16T00:47:05.668265Z  INFO db: Global module db version: 0
+2023-11-16T00:47:05.668284Z  INFO core: Init module module_instance_id=0 kind=dummy
+2023-11-16T00:47:05.668329Z  INFO db: dummy module db version: 1
+2023-11-16T00:47:05.668368Z  INFO core: Init module module_instance_id=1 kind=wallet
+2023-11-16T00:47:05.668413Z  INFO db: wallet module db version: 0
+2023-11-16T00:47:05.669869Z  INFO fedimint_wallet_server: Connected to bitcoind height=122
+2023-11-16T00:47:05.670560Z  INFO fedimint_wallet_server: Bitcoind feerate not available. Using defaults. feerate=0
+2023-11-16T00:47:05.671418Z  INFO net::api: Starting api on ws://127.0.0.1:17703
+2023-11-16T00:47:05.671653Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:05.671783Z  INFO consensus: Waiting for peers config ee8a14ef2109cdddab7dbbbf7522ffcb3a4c9ce1ecea89845fb927d5ef888b83
+2023-11-16T00:47:05.671906Z  INFO db: Global module db version: 0
+2023-11-16T00:47:05.671921Z  INFO core: Init module module_instance_id=0 kind=dummy
+2023-11-16T00:47:05.671957Z  INFO db: dummy module db version: 1
+2023-11-16T00:47:05.671986Z  INFO core: Init module module_instance_id=1 kind=wallet
+2023-11-16T00:47:05.672021Z  INFO db: wallet module db version: 0
+2023-11-16T00:47:05.672153Z  INFO connection{remote_addr=127.0.0.1:56202 conn_id=0}: jsonrpsee_server::server: Accepting new connection 1/1000
+2023-11-16T00:47:05.672568Z  WARN net::api: Unable to connect to peer peer_id=1 err=Networking or low-level protocol error: Error when opening the TCP socket: Connection refused (os error 111)
+2023-11-16T00:47:05.672704Z  WARN net::api: Unable to connect to peer peer_id=2 err=Networking or low-level protocol error: Error when opening the TCP socket: Connection refused (os error 111)
+2023-11-16T00:47:05.672848Z  WARN consensus: Could not check consensus config hash: Federation rpc error {general => Received errors from 2 peers: peer-1: Rpc error: Networking or low-level protocol error: Error when opening the TCP socket: Connection refused (os error 111), peer-2: Rpc error: Networking or low-level protocol error: Error when opening the TCP socket: Connection refused (os error 111)), 1 => Rpc error: Networking or low-level protocol error: Error when opening the TCP socket: Connection refused (os error 111))2 => Rpc error: Networking or low-level protocol error: Error when opening the TCP socket: Connection refused (os error 111)), }
+2023-11-16T00:47:05.672948Z ERROR connection{remote_addr=127.0.0.1:56202 conn_id=0}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Connection reset by peer (os error 104); terminate connection: 0
+2023-11-16T00:47:05.673126Z  INFO fedimint_wallet_server: Connected to bitcoind height=122
+2023-11-16T00:47:05.673614Z  INFO fedimint_wallet_server: Bitcoind feerate not available. Using defaults. feerate=0
+2023-11-16T00:47:05.674368Z  INFO net::api: Starting api on ws://127.0.0.1:17705
+2023-11-16T00:47:05.674499Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:05.674687Z  INFO consensus: Waiting for peers config ee8a14ef2109cdddab7dbbbf7522ffcb3a4c9ce1ecea89845fb927d5ef888b83
+2023-11-16T00:47:05.674832Z  INFO db: Global module db version: 0
+2023-11-16T00:47:05.674847Z  INFO core: Init module module_instance_id=0 kind=dummy
+2023-11-16T00:47:05.674882Z  INFO db: dummy module db version: 1
+2023-11-16T00:47:05.674911Z  INFO core: Init module module_instance_id=1 kind=wallet
+2023-11-16T00:47:05.674947Z  INFO db: wallet module db version: 0
+2023-11-16T00:47:05.674977Z  INFO connection{remote_addr=127.0.0.1:56216 conn_id=1}: jsonrpsee_server::server: Accepting new connection 1/1000
+2023-11-16T00:47:05.675128Z  INFO connection{remote_addr=127.0.0.1:43560 conn_id=0}: jsonrpsee_server::server: Accepting new connection 1/1000
+2023-11-16T00:47:05.675421Z  WARN net::api: Unable to connect to peer peer_id=2 err=Networking or low-level protocol error: Error when opening the TCP socket: Connection refused (os error 111)
+2023-11-16T00:47:05.675500Z  WARN net::api: Unable to connect to peer peer_id=3 err=Networking or low-level protocol error: Error when opening the TCP socket: Connection refused (os error 111)
+2023-11-16T00:47:05.675586Z  WARN consensus: Could not check consensus config hash: Federation rpc error {general => Received errors from 2 peers: peer-2: Rpc error: Networking or low-level protocol error: Error when opening the TCP socket: Connection refused (os error 111), peer-3: Rpc error: Networking or low-level protocol error: Error when opening the TCP socket: Connection refused (os error 111)), 2 => Rpc error: Networking or low-level protocol error: Error when opening the TCP socket: Connection refused (os error 111))3 => Rpc error: Networking or low-level protocol error: Error when opening the TCP socket: Connection refused (os error 111)), }
+2023-11-16T00:47:05.675676Z ERROR connection{remote_addr=127.0.0.1:56216 conn_id=1}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Connection reset by peer (os error 104); terminate connection: 1
+2023-11-16T00:47:05.675725Z  WARN connection{remote_addr=127.0.0.1:43560 conn_id=0}: jsonrpsee_server::server: HTTP serve connection failed hyper::Error(IncompleteMessage)
+2023-11-16T00:47:05.675816Z  WARN connection{remote_addr=127.0.0.1:43560 conn_id=0}: jsonrpsee_server::server: Could not upgrade connection: operation was canceled: upgrade expected but not completed
+2023-11-16T00:47:05.676010Z  INFO fedimint_wallet_server: Connected to bitcoind height=122
+2023-11-16T00:47:05.676525Z  INFO fedimint_wallet_server: Bitcoind feerate not available. Using defaults. feerate=0
+2023-11-16T00:47:05.677268Z  INFO net::api: Starting api on ws://127.0.0.1:17707
+2023-11-16T00:47:05.677354Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:05.677584Z  INFO consensus: Waiting for peers config ee8a14ef2109cdddab7dbbbf7522ffcb3a4c9ce1ecea89845fb927d5ef888b83
+2023-11-16T00:47:05.677715Z  INFO db: Global module db version: 0
+2023-11-16T00:47:05.677730Z  INFO core: Init module module_instance_id=0 kind=dummy
+2023-11-16T00:47:05.677763Z  INFO db: dummy module db version: 1
+2023-11-16T00:47:05.677792Z  INFO core: Init module module_instance_id=1 kind=wallet
+2023-11-16T00:47:05.677807Z  INFO connection{remote_addr=127.0.0.1:56224 conn_id=2}: jsonrpsee_server::server: Accepting new connection 1/1000
+2023-11-16T00:47:05.677830Z  INFO db: wallet module db version: 0
+2023-11-16T00:47:05.677895Z  INFO connection{remote_addr=127.0.0.1:43566 conn_id=1}: jsonrpsee_server::server: Accepting new connection 1/1000
+2023-11-16T00:47:05.677983Z  INFO connection{remote_addr=127.0.0.1:52972 conn_id=0}: jsonrpsee_server::server: Accepting new connection 1/1000
+2023-11-16T00:47:05.678252Z  WARN net::api: Unable to connect to peer peer_id=3 err=Networking or low-level protocol error: Error when opening the TCP socket: Connection refused (os error 111)
+2023-11-16T00:47:05.678907Z  INFO fedimint_wallet_server: Connected to bitcoind height=122
+2023-11-16T00:47:05.679357Z  INFO consensus: Confirmed peers config ee8a14ef2109cdddab7dbbbf7522ffcb3a4c9ce1ecea89845fb927d5ef888b83
+2023-11-16T00:47:05.679420Z  INFO fedimint_wallet_server: Bitcoind feerate not available. Using defaults. feerate=0
+2023-11-16T00:47:05.679547Z ERROR connection{remote_addr=127.0.0.1:43566 conn_id=1}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Transport endpoint is not connected (os error 107); terminate connection: 1
+2023-11-16T00:47:05.679551Z ERROR connection{remote_addr=127.0.0.1:56224 conn_id=2}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Transport endpoint is not connected (os error 107); terminate connection: 2
+2023-11-16T00:47:05.679665Z  INFO consensus: Loaded aleph buffer with 0 bytes
+2023-11-16T00:47:05.679761Z  INFO AlephBFT-member: NodeIndex(2) Starting a new session.    
+2023-11-16T00:47:05.679834Z ERROR connection{remote_addr=127.0.0.1:52972 conn_id=0}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Transport endpoint is not connected (os error 107); terminate connection: 0
+2023-11-16T00:47:05.680002Z  INFO AlephBFT-backup-loader: Loaded 0 units from backup. Able to continue from round: 0.    
+2023-11-16T00:47:05.680022Z  INFO AlephBFT-backup-loader: Next round inferred from collection: 0    
+2023-11-16T00:47:05.680285Z  INFO net::api: Starting api on ws://127.0.0.1:17709
+2023-11-16T00:47:05.680411Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:05.680615Z  INFO test: Setting new client with config
+2023-11-16T00:47:05.680687Z  INFO consensus: Waiting for peers config ee8a14ef2109cdddab7dbbbf7522ffcb3a4c9ce1ecea89845fb927d5ef888b83
+2023-11-16T00:47:05.680898Z  INFO connection{remote_addr=127.0.0.1:56234 conn_id=3}: jsonrpsee_server::server: Accepting new connection 1/1000
+2023-11-16T00:47:05.681034Z  INFO connection{remote_addr=127.0.0.1:43576 conn_id=2}: jsonrpsee_server::server: Accepting new connection 1/1000
+2023-11-16T00:47:05.681170Z  INFO connection{remote_addr=127.0.0.1:52986 conn_id=1}: jsonrpsee_server::server: Accepting new connection 1/1000
+2023-11-16T00:47:05.681200Z  INFO connection{remote_addr=127.0.0.1:54716 conn_id=0}: jsonrpsee_server::server: Accepting new connection 1/1000
+2023-11-16T00:47:05.681428Z  INFO connection{remote_addr=127.0.0.1:56242 conn_id=4}: jsonrpsee_server::server: Accepting new connection 2/1000
+2023-11-16T00:47:05.681546Z  INFO connection{remote_addr=127.0.0.1:43590 conn_id=3}: jsonrpsee_server::server: Accepting new connection 2/1000
+2023-11-16T00:47:05.681570Z  INFO connection{remote_addr=127.0.0.1:52992 conn_id=2}: jsonrpsee_server::server: Accepting new connection 2/1000
+2023-11-16T00:47:05.681630Z  INFO connection{remote_addr=127.0.0.1:54722 conn_id=1}: jsonrpsee_server::server: Accepting new connection 2/1000
+2023-11-16T00:47:05.682736Z  INFO consensus: Confirmed peers config ee8a14ef2109cdddab7dbbbf7522ffcb3a4c9ce1ecea89845fb927d5ef888b83
+2023-11-16T00:47:05.682906Z ERROR connection{remote_addr=127.0.0.1:56234 conn_id=3}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Transport endpoint is not connected (os error 107); terminate connection: 3
+2023-11-16T00:47:05.682907Z ERROR connection{remote_addr=127.0.0.1:52986 conn_id=1}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Transport endpoint is not connected (os error 107); terminate connection: 1
+2023-11-16T00:47:05.682922Z ERROR connection{remote_addr=127.0.0.1:43576 conn_id=2}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Transport endpoint is not connected (os error 107); terminate connection: 2
+2023-11-16T00:47:05.683105Z  INFO consensus: Loaded aleph buffer with 0 bytes
+2023-11-16T00:47:05.683206Z  INFO AlephBFT-member: NodeIndex(3) Starting a new session.    
+2023-11-16T00:47:05.683251Z ERROR connection{remote_addr=127.0.0.1:54716 conn_id=0}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Transport endpoint is not connected (os error 107); terminate connection: 0
+2023-11-16T00:47:05.683428Z  INFO AlephBFT-backup-loader: Loaded 0 units from backup. Able to continue from round: 0.    
+2023-11-16T00:47:05.683451Z  INFO AlephBFT-backup-loader: Next round inferred from collection: 0    
+2023-11-16T00:47:05.683676Z  INFO fedimint_client::sm::executor: Starting state machine executor task
+2023-11-16T00:47:05.683734Z  INFO fedimint_wallet_tests: Starting test peg_outs_must_wait_for_available_utxos
+2023-11-16T00:47:05.773962Z  INFO connection{remote_addr=127.0.0.1:56254 conn_id=5}: jsonrpsee_server::server: Accepting new connection 2/1000
+2023-11-16T00:47:05.773974Z  INFO connection{remote_addr=127.0.0.1:43600 conn_id=4}: jsonrpsee_server::server: Accepting new connection 2/1000
+2023-11-16T00:47:05.774073Z  INFO connection{remote_addr=127.0.0.1:53006 conn_id=3}: jsonrpsee_server::server: Accepting new connection 2/1000
+2023-11-16T00:47:05.774183Z  INFO connection{remote_addr=127.0.0.1:54734 conn_id=2}: jsonrpsee_server::server: Accepting new connection 2/1000
+2023-11-16T00:47:05.774545Z  INFO fedimint_wallet_tests: Current consensus block count is 0, waiting for consensus to reach block count 1
+2023-11-16T00:47:05.775669Z  INFO consensus: Confirmed peers config ee8a14ef2109cdddab7dbbbf7522ffcb3a4c9ce1ecea89845fb927d5ef888b83
+2023-11-16T00:47:05.775871Z ERROR connection{remote_addr=127.0.0.1:43600 conn_id=4}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Transport endpoint is not connected (os error 107); terminate connection: 4
+2023-11-16T00:47:05.775873Z ERROR connection{remote_addr=127.0.0.1:53006 conn_id=3}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Transport endpoint is not connected (os error 107); terminate connection: 3
+2023-11-16T00:47:05.775918Z ERROR connection{remote_addr=127.0.0.1:56254 conn_id=5}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Transport endpoint is not connected (os error 107); terminate connection: 5
+2023-11-16T00:47:05.775991Z  INFO consensus: Loaded aleph buffer with 0 bytes
+2023-11-16T00:47:05.776094Z  INFO AlephBFT-member: NodeIndex(0) Starting a new session.    
+2023-11-16T00:47:05.776181Z ERROR connection{remote_addr=127.0.0.1:54734 conn_id=2}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Transport endpoint is not connected (os error 107); terminate connection: 2
+2023-11-16T00:47:05.776267Z  INFO AlephBFT-backup-loader: Loaded 0 units from backup. Able to continue from round: 0.    
+2023-11-16T00:47:05.776288Z  INFO AlephBFT-backup-loader: Next round inferred from collection: 0    
+2023-11-16T00:47:05.776349Z  INFO connection{remote_addr=127.0.0.1:56262 conn_id=6}: jsonrpsee_server::server: Accepting new connection 2/1000
+2023-11-16T00:47:05.776463Z  INFO connection{remote_addr=127.0.0.1:43606 conn_id=5}: jsonrpsee_server::server: Accepting new connection 2/1000
+2023-11-16T00:47:05.776599Z  INFO connection{remote_addr=127.0.0.1:53020 conn_id=4}: jsonrpsee_server::server: Accepting new connection 2/1000
+2023-11-16T00:47:05.776683Z  INFO connection{remote_addr=127.0.0.1:54746 conn_id=3}: jsonrpsee_server::server: Accepting new connection 2/1000
+2023-11-16T00:47:05.777923Z  INFO consensus: Confirmed peers config ee8a14ef2109cdddab7dbbbf7522ffcb3a4c9ce1ecea89845fb927d5ef888b83
+2023-11-16T00:47:05.778125Z ERROR connection{remote_addr=127.0.0.1:53020 conn_id=4}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Broken pipe (os error 32); terminate connection: 4
+2023-11-16T00:47:05.778137Z ERROR connection{remote_addr=127.0.0.1:56262 conn_id=6}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Transport endpoint is not connected (os error 107); terminate connection: 6
+2023-11-16T00:47:05.778179Z ERROR connection{remote_addr=127.0.0.1:43606 conn_id=5}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Transport endpoint is not connected (os error 107); terminate connection: 5
+2023-11-16T00:47:05.778196Z  INFO consensus: Loaded aleph buffer with 0 bytes
+2023-11-16T00:47:05.778266Z  INFO AlephBFT-member: NodeIndex(1) Starting a new session.    
+2023-11-16T00:47:05.778352Z ERROR connection{remote_addr=127.0.0.1:54746 conn_id=3}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Transport endpoint is not connected (os error 107); terminate connection: 3
+2023-11-16T00:47:05.778375Z ERROR jsonrpsee_server::transport::ws: WS transport error: send failed: Networking or low-level protocol error: connection closed
+2023-11-16T00:47:05.778426Z  INFO AlephBFT-backup-loader: Loaded 0 units from backup. Able to continue from round: 0.    
+2023-11-16T00:47:05.778461Z  INFO AlephBFT-backup-loader: Next round inferred from collection: 0    
+2023-11-16T00:47:06.674581Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:06.676823Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:06.678902Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:06.681800Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:06.777996Z  INFO fedimint_wallet_tests: Current consensus block count is 0, waiting for consensus to reach block count 1
+2023-11-16T00:47:07.677838Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:07.680445Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:07.682051Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:07.684645Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:07.720353Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(2) peer=PeerId(3) disconnect_count=1
+2023-11-16T00:47:07.731882Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(3) peer=PeerId(2) disconnect_count=0
+2023-11-16T00:47:07.753102Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(1) peer=PeerId(2) disconnect_count=1
+2023-11-16T00:47:07.753191Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(2) peer=PeerId(1) disconnect_count=0
+2023-11-16T00:47:07.781522Z  INFO fedimint_wallet_tests: Current consensus block count is 0, waiting for consensus to reach block count 1
+2023-11-16T00:47:07.784841Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(1) peer=PeerId(0) disconnect_count=0
+2023-11-16T00:47:07.791049Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(0) peer=PeerId(1) disconnect_count=1
+2023-11-16T00:47:07.849963Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(0) peer=PeerId(2) disconnect_count=1
+2023-11-16T00:47:07.851179Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(2) peer=PeerId(0) disconnect_count=0
+2023-11-16T00:47:07.872490Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(1) peer=PeerId(3) disconnect_count=1
+2023-11-16T00:47:07.879118Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(3) peer=PeerId(1) disconnect_count=0
+2023-11-16T00:47:08.554340Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:08.562515Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:08.570968Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:08.683226Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:08.685559Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:08.685814Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:08.688537Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:08.785762Z  INFO fedimint_wallet_tests: Current consensus block count is 0, waiting for consensus to reach block count 1
+2023-11-16T00:47:08.839713Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:08.840461Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:08.841152Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:08.850873Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:08.851451Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:08.852214Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:09.005987Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:09.006611Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:09.007337Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:09.117027Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:09.117627Z  INFO fedimint_wallet_server: New consensus height, syncing up new_height=121 block_to_go=10
+2023-11-16T00:47:09.125775Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=8
+2023-11-16T00:47:09.126740Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:09.127490Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:09.165559Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:09.166252Z  INFO fedimint_wallet_server: New consensus height, syncing up new_height=121 block_to_go=10
+2023-11-16T00:47:09.172821Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=6
+2023-11-16T00:47:09.173448Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:09.174049Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:09.688431Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:09.689866Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:09.691162Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:09.692660Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:10.068901Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(0) peer=PeerId(3) disconnect_count=2
+2023-11-16T00:47:10.070965Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(3) peer=PeerId(0) disconnect_count=0
+2023-11-16T00:47:10.096226Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(0) peer=PeerId(2) disconnect_count=1
+2023-11-16T00:47:10.100785Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(2) peer=PeerId(0) disconnect_count=1
+2023-11-16T00:47:10.202005Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:10.562853Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:10.563434Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:10.564102Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:10.675382Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:10.676056Z  INFO fedimint_wallet_server: New consensus height, syncing up new_height=121 block_to_go=10
+2023-11-16T00:47:10.684939Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=9
+2023-11-16T00:47:10.685687Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:10.686268Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:10.692643Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:10.694019Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:10.694560Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:10.696475Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:10.803248Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(1) peer=PeerId(2) disconnect_count=1
+2023-11-16T00:47:10.805541Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(2) peer=PeerId(1) disconnect_count=1
+2023-11-16T00:47:10.824482Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(0) peer=PeerId(1) disconnect_count=1
+2023-11-16T00:47:10.832339Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(1) peer=PeerId(0) disconnect_count=1
+2023-11-16T00:47:10.940454Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:10.940930Z  INFO fedimint_wallet_server: New consensus height, syncing up new_height=121 block_to_go=10
+2023-11-16T00:47:10.949436Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=8
+2023-11-16T00:47:10.950179Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:10.950867Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:11.304426Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(3) peer=PeerId(1) disconnect_count=1
+2023-11-16T00:47:11.305615Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(1) peer=PeerId(3) disconnect_count=1
+2023-11-16T00:47:11.435835Z  INFO fedimint_wallet_tests: Current consensus block count is 122, consensus caught up
+2023-11-16T00:47:11.437822Z DEBUG timing: Operation timing name=autocmmit - commit_tx duration_ms=0
+2023-11-16T00:47:11.437851Z  INFO fedimint_wallet_tests: Peg-in address generated address=bcrt1qrzmmrjevwq5n6hw2q0djx06vhjthz5nqlp28thqjka9drnykj40qrf2e7y
+2023-11-16T00:47:11.483307Z  INFO fedimint_wallet_tests: Peg-in transaction mined height=132 tx=Transaction { version: 2, lock_time: PackedLockTime(131), input: [TxIn { previous_output: OutPoint { txid: 7c7a3bbc5239b968a87dca8afdd46b35c39e72a8d0bd036df2d4919349639d6c, vout: 0 }, script_sig: Script(), sequence: Sequence(4294967293), witness: Witness { content: [71, 48, 68, 2, 32, 73, 252, 123, 67, 132, 93, 77, 185, 202, 75, 23, 223, 251, 161, 14, 84, 6, 205, 103, 156, 12, 78, 145, 59, 254, 0, 161, 135, 229, 20, 221, 108, 2, 32, 30, 141, 218, 149, 99, 29, 108, 213, 35, 128, 142, 114, 198, 175, 141, 243, 59, 55, 135, 121, 184, 95, 251, 99, 31, 191, 245, 38, 44, 220, 55, 12, 1, 33, 2, 141, 112, 121, 105, 202, 62, 36, 103, 199, 148, 139, 223, 218, 50, 99, 168, 81, 28, 100, 75, 188, 130, 187, 180, 130, 221, 123, 240, 134, 202, 148, 195], witness_elements: 2, last: 72, second_to_last: 0 } }], output: [TxOut { value: 5000, script_pubkey: Script(OP_0 OP_PUSHBYTES_32 18b7b1cb2c70293d5dca03db233f4cbc97715260f85475dc12b74ad1cc96955e) }, TxOut { value: 4899982760, script_pubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 ec5b375863dc9b3adb26279005fca565d230ee0d0f90df9f20a68e95a00e53b4) }] }
+2023-11-16T00:47:11.694042Z DEBUG timing: Operation timing name=autocmmit - commit_tx duration_ms=0
+2023-11-16T00:47:11.695814Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:11.698820Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:11.700001Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:11.700175Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:12.172516Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(3) peer=PeerId(0) disconnect_count=1
+2023-11-16T00:47:12.179309Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(0) peer=PeerId(3) disconnect_count=1
+2023-11-16T00:47:12.698021Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:12.701349Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:12.702424Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:12.702474Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:12.816041Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:12.854060Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:12.872791Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:13.115697Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:13.257004Z  INFO fedimint_wallet_server: New consensus height, syncing up new_height=122 block_to_go=1
+2023-11-16T00:47:13.258474Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=2
+2023-11-16T00:47:13.259317Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:13.320112Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(2) peer=PeerId(1) disconnect_count=1
+2023-11-16T00:47:13.322295Z  INFO fedimint_wallet_server: New consensus height, syncing up new_height=122 block_to_go=1
+2023-11-16T00:47:13.322636Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(1) peer=PeerId(2) disconnect_count=1
+2023-11-16T00:47:13.323715Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=2
+2023-11-16T00:47:13.324721Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:13.397888Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(2) peer=PeerId(3) disconnect_count=1
+2023-11-16T00:47:13.405174Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(3) peer=PeerId(2) disconnect_count=1
+2023-11-16T00:47:13.446101Z  INFO fedimint_wallet_server: New consensus height, syncing up new_height=122 block_to_go=1
+2023-11-16T00:47:13.447527Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:47:13.448438Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:13.701098Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:13.705297Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:13.705532Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:13.705539Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:13.761444Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:47:13.762594Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:13.800624Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:13.801379Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:13.810469Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:13.811547Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:13.907952Z  INFO fedimint_wallet_server: New consensus height, syncing up new_height=122 block_to_go=1
+2023-11-16T00:47:13.908662Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:13.909072Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:14.010365Z  INFO fedimint_wallet_server: New consensus height, syncing up new_height=132 block_to_go=10
+2023-11-16T00:47:14.014559Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=4
+2023-11-16T00:47:14.051677Z  INFO fedimint_wallet_server: New consensus height, syncing up new_height=132 block_to_go=10
+2023-11-16T00:47:14.055133Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=3
+2023-11-16T00:47:14.062379Z  INFO fedimint_wallet_server: New consensus height, syncing up new_height=132 block_to_go=10
+2023-11-16T00:47:14.065911Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=3
+2023-11-16T00:47:14.261878Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:14.313020Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:14.359804Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:14.490658Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:14.491750Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:14.492662Z  INFO fedimint_wallet_server: New consensus height, syncing up new_height=132 block_to_go=10
+2023-11-16T00:47:14.501171Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=8
+2023-11-16T00:47:14.706670Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:14.709722Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:14.711731Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:14.711768Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:14.714536Z DEBUG timing: Operation timing name=autocmmit - commit_tx duration_ms=0
+2023-11-16T00:47:14.790236Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:47:14.937071Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(0) peer=PeerId(2) disconnect_count=1
+2023-11-16T00:47:14.938283Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(2) peer=PeerId(0) disconnect_count=1
+2023-11-16T00:47:15.680168Z  INFO AlephBFT-member: Member status report: task queue content: CoordRequest - 8, ParentsRequest - 0, UnitBroadcast - 96, RequestNewest - 0.    
+2023-11-16T00:47:15.680724Z  INFO AlephBFT-runway: Runway status report: healthy. DAG size - 96; DAG height - 24; DAG top row - [(0, 23), (1, 24), (2, 22), (3, 23)].    
+2023-11-16T00:47:15.683572Z  INFO AlephBFT-member: Member status report: task queue content: CoordRequest - 0, ParentsRequest - 0, UnitBroadcast - 88, RequestNewest - 0.    
+2023-11-16T00:47:15.684057Z  INFO AlephBFT-runway: Runway status report: healthy. DAG size - 88; DAG height - 24; DAG top row - [(0, 23), (1, 24), (2, 14), (3, 23)].    
+2023-11-16T00:47:15.711276Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:15.714249Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:15.715847Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:15.717675Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:15.766036Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=2
+2023-11-16T00:47:15.776422Z  INFO AlephBFT-member: Member status report: task queue content: CoordRequest - 1, ParentsRequest - 0, UnitBroadcast - 92, RequestNewest - 0.    
+2023-11-16T00:47:15.776873Z  INFO AlephBFT-runway: Runway status report: healthy. DAG size - 92; DAG height - 24; DAG top row - [(0, 24), (1, 24), (2, 16), (3, 24)].    
+2023-11-16T00:47:15.777866Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=2
+2023-11-16T00:47:15.778588Z  INFO AlephBFT-member: Member status report: task queue content: CoordRequest - 0, ParentsRequest - 0, UnitBroadcast - 100, RequestNewest - 0.    
+2023-11-16T00:47:15.779158Z  INFO AlephBFT-runway: Runway status report: healthy. DAG size - 100; DAG height - 25; DAG top row - [(0, 24), (1, 25), (2, 23), (3, 24)].    
+2023-11-16T00:47:15.781962Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=2
+2023-11-16T00:47:15.785009Z DEBUG timing: Operation timing name=autocmmit - commit_tx duration_ms=0
+2023-11-16T00:47:15.785897Z DEBUG timing: Operation timing name=autocmmit - commit_tx duration_ms=0
+2023-11-16T00:47:15.786653Z  INFO fedimint_wallet_tests: Peg-in transaction claimed height=132 tx=Transaction { version: 2, lock_time: PackedLockTime(131), input: [TxIn { previous_output: OutPoint { txid: 7c7a3bbc5239b968a87dca8afdd46b35c39e72a8d0bd036df2d4919349639d6c, vout: 0 }, script_sig: Script(), sequence: Sequence(4294967293), witness: Witness { content: [71, 48, 68, 2, 32, 73, 252, 123, 67, 132, 93, 77, 185, 202, 75, 23, 223, 251, 161, 14, 84, 6, 205, 103, 156, 12, 78, 145, 59, 254, 0, 161, 135, 229, 20, 221, 108, 2, 32, 30, 141, 218, 149, 99, 29, 108, 213, 35, 128, 142, 114, 198, 175, 141, 243, 59, 55, 135, 121, 184, 95, 251, 99, 31, 191, 245, 38, 44, 220, 55, 12, 1, 33, 2, 141, 112, 121, 105, 202, 62, 36, 103, 199, 148, 139, 223, 218, 50, 99, 168, 81, 28, 100, 75, 188, 130, 187, 180, 130, 221, 123, 240, 134, 202, 148, 195], witness_elements: 2, last: 72, second_to_last: 0 } }], output: [TxOut { value: 5000, script_pubkey: Script(OP_0 OP_PUSHBYTES_32 18b7b1cb2c70293d5dca03db233f4cbc97715260f85475dc12b74ad1cc96955e) }, TxOut { value: 4899982760, script_pubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 ec5b375863dc9b3adb26279005fca565d230ee0d0f90df9f20a68e95a00e53b4) }] }
+2023-11-16T00:47:15.786767Z  INFO fedimint_wallet_tests: Peg-in finished for test peg_outs_must_wait_for_available_utxos
+2023-11-16T00:47:15.812189Z  INFO fedimint_wallet_tests: first address: bcrt1qxpcxjz5sdanl0xx0ltk9pe6sal097yfjpu34sn
+2023-11-16T00:47:15.813069Z  INFO connection{remote_addr=127.0.0.1:43590 conn_id=3}: fedimint_wallet_server: inside api_endpoint PEG_OUT_FEES_ENDPOINT
+2023-11-16T00:47:15.813069Z  INFO connection{remote_addr=127.0.0.1:56242 conn_id=4}: fedimint_wallet_server: inside api_endpoint PEG_OUT_FEES_ENDPOINT
+2023-11-16T00:47:15.813110Z  INFO connection{remote_addr=127.0.0.1:52992 conn_id=2}: fedimint_wallet_server: inside api_endpoint PEG_OUT_FEES_ENDPOINT
+2023-11-16T00:47:15.813161Z  INFO connection{remote_addr=127.0.0.1:43590 conn_id=3}: fedimint_wallet_server: feerate: Feerate { sats_per_kvb: 1000 }
+2023-11-16T00:47:15.813161Z  INFO connection{remote_addr=127.0.0.1:56242 conn_id=4}: fedimint_wallet_server: feerate: Feerate { sats_per_kvb: 1000 }
+2023-11-16T00:47:15.813177Z  INFO connection{remote_addr=127.0.0.1:52992 conn_id=2}: fedimint_wallet_server: feerate: Feerate { sats_per_kvb: 1000 }
+2023-11-16T00:47:15.813214Z  INFO connection{remote_addr=127.0.0.1:54722 conn_id=1}: fedimint_wallet_server: inside api_endpoint PEG_OUT_FEES_ENDPOINT
+2023-11-16T00:47:15.813293Z  INFO connection{remote_addr=127.0.0.1:54722 conn_id=1}: fedimint_wallet_server: feerate: Feerate { sats_per_kvb: 1000 }
+2023-11-16T00:47:15.813506Z  WARN connection{remote_addr=127.0.0.1:52992 conn_id=2}: fedimint_wallet_server: Error returning peg-out fees Not enough SpendableUTXO
+2023-11-16T00:47:15.813523Z  INFO connection{remote_addr=127.0.0.1:56242 conn_id=4}: fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=5000 peg_out_sats=1000 fees_sats=871 fee_rate=1000 change_sats=3129
+2023-11-16T00:47:15.813524Z  INFO connection{remote_addr=127.0.0.1:43590 conn_id=3}: fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=5000 peg_out_sats=1000 fees_sats=871 fee_rate=1000 change_sats=3129
+2023-11-16T00:47:15.813579Z  INFO connection{remote_addr=127.0.0.1:56242 conn_id=4}: fedimint_wallet_server: Creating peg-out tx txid=f1ce3d7592b0b342d79864e46daa7c6c52c4b63f93cf2793804590cd08fe894c
+2023-11-16T00:47:15.813579Z  INFO connection{remote_addr=127.0.0.1:43590 conn_id=3}: fedimint_wallet_server: Creating peg-out tx txid=f1ce3d7592b0b342d79864e46daa7c6c52c4b63f93cf2793804590cd08fe894c
+2023-11-16T00:47:15.813571Z  INFO connection{remote_addr=127.0.0.1:54722 conn_id=1}: fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=5000 peg_out_sats=1000 fees_sats=871 fee_rate=1000 change_sats=3129
+2023-11-16T00:47:15.813616Z  INFO connection{remote_addr=127.0.0.1:54722 conn_id=1}: fedimint_wallet_server: Creating peg-out tx txid=f1ce3d7592b0b342d79864e46daa7c6c52c4b63f93cf2793804590cd08fe894c
+2023-11-16T00:47:15.817166Z DEBUG timing: Operation timing name=autocmmit - commit_tx duration_ms=0
+2023-11-16T00:47:15.899482Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:47:16.013090Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:16.013499Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:16.024865Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:16.025345Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:16.027162Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:16.027597Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:16.104251Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:16.104881Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:16.371576Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(3) peer=PeerId(2) disconnect_count=1
+2023-11-16T00:47:16.375432Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(2) peer=PeerId(3) disconnect_count=1
+2023-11-16T00:47:16.716323Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:16.718614Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:16.719148Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:16.721249Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:16.791292Z  INFO connection{remote_addr=127.0.0.1:43590 conn_id=3}: fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=5000 peg_out_sats=1000 fees_sats=871 fee_rate=1000 change_sats=3129
+2023-11-16T00:47:16.791351Z  INFO connection{remote_addr=127.0.0.1:43590 conn_id=3}: fedimint_wallet_server: Creating peg-out tx txid=c81dcd17f1b17c0b795fd06df87fb53a09fd12f6700263049317a1a57a3d343a
+2023-11-16T00:47:16.791852Z  INFO connection{remote_addr=127.0.0.1:43590 conn_id=3}: fedimint_wallet_server: Signing peg out txid=c81dcd17f1b17c0b795fd06df87fb53a09fd12f6700263049317a1a57a3d343a
+2023-11-16T00:47:16.791918Z  INFO connection{remote_addr=127.0.0.1:54722 conn_id=1}: fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=5000 peg_out_sats=1000 fees_sats=871 fee_rate=1000 change_sats=3129
+2023-11-16T00:47:16.791986Z  INFO connection{remote_addr=127.0.0.1:54722 conn_id=1}: fedimint_wallet_server: Creating peg-out tx txid=c81dcd17f1b17c0b795fd06df87fb53a09fd12f6700263049317a1a57a3d343a
+2023-11-16T00:47:16.791987Z  INFO connection{remote_addr=127.0.0.1:56242 conn_id=4}: fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=5000 peg_out_sats=1000 fees_sats=871 fee_rate=1000 change_sats=3129
+2023-11-16T00:47:16.792009Z  INFO connection{remote_addr=127.0.0.1:52992 conn_id=2}: fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=5000 peg_out_sats=1000 fees_sats=871 fee_rate=1000 change_sats=3129
+2023-11-16T00:47:16.792053Z  INFO connection{remote_addr=127.0.0.1:56242 conn_id=4}: fedimint_wallet_server: Creating peg-out tx txid=c81dcd17f1b17c0b795fd06df87fb53a09fd12f6700263049317a1a57a3d343a
+2023-11-16T00:47:16.792060Z  INFO connection{remote_addr=127.0.0.1:52992 conn_id=2}: fedimint_wallet_server: Creating peg-out tx txid=c81dcd17f1b17c0b795fd06df87fb53a09fd12f6700263049317a1a57a3d343a
+2023-11-16T00:47:16.792909Z  INFO connection{remote_addr=127.0.0.1:56242 conn_id=4}: fedimint_wallet_server: Signing peg out txid=c81dcd17f1b17c0b795fd06df87fb53a09fd12f6700263049317a1a57a3d343a
+2023-11-16T00:47:16.792910Z  INFO connection{remote_addr=127.0.0.1:54722 conn_id=1}: fedimint_wallet_server: Signing peg out txid=c81dcd17f1b17c0b795fd06df87fb53a09fd12f6700263049317a1a57a3d343a
+2023-11-16T00:47:16.792938Z  INFO connection{remote_addr=127.0.0.1:52992 conn_id=2}: fedimint_wallet_server: Signing peg out txid=c81dcd17f1b17c0b795fd06df87fb53a09fd12f6700263049317a1a57a3d343a
+2023-11-16T00:47:17.720295Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:17.722483Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:17.723243Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:17.725297Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:17.768318Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(0) peer=PeerId(2) disconnect_count=1
+2023-11-16T00:47:17.769684Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(2) peer=PeerId(0) disconnect_count=1
+2023-11-16T00:47:17.770978Z  INFO fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=5000 peg_out_sats=1000 fees_sats=871 fee_rate=1000 change_sats=3129
+2023-11-16T00:47:17.771055Z  INFO fedimint_wallet_server: Creating peg-out tx txid=c81dcd17f1b17c0b795fd06df87fb53a09fd12f6700263049317a1a57a3d343a
+2023-11-16T00:47:17.772097Z  INFO fedimint_wallet_server: Signing peg out txid=c81dcd17f1b17c0b795fd06df87fb53a09fd12f6700263049317a1a57a3d343a
+2023-11-16T00:47:17.773393Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=4
+2023-11-16T00:47:17.777288Z  INFO fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=5000 peg_out_sats=1000 fees_sats=871 fee_rate=1000 change_sats=3129
+2023-11-16T00:47:17.777353Z  INFO fedimint_wallet_server: Creating peg-out tx txid=c81dcd17f1b17c0b795fd06df87fb53a09fd12f6700263049317a1a57a3d343a
+2023-11-16T00:47:17.778343Z  INFO fedimint_wallet_server: Signing peg out txid=c81dcd17f1b17c0b795fd06df87fb53a09fd12f6700263049317a1a57a3d343a
+2023-11-16T00:47:17.779508Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=3
+2023-11-16T00:47:17.784107Z  INFO fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=5000 peg_out_sats=1000 fees_sats=871 fee_rate=1000 change_sats=3129
+2023-11-16T00:47:17.784176Z  INFO fedimint_wallet_server: Creating peg-out tx txid=c81dcd17f1b17c0b795fd06df87fb53a09fd12f6700263049317a1a57a3d343a
+2023-11-16T00:47:17.785161Z  INFO fedimint_wallet_server: Signing peg out txid=c81dcd17f1b17c0b795fd06df87fb53a09fd12f6700263049317a1a57a3d343a
+2023-11-16T00:47:17.786333Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=3
+2023-11-16T00:47:17.788427Z DEBUG timing: Operation timing name=autocmmit - commit_tx duration_ms=0
+2023-11-16T00:47:17.788946Z DEBUG timing: Operation timing name=autocmmit - commit_tx duration_ms=0
+2023-11-16T00:47:17.792695Z DEBUG timing: Operation timing name=autocmmit - commit_tx duration_ms=0
+2023-11-16T00:47:18.206636Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:18.228009Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:18.268131Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:18.457089Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:18.512024Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:47:18.525659Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:18.725862Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:18.726844Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:18.728161Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:18.729259Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:18.931542Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(2) peer=PeerId(1) disconnect_count=1
+2023-11-16T00:47:18.939523Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(1) peer=PeerId(2) disconnect_count=1
+2023-11-16T00:47:19.711404Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=2
+2023-11-16T00:47:19.730090Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:19.731420Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:19.733808Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:19.733877Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:19.749612Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=3
+2023-11-16T00:47:19.770592Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=2
+2023-11-16T00:47:19.961962Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=2
+2023-11-16T00:47:19.991018Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(3) peer=PeerId(1) disconnect_count=1
+2023-11-16T00:47:19.994812Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(1) peer=PeerId(3) disconnect_count=1
+2023-11-16T00:47:20.013569Z  INFO fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=5000 peg_out_sats=1000 fees_sats=871 fee_rate=1000 change_sats=3129
+2023-11-16T00:47:20.013622Z  INFO fedimint_wallet_server: Creating peg-out tx txid=c81dcd17f1b17c0b795fd06df87fb53a09fd12f6700263049317a1a57a3d343a
+2023-11-16T00:47:20.014082Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:47:20.014156Z  INFO fedimint_wallet_server: Signing peg out txid=c81dcd17f1b17c0b795fd06df87fb53a09fd12f6700263049317a1a57a3d343a
+2023-11-16T00:47:20.014704Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=2
+2023-11-16T00:47:20.032089Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=2
+2023-11-16T00:47:20.167068Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:47:20.167579Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:20.213310Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=3
+2023-11-16T00:47:20.252734Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=3
+2023-11-16T00:47:20.258896Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=3
+2023-11-16T00:47:20.734727Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:20.736301Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:20.738964Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:20.739061Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:20.772383Z  INFO connection{remote_addr=127.0.0.1:52992 conn_id=2}: fedimint_wallet_server: inside api_endpoint PEG_OUT_FEES_ENDPOINT
+2023-11-16T00:47:20.772420Z  INFO connection{remote_addr=127.0.0.1:43590 conn_id=3}: fedimint_wallet_server: inside api_endpoint PEG_OUT_FEES_ENDPOINT
+2023-11-16T00:47:20.772423Z  INFO connection{remote_addr=127.0.0.1:56242 conn_id=4}: fedimint_wallet_server: inside api_endpoint PEG_OUT_FEES_ENDPOINT
+2023-11-16T00:47:20.772452Z  INFO connection{remote_addr=127.0.0.1:52992 conn_id=2}: fedimint_wallet_server: feerate: Feerate { sats_per_kvb: 1000 }
+2023-11-16T00:47:20.772479Z  INFO connection{remote_addr=127.0.0.1:43590 conn_id=3}: fedimint_wallet_server: feerate: Feerate { sats_per_kvb: 1000 }
+2023-11-16T00:47:20.772482Z  INFO connection{remote_addr=127.0.0.1:56242 conn_id=4}: fedimint_wallet_server: feerate: Feerate { sats_per_kvb: 1000 }
+2023-11-16T00:47:20.772587Z  INFO connection{remote_addr=127.0.0.1:54722 conn_id=1}: fedimint_wallet_server: inside api_endpoint PEG_OUT_FEES_ENDPOINT
+2023-11-16T00:47:20.772643Z  INFO connection{remote_addr=127.0.0.1:54722 conn_id=1}: fedimint_wallet_server: feerate: Feerate { sats_per_kvb: 1000 }
+2023-11-16T00:47:20.772714Z  WARN connection{remote_addr=127.0.0.1:52992 conn_id=2}: fedimint_wallet_server: Error returning peg-out fees Not enough SpendableUTXO
+2023-11-16T00:47:20.772752Z  WARN connection{remote_addr=127.0.0.1:43590 conn_id=3}: fedimint_wallet_server: Error returning peg-out fees Not enough SpendableUTXO
+2023-11-16T00:47:20.772759Z  WARN connection{remote_addr=127.0.0.1:56242 conn_id=4}: fedimint_wallet_server: Error returning peg-out fees Not enough SpendableUTXO
+2023-11-16T00:47:20.772912Z  WARN connection{remote_addr=127.0.0.1:54722 conn_id=1}: fedimint_wallet_server: Error returning peg-out fees Not enough SpendableUTXO
+2023-11-16T00:47:20.874999Z  INFO fedimint_wallet_tests: Current consensus block count is 133, waiting for consensus to reach block count 144
+2023-11-16T00:47:21.017030Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:47:21.049050Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(2) peer=PeerId(3) disconnect_count=2
+2023-11-16T00:47:21.049081Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(3) peer=PeerId(2) disconnect_count=1
+2023-11-16T00:47:21.098777Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:47:21.181206Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=2
+2023-11-16T00:47:21.700979Z  INFO fedimint_bitcoind::bitcoincore: Error broadcasting transaction error=JsonRpc(Rpc(RpcError { code: -27, message: "Transaction already in block chain", data: None }))
+2023-11-16T00:47:21.706641Z  INFO fedimint_bitcoind::bitcoincore: Error broadcasting transaction error=JsonRpc(Rpc(RpcError { code: -27, message: "Transaction already in block chain", data: None }))
+2023-11-16T00:47:21.707604Z  INFO fedimint_bitcoind::bitcoincore: Error broadcasting transaction error=JsonRpc(Rpc(RpcError { code: -27, message: "Transaction already in block chain", data: None }))
+2023-11-16T00:47:21.713488Z  INFO fedimint_bitcoind::bitcoincore: Error broadcasting transaction error=JsonRpc(Rpc(RpcError { code: -27, message: "Transaction already in block chain", data: None }))
+2023-11-16T00:47:21.738128Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:21.740140Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:21.741804Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:21.743355Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:21.876854Z  INFO fedimint_wallet_tests: Current consensus block count is 133, waiting for consensus to reach block count 144
+2023-11-16T00:47:22.706466Z  INFO fedimint_bitcoind::bitcoincore: Error broadcasting transaction error=JsonRpc(Rpc(RpcError { code: -27, message: "Transaction already in block chain", data: None }))
+2023-11-16T00:47:22.710003Z  INFO fedimint_bitcoind::bitcoincore: Error broadcasting transaction error=JsonRpc(Rpc(RpcError { code: -27, message: "Transaction already in block chain", data: None }))
+2023-11-16T00:47:22.710115Z  INFO fedimint_bitcoind::bitcoincore: Error broadcasting transaction error=JsonRpc(Rpc(RpcError { code: -27, message: "Transaction already in block chain", data: None }))
+2023-11-16T00:47:22.717482Z  INFO fedimint_bitcoind::bitcoincore: Error broadcasting transaction error=JsonRpc(Rpc(RpcError { code: -27, message: "Transaction already in block chain", data: None }))
+2023-11-16T00:47:22.742065Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:22.744070Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:22.745149Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:22.746458Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:22.755061Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(1) peer=PeerId(2) disconnect_count=1
+2023-11-16T00:47:22.761574Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(2) peer=PeerId(1) disconnect_count=1
+2023-11-16T00:47:22.784363Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:47:22.821520Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:47:22.847146Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:47:22.880057Z  INFO fedimint_wallet_tests: Current consensus block count is 133, waiting for consensus to reach block count 144
+2023-11-16T00:47:23.033640Z  INFO fedimint_wallet_server: New consensus height, syncing up new_height=143 block_to_go=11
+2023-11-16T00:47:23.073758Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=40
+2023-11-16T00:47:23.089859Z  INFO fedimint_wallet_server: New consensus height, syncing up new_height=143 block_to_go=11
+2023-11-16T00:47:23.095847Z  INFO fedimint_wallet_server: New consensus height, syncing up new_height=143 block_to_go=11
+2023-11-16T00:47:23.125788Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=36
+2023-11-16T00:47:23.129805Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=34
+2023-11-16T00:47:23.285092Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:47:23.331391Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=2
+2023-11-16T00:47:23.342106Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:47:23.632109Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(2) peer=PeerId(0) disconnect_count=1
+2023-11-16T00:47:23.637730Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(0) peer=PeerId(2) disconnect_count=1
+2023-11-16T00:47:23.712647Z  INFO fedimint_bitcoind::bitcoincore: Error broadcasting transaction error=JsonRpc(Rpc(RpcError { code: -27, message: "Transaction already in block chain", data: None }))
+2023-11-16T00:47:23.747867Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:23.747883Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:23.749888Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:23.749932Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:23.883021Z  INFO fedimint_wallet_tests: Current consensus block count is 144, consensus caught up
+2023-11-16T00:47:23.884521Z  INFO connection{remote_addr=127.0.0.1:43590 conn_id=3}: fedimint_wallet_server: inside api_endpoint PEG_OUT_FEES_ENDPOINT
+2023-11-16T00:47:23.884606Z  INFO connection{remote_addr=127.0.0.1:54722 conn_id=1}: fedimint_wallet_server: inside api_endpoint PEG_OUT_FEES_ENDPOINT
+2023-11-16T00:47:23.884636Z  INFO connection{remote_addr=127.0.0.1:43590 conn_id=3}: fedimint_wallet_server: feerate: Feerate { sats_per_kvb: 1000 }
+2023-11-16T00:47:23.884711Z  INFO connection{remote_addr=127.0.0.1:54722 conn_id=1}: fedimint_wallet_server: feerate: Feerate { sats_per_kvb: 1000 }
+2023-11-16T00:47:23.884768Z  INFO connection{remote_addr=127.0.0.1:52992 conn_id=2}: fedimint_wallet_server: inside api_endpoint PEG_OUT_FEES_ENDPOINT
+2023-11-16T00:47:23.884768Z  INFO connection{remote_addr=127.0.0.1:56242 conn_id=4}: fedimint_wallet_server: inside api_endpoint PEG_OUT_FEES_ENDPOINT
+2023-11-16T00:47:23.884901Z  INFO connection{remote_addr=127.0.0.1:56242 conn_id=4}: fedimint_wallet_server: feerate: Feerate { sats_per_kvb: 1000 }
+2023-11-16T00:47:23.884901Z  INFO connection{remote_addr=127.0.0.1:52992 conn_id=2}: fedimint_wallet_server: feerate: Feerate { sats_per_kvb: 1000 }
+2023-11-16T00:47:23.885160Z  INFO connection{remote_addr=127.0.0.1:43590 conn_id=3}: fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=3129 peg_out_sats=1000 fees_sats=871 fee_rate=1000 change_sats=1258
+2023-11-16T00:47:23.885207Z  INFO connection{remote_addr=127.0.0.1:54722 conn_id=1}: fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=3129 peg_out_sats=1000 fees_sats=871 fee_rate=1000 change_sats=1258
+2023-11-16T00:47:23.885242Z  INFO connection{remote_addr=127.0.0.1:43590 conn_id=3}: fedimint_wallet_server: Creating peg-out tx txid=fcec322e623086e75267dc2fd667746e88b2f7f7c26f44bbe2cccce8e6b927b2
+2023-11-16T00:47:23.885284Z  INFO connection{remote_addr=127.0.0.1:54722 conn_id=1}: fedimint_wallet_server: Creating peg-out tx txid=fcec322e623086e75267dc2fd667746e88b2f7f7c26f44bbe2cccce8e6b927b2
+2023-11-16T00:47:23.885601Z  WARN connection{remote_addr=127.0.0.1:52992 conn_id=2}: fedimint_wallet_server: Error returning peg-out fees Not enough SpendableUTXO
+2023-11-16T00:47:23.885601Z  INFO connection{remote_addr=127.0.0.1:56242 conn_id=4}: fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=3129 peg_out_sats=1000 fees_sats=871 fee_rate=1000 change_sats=1258
+2023-11-16T00:47:23.885702Z  INFO connection{remote_addr=127.0.0.1:56242 conn_id=4}: fedimint_wallet_server: Creating peg-out tx txid=fcec322e623086e75267dc2fd667746e88b2f7f7c26f44bbe2cccce8e6b927b2
+2023-11-16T00:47:23.888077Z DEBUG timing: Operation timing name=autocmmit - commit_tx duration_ms=0
+2023-11-16T00:47:24.397037Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(1) peer=PeerId(0) disconnect_count=1
+2023-11-16T00:47:24.402678Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(0) peer=PeerId(1) disconnect_count=1
+2023-11-16T00:47:24.715782Z  INFO fedimint_bitcoind::bitcoincore: Error broadcasting transaction error=JsonRpc(Rpc(RpcError { code: -27, message: "Transaction already in block chain", data: None }))
+2023-11-16T00:47:24.751295Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:24.752982Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:24.753253Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:24.753989Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:24.806814Z  INFO connection{remote_addr=127.0.0.1:56242 conn_id=4}: fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=3129 peg_out_sats=1000 fees_sats=871 fee_rate=1000 change_sats=1258
+2023-11-16T00:47:24.806931Z  INFO connection{remote_addr=127.0.0.1:56242 conn_id=4}: fedimint_wallet_server: Creating peg-out tx txid=76d7e8882107c5b4432e454c2fba3e26b5617547ec29d9deaa5049b753c19756
+2023-11-16T00:47:24.807030Z  INFO connection{remote_addr=127.0.0.1:54722 conn_id=1}: fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=3129 peg_out_sats=1000 fees_sats=871 fee_rate=1000 change_sats=1258
+2023-11-16T00:47:24.807052Z  INFO connection{remote_addr=127.0.0.1:43590 conn_id=3}: fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=3129 peg_out_sats=1000 fees_sats=871 fee_rate=1000 change_sats=1258
+2023-11-16T00:47:24.807136Z  INFO connection{remote_addr=127.0.0.1:54722 conn_id=1}: fedimint_wallet_server: Creating peg-out tx txid=76d7e8882107c5b4432e454c2fba3e26b5617547ec29d9deaa5049b753c19756
+2023-11-16T00:47:24.807157Z  INFO connection{remote_addr=127.0.0.1:43590 conn_id=3}: fedimint_wallet_server: Creating peg-out tx txid=76d7e8882107c5b4432e454c2fba3e26b5617547ec29d9deaa5049b753c19756
+2023-11-16T00:47:24.808024Z  INFO connection{remote_addr=127.0.0.1:56242 conn_id=4}: fedimint_wallet_server: Signing peg out txid=76d7e8882107c5b4432e454c2fba3e26b5617547ec29d9deaa5049b753c19756
+2023-11-16T00:47:24.808314Z  INFO connection{remote_addr=127.0.0.1:43590 conn_id=3}: fedimint_wallet_server: Signing peg out txid=76d7e8882107c5b4432e454c2fba3e26b5617547ec29d9deaa5049b753c19756
+2023-11-16T00:47:24.808355Z  INFO connection{remote_addr=127.0.0.1:54722 conn_id=1}: fedimint_wallet_server: Signing peg out txid=76d7e8882107c5b4432e454c2fba3e26b5617547ec29d9deaa5049b753c19756
+2023-11-16T00:47:25.094375Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:47:25.234777Z  INFO fedimint_wallet_server: New consensus height, syncing up new_height=143 block_to_go=11
+2023-11-16T00:47:25.270220Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=36
+2023-11-16T00:47:25.272240Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:47:25.621863Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(3) peer=PeerId(2) disconnect_count=1
+2023-11-16T00:47:25.630693Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(2) peer=PeerId(3) disconnect_count=1
+2023-11-16T00:47:25.680416Z  INFO AlephBFT-member: Member status report: task queue content: CoordRequest - 11, ParentsRequest - 0, UnitBroadcast - 227, RequestNewest - 0.    
+2023-11-16T00:47:25.682272Z  INFO AlephBFT-runway: Runway status report: behind by 3 rounds. DAG size - 240; DAG height - 60; DAG top row - [(0, 60), (1, 60), (2, 57), (3, 59)].    
+2023-11-16T00:47:25.683973Z  INFO AlephBFT-member: Member status report: task queue content: CoordRequest - 0, ParentsRequest - 0, UnitBroadcast - 206, RequestNewest - 0.    
+2023-11-16T00:47:25.685406Z  INFO AlephBFT-runway: Runway status report: healthy. DAG size - 215; DAG height - 61; DAG top row - [(0, 60), (1, 61), (2, 29), (3, 61)].    
+2023-11-16T00:47:25.757215Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:25.758452Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:25.759687Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:25.760613Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:25.776751Z  INFO AlephBFT-member: Member status report: task queue content: CoordRequest - 3, ParentsRequest - 0, UnitBroadcast - 230, RequestNewest - 0.    
+2023-11-16T00:47:25.778356Z  INFO AlephBFT-runway: Runway status report: healthy. DAG size - 240; DAG height - 61; DAG top row - [(0, 61), (1, 61), (2, 54), (3, 60)].    
+2023-11-16T00:47:25.778839Z  INFO AlephBFT-member: Member status report: task queue content: CoordRequest - 0, ParentsRequest - 0, UnitBroadcast - 232, RequestNewest - 0.    
+2023-11-16T00:47:25.780653Z  INFO AlephBFT-runway: Runway status report: healthy. DAG size - 244; DAG height - 61; DAG top row - [(0, 61), (1, 61), (2, 57), (3, 61)].    
+2023-11-16T00:47:26.595055Z  INFO fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=3129 peg_out_sats=1000 fees_sats=871 fee_rate=1000 change_sats=1258
+2023-11-16T00:47:26.595145Z  INFO fedimint_wallet_server: Creating peg-out tx txid=76d7e8882107c5b4432e454c2fba3e26b5617547ec29d9deaa5049b753c19756
+2023-11-16T00:47:26.596259Z  INFO fedimint_wallet_server: Signing peg out txid=76d7e8882107c5b4432e454c2fba3e26b5617547ec29d9deaa5049b753c19756
+2023-11-16T00:47:26.597851Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=5
+2023-11-16T00:47:26.599628Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:47:26.642723Z  INFO fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=3129 peg_out_sats=1000 fees_sats=871 fee_rate=1000 change_sats=1258
+2023-11-16T00:47:26.642767Z  INFO fedimint_wallet_server: Creating peg-out tx txid=76d7e8882107c5b4432e454c2fba3e26b5617547ec29d9deaa5049b753c19756
+2023-11-16T00:47:26.643197Z  INFO fedimint_wallet_server: Signing peg out txid=76d7e8882107c5b4432e454c2fba3e26b5617547ec29d9deaa5049b753c19756
+2023-11-16T00:47:26.644008Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=2
+2023-11-16T00:47:26.644814Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=0
+2023-11-16T00:47:26.669266Z  INFO fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=3129 peg_out_sats=1000 fees_sats=871 fee_rate=1000 change_sats=1258
+2023-11-16T00:47:26.669336Z  INFO fedimint_wallet_server: Creating peg-out tx txid=76d7e8882107c5b4432e454c2fba3e26b5617547ec29d9deaa5049b753c19756
+2023-11-16T00:47:26.670401Z  INFO fedimint_wallet_server: Signing peg out txid=76d7e8882107c5b4432e454c2fba3e26b5617547ec29d9deaa5049b753c19756
+2023-11-16T00:47:26.671784Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=4
+2023-11-16T00:47:26.673164Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:47:26.675813Z DEBUG timing: Operation timing name=autocmmit - commit_tx duration_ms=0
+2023-11-16T00:47:26.676330Z DEBUG timing: Operation timing name=autocmmit - commit_tx duration_ms=0
+2023-11-16T00:47:26.681048Z DEBUG timing: Operation timing name=autocmmit - commit_tx duration_ms=0
+2023-11-16T00:47:26.762595Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:26.763530Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:26.764781Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:26.766183Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:26.844901Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:47:26.871440Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:47:26.899376Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:47:26.935335Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(0) peer=PeerId(3) disconnect_count=1
+2023-11-16T00:47:26.935654Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(3) peer=PeerId(0) disconnect_count=1
+2023-11-16T00:47:27.768631Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:27.769698Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:27.770213Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:27.770213Z  INFO fedimint_wallet_server: inside consensus_proposal, about to get_fee_rate
+2023-11-16T00:47:27.845532Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:47:27.884590Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:47:27.899365Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:47:27.928482Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(2) peer=PeerId(1) disconnect_count=1
+2023-11-16T00:47:27.939164Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(1) peer=PeerId(2) disconnect_count=1
+2023-11-16T00:47:28.097985Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=3
+2023-11-16T00:47:28.101689Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=3
+2023-11-16T00:47:28.114950Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=2
+2023-11-16T00:47:28.118958Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=3
+2023-11-16T00:47:28.136396Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=2
+2023-11-16T00:47:28.139988Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=3
+2023-11-16T00:47:28.331116Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(2) peer=PeerId(0) disconnect_count=1
+2023-11-16T00:47:28.332560Z  INFO run_io_thread: net::peer: Initializing new connection our_id=PeerId(0) peer=PeerId(2) disconnect_count=1
+2023-11-16T00:47:28.647142Z  INFO fedimint_wallet_server: Creating peg-out tx inputs=1 input_sats=3129 peg_out_sats=1000 fees_sats=871 fee_rate=1000 change_sats=1258
+2023-11-16T00:47:28.647232Z  INFO fedimint_wallet_server: Creating peg-out tx txid=76d7e8882107c5b4432e454c2fba3e26b5617547ec29d9deaa5049b753c19756
+2023-11-16T00:47:28.648444Z  INFO fedimint_wallet_server: Signing peg out txid=76d7e8882107c5b4432e454c2fba3e26b5617547ec29d9deaa5049b753c19756
+2023-11-16T00:47:28.649901Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=5
+2023-11-16T00:47:28.651559Z DEBUG timing: Operation timing name=process_consensus_item duration_ms=1
+2023-11-16T00:47:28.730800Z  INFO fedimint_client: Last client reference dropped, shutting down client task group
+2023-11-16T00:47:28.731226Z  INFO fedimint_client::sm::executor: Shutting down state machine executor runner due to shutdown signal
+2023-11-16T00:47:28.732456Z ERROR connection{remote_addr=127.0.0.1:56242 conn_id=4}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Transport endpoint is not connected (os error 107); terminate connection: 4
+2023-11-16T00:47:28.732487Z ERROR connection{remote_addr=127.0.0.1:43590 conn_id=3}: jsonrpsee_server::transport::ws: WS transport error: i/o error: Transport endpoint is not connected (os error 107); terminate connection: 3
+thread 'tokio-runtime-worker' panicked at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/time/entry.rs:557:13:
+A Tokio 1.x context was found, but it is being shutdown.
+stack backtrace:
+   0: rust_begin_unwind
+             at /rustc/cc66ad468955717ab92600c770da8c1601a4ff33/library/std/src/panicking.rs:595:5
+   1: core::panicking::panic_fmt
+             at /rustc/cc66ad468955717ab92600c770da8c1601a4ff33/library/core/src/panicking.rs:67:14
+   2: core::panicking::panic_display
+             at /rustc/cc66ad468955717ab92600c770da8c1601a4ff33/library/core/src/panicking.rs:150:5
+   3: tokio::runtime::time::entry::TimerEntry::poll_elapsed
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/time/entry.rs:557:13
+   4: tokio::time::sleep::Sleep::poll_elapsed
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/time/sleep.rs:416:22
+   5: <tokio::time::sleep::Sleep as core::future::future::Future>::poll
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/time/sleep.rs:448:22
+   6: fedimint_core::task::imp::sleep::{{closure}}
+             at /home/nix/fedimint/fedimint-core/src/task.rs:437:38
+   7: fedimint_wallet_server::run_broadcast_pending_tx::{{closure}}::{{closure}}
+             at /home/nix/fedimint/modules/fedimint-wallet-server/src/lib.rs:1156:39
+   8: <tracing::instrument::Instrumented<T> as core::future::future::Future>::poll
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tracing-0.1.37/src/instrument.rs:272:9
+   9: fedimint_wallet_server::run_broadcast_pending_tx::{{closure}}
+             at /home/nix/fedimint/modules/fedimint-wallet-server/src/lib.rs:1152:1
+  10: fedimint_wallet_server::Wallet::new_with_bitcoind::{{closure}}::{{closure}}::{{closure}}
+             at /home/nix/fedimint/modules/fedimint-wallet-server/src/lib.rs:724:93
+  11: fedimint_core::task::TaskGroup::spawn::{{closure}}::{{closure}}
+             at /home/nix/fedimint/fedimint-core/src/task.rs:196:35
+  12: <tracing::instrument::Instrumented<T> as core::future::future::Future>::poll
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tracing-0.1.37/src/instrument.rs:272:9
+  13: tokio::runtime::task::core::Core<T,S>::poll::{{closure}}
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/task/core.rs:334:17
+  14: tokio::loom::std::unsafe_cell::UnsafeCell<T>::with_mut
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/loom/std/unsafe_cell.rs:16:9
+  15: tokio::runtime::task::core::Core<T,S>::poll
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/task/core.rs:323:13
+  16: tokio::runtime::task::harness::poll_future::{{closure}}
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/task/harness.rs:485:19
+  17: <core::panic::unwind_safe::AssertUnwindSafe<F> as core::ops::function::FnOnce<()>>::call_once
+             at /rustc/cc66ad468955717ab92600c770da8c1601a4ff33/library/core/src/panic/unwind_safe.rs:271:9
+  18: std::panicking::try::do_call
+             at /rustc/cc66ad468955717ab92600c770da8c1601a4ff33/library/std/src/panicking.rs:502:40
+  19: __rust_try
+  20: std::panicking::try
+             at /rustc/cc66ad468955717ab92600c770da8c1601a4ff33/library/std/src/panicking.rs:466:19
+  21: std::panic::catch_unwind
+             at /rustc/cc66ad468955717ab92600c770da8c1601a4ff33/library/std/src/panic.rs:142:14
+  22: tokio::runtime::task::harness::poll_future
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/task/harness.rs:473:18
+  23: tokio::runtime::task::harness::Harness<T,S>::poll_inner
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/task/harness.rs:208:27
+  24: tokio::runtime::task::harness::Harness<T,S>::poll
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/task/harness.rs:153:15
+  25: tokio::runtime::task::raw::poll
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/task/raw.rs:276:5
+  26: tokio::runtime::task::raw::RawTask::poll
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/task/raw.rs:200:18
+  27: tokio::runtime::task::LocalNotified<S>::run
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/task/mod.rs:400:9
+  28: tokio::runtime::scheduler::multi_thread::worker::Context::run_task::{{closure}}
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/scheduler/multi_thread/worker.rs:576:13
+  29: tokio::runtime::coop::with_budget
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/coop.rs:107:5
+  30: tokio::runtime::coop::budget
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/coop.rs:73:5
+  31: tokio::runtime::scheduler::multi_thread::worker::Context::run_task
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/scheduler/multi_thread/worker.rs:575:9
+  32: tokio::runtime::scheduler::multi_thread::worker::Context::run
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/scheduler/multi_thread/worker.rs:538:24
+  33: tokio::runtime::scheduler::multi_thread::worker::run::{{closure}}::{{closure}}
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/scheduler/multi_thread/worker.rs:491:21
+  34: tokio::runtime::context::scoped::Scoped<T>::set
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/context/scoped.rs:40:9
+  35: tokio::runtime::context::set_scheduler::{{closure}}
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/context.rs:176:26
+  36: std::thread::local::LocalKey<T>::try_with
+             at /rustc/cc66ad468955717ab92600c770da8c1601a4ff33/library/std/src/thread/local.rs:270:16
+  37: std::thread::local::LocalKey<T>::with
+             at /rustc/cc66ad468955717ab92600c770da8c1601a4ff33/library/std/src/thread/local.rs:246:9
+  38: tokio::runtime::context::set_scheduler
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/context.rs:176:9
+  39: tokio::runtime::scheduler::multi_thread::worker::run::{{closure}}
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/scheduler/multi_thread/worker.rs:486:9
+  40: tokio::runtime::context::runtime::enter_runtime
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/context/runtime.rs:65:16
+  41: tokio::runtime::scheduler::multi_thread::worker::run
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/scheduler/multi_thread/worker.rs:478:5
+  42: tokio::runtime::scheduler::multi_thread::worker::block_in_place::{{closure}}::{{closure}}
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/scheduler/multi_thread/worker.rs:422:41
+  43: <tokio::runtime::blocking::task::BlockingTask<T> as core::future::future::Future>::poll
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/blocking/task.rs:42:21
+  44: <tracing::instrument::Instrumented<T> as core::future::future::Future>::poll
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tracing-0.1.37/src/instrument.rs:272:9
+  45: tokio::runtime::task::core::Core<T,S>::poll::{{closure}}
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/task/core.rs:334:17
+  46: tokio::loom::std::unsafe_cell::UnsafeCell<T>::with_mut
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/loom/std/unsafe_cell.rs:16:9
+  47: tokio::runtime::task::core::Core<T,S>::poll
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/task/core.rs:323:13
+  48: tokio::runtime::task::harness::poll_future::{{closure}}
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/task/harness.rs:485:19
+  49: <core::panic::unwind_safe::AssertUnwindSafe<F> as core::ops::function::FnOnce<()>>::call_once
+             at /rustc/cc66ad468955717ab92600c770da8c1601a4ff33/library/core/src/panic/unwind_safe.rs:271:9
+  50: std::panicking::try::do_call
+             at /rustc/cc66ad468955717ab92600c770da8c1601a4ff33/library/std/src/panicking.rs:502:40
+  51: __rust_try
+  52: std::panicking::try
+             at /rustc/cc66ad468955717ab92600c770da8c1601a4ff33/library/std/src/panicking.rs:466:19
+  53: std::panic::catch_unwind
+             at /rustc/cc66ad468955717ab92600c770da8c1601a4ff33/library/std/src/panic.rs:142:14
+  54: tokio::runtime::task::harness::poll_future
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/task/harness.rs:473:18
+  55: tokio::runtime::task::harness::Harness<T,S>::poll_inner
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/task/harness.rs:208:27
+  56: tokio::runtime::task::harness::Harness<T,S>::poll
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/task/harness.rs:153:15
+  57: tokio::runtime::task::raw::poll
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/task/raw.rs:276:5
+  58: tokio::runtime::task::raw::RawTask::poll
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/task/raw.rs:200:18
+  59: tokio::runtime::task::UnownedTask<S>::run
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/task/mod.rs:437:9
+  60: tokio::runtime::blocking::pool::Task::run
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/blocking/pool.rs:159:9
+  61: tokio::runtime::blocking::pool::Inner::run
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/blocking/pool.rs:513:17
+  62: tokio::runtime::blocking::pool::Spawner::spawn_thread::{{closure}}
+             at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.32.0/src/runtime/blocking/pool.rs:471:13
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+test peg_outs_must_wait_for_available_utxos ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 24.39s
+
+        PASS [  24.447s] fedimint-wallet-tests::fedimint_wallet_tests peg_outs_must_wait_for_available_utxos
+------------
+     Summary [  24.447s] 1 test run: 1 passed, 5 skipped
+### Testing against bitcoind - complete
+fm success: rust-tests
+Auto-killing external-daemons(PID: 434365) and waiting it to finish...
+2023-11-16T00:47:30.103560Z  INFO task: signal received, starting graceful shutdown
+2023-11-16T00:47:30.107667Z  INFO devimint: sending SIGTERM to lightningd and waiting for it to exit
+2023-11-16T00:47:30.108440Z  INFO devimint: sending SIGKILL to lnd and waiting for it to exit
+2023-11-16T00:47:30.111411Z  INFO devimint: sending SIGKILL to electrs and waiting for it to exit
+2023-11-16T00:47:30.112398Z  INFO devimint: sending SIGKILL to esplora and waiting for it to exit
+2023-11-16T00:47:30.113520Z  INFO devimint: sending SIGKILL to bitcoind and waiting for it to exit

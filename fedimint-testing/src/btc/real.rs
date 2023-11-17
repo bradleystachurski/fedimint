@@ -5,6 +5,7 @@ use std::time::Duration;
 use anyhow::Context;
 use async_trait::async_trait;
 use bitcoin::{Address, Transaction, Txid};
+use bitcoincore_rpc::bitcoincore_rpc_json::EstimateMode;
 use bitcoincore_rpc::{Client, RpcApi};
 use fedimint_bitcoind::DynBitcoindRpc;
 use fedimint_core::encoding::Decodable;
@@ -12,10 +13,10 @@ use fedimint_core::module::registry::ModuleDecoderRegistry;
 use fedimint_core::task::sleep;
 use fedimint_core::txoproof::TxOutProof;
 use fedimint_core::util::SafeUrl;
-use fedimint_core::{task, Amount};
+use fedimint_core::{task, Amount, Feerate};
 use fedimint_logging::LOG_TEST;
 use lazy_static::lazy_static;
-use tracing::{debug, trace};
+use tracing::{debug, info, trace};
 
 use crate::btc::BitcoinTest;
 
@@ -49,40 +50,45 @@ impl BitcoinTest for RealBitcoinTestNoLock {
     }
 
     async fn mine_blocks(&self, block_num: u64) {
-        if let Some(block_hash) = self
+        match self
             .client
             .generate_to_address(block_num, &self.get_new_address().await)
-            .expect(Self::ERROR)
-            .last()
         {
-            let last_mined_block = self
-                .client
-                .get_block_header_info(block_hash)
-                .expect("rpc failed");
-            let expected_block_count = last_mined_block.height as u64 + 1;
-            // waits for the rpc client to catch up to bitcoind
-            loop {
-                let current_block_count = self.rpc.get_block_count().await.expect("rpc failed");
-                if current_block_count < expected_block_count {
-                    debug!(
-                        target: LOG_TEST,
-                        ?block_num,
-                        ?expected_block_count,
-                        ?current_block_count,
-                        "Waiting for blocks to be mined"
-                    );
-                    sleep(Duration::from_millis(200)).await;
-                } else {
-                    debug!(
-                        target: LOG_TEST,
-                        ?block_num,
-                        ?expected_block_count,
-                        ?current_block_count,
-                        "Mined blocks"
-                    );
-                    break;
+            Ok(res) => match res.last() {
+                Some(block_hash) => {
+                    let last_mined_block = self
+                        .client
+                        .get_block_header_info(block_hash)
+                        .expect("rpc failed");
+                    let expected_block_count = last_mined_block.height as u64 + 1;
+                    // waits for the rpc client to catch up to bitcoind
+                    loop {
+                        let current_block_count =
+                            self.rpc.get_block_count().await.expect("rpc failed");
+                        if current_block_count < expected_block_count {
+                            debug!(
+                                target: LOG_TEST,
+                                ?block_num,
+                                ?expected_block_count,
+                                ?current_block_count,
+                                "Waiting for blocks to be mined"
+                            );
+                            sleep(Duration::from_millis(200)).await;
+                        } else {
+                            debug!(
+                                target: LOG_TEST,
+                                ?block_num,
+                                ?expected_block_count,
+                                ?current_block_count,
+                                "Mined blocks"
+                            );
+                            break;
+                        }
+                    }
                 }
-            }
+                None => info!("dang, there wasn't anything returned from generate_to_address"),
+            },
+            Err(e) => info!("dang, there was an error: {:?}", e),
         };
     }
 
@@ -143,12 +149,66 @@ impl BitcoinTest for RealBitcoinTestNoLock {
     async fn get_mempool_tx_fee(&self, txid: &Txid) -> Amount {
         loop {
             match self.client.get_mempool_entry(txid) {
-                Ok(tx) => return tx.fees.base.into(),
+                Ok(tx) => {
+                    info!(?tx, "inside self.client.get_mempool_entry");
+                    info!("{:#?}", tx);
+                    return tx.fees.base.into();
+                }
                 Err(_) => {
                     sleep(Duration::from_millis(100)).await;
                     continue;
                 }
             }
+        }
+    }
+
+    async fn estimate_smart_fee(&self) -> Option<Feerate> {
+        // putting up here so we fail fast, don't need to wait for full test
+        let bitcoincore_dir = std::env::var("FM_BTC_DIR")
+            .expect("Must have bitcoind data dir defined for real tests");
+        info!(?bitcoincore_dir);
+        let datadir_arg = format!("-datadir={}", bitcoincore_dir);
+        info!(?datadir_arg);
+        let help_command = format!("bitcoin-cli {} help", &datadir_arg);
+        let output = std::process::Command::new("sh")
+            .arg("-c")
+            .arg(help_command)
+            .output()
+            .expect("dang, didn't work");
+
+        info!("status: {}", output.status);
+        info!("stdout: {}", String::from_utf8_lossy(&output.stdout));
+        info!("stderr: {}", String::from_utf8_lossy(&output.stderr));
+        match self
+            .client
+            .estimate_smart_fee(10, Some(EstimateMode::Conservative))
+        {
+            Ok(res) => res.fee_rate.map(|amount| {
+                info!(?res);
+                info!(?amount, "estimatesmartfee returned a feerate!");
+                info!("attempting to get the economical feerate");
+                let economical_fee_rate = self
+                    .client
+                    .estimate_smart_fee(10, Some(EstimateMode::Economical));
+                info!(?economical_fee_rate);
+                info!("attempting to use bitcoin-cli to estimate fee");
+
+                let estimate_smart_fee_command =
+                    format!("bitcoin-cli {} estimatesmartfee 10", &datadir_arg);
+                let output = std::process::Command::new("sh")
+                    .arg("-c")
+                    .arg(estimate_smart_fee_command)
+                    .output()
+                    .expect("dang, didn't work");
+
+                info!("status: {}", output.status);
+                info!("stdout: {}", String::from_utf8_lossy(&output.stdout));
+                info!("stderr: {}", String::from_utf8_lossy(&output.stderr));
+                Feerate {
+                    sats_per_kvb: amount.to_sat(),
+                }
+            }),
+            Err(_) => None,
         }
     }
 }
@@ -239,6 +299,11 @@ impl BitcoinTest for RealBitcoinTest {
         let _lock = self.lock_exclusive().await;
         self.inner.get_mempool_tx_fee(txid).await
     }
+
+    async fn estimate_smart_fee(&self) -> Option<Feerate> {
+        let _lock = self.lock_exclusive().await;
+        self.inner.estimate_smart_fee().await
+    }
 }
 
 #[async_trait]
@@ -276,5 +341,9 @@ impl BitcoinTest for RealBitcoinTestLocked {
 
     async fn get_mempool_tx_fee(&self, txid: &Txid) -> Amount {
         self.inner.get_mempool_tx_fee(txid).await
+    }
+
+    async fn estimate_smart_fee(&self) -> Option<Feerate> {
+        self.inner.estimate_smart_fee().await
     }
 }

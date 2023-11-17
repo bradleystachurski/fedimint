@@ -253,6 +253,10 @@ impl BitcoinTest for FakeBitcoinTest {
             return fee;
         }
     }
+
+    async fn estimate_smart_fee(&self) -> Option<Feerate> {
+        unimplemented!("nah")
+    }
 }
 
 #[async_trait]
@@ -271,6 +275,7 @@ impl IBitcoindRpc for FakeBitcoinTest {
             .block_hash())
     }
 
+    // TODO: use hardcoded feerate, unit tests to confirm logic
     async fn get_fee_rate(&self, _confirmation_target: u16) -> BitcoinRpcResult<Option<Feerate>> {
         Ok(None)
     }
