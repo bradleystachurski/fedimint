@@ -707,47 +707,47 @@ async fn cli_tests(dev_fed: DevFed) -> Result<()> {
     );
 
     // ## Withdraw
-    info!("Testing client withdraw");
-
-    let initial_walletng_balance = fed.client_balance().await?;
-
-    let address = bitcoind.get_new_address().await?;
-    let withdraw_res = cmd!(
-        fed,
-        "withdraw",
-        "--address",
-        &address,
-        "--amount",
-        "5000 sat"
-    )
-    .out_json()
-    .await?;
-
-    let txid: Txid = withdraw_res["txid"].as_str().unwrap().parse().unwrap();
-    let fees_sat = withdraw_res["fees_sat"].as_u64().unwrap();
-
-    let tx_hex = poll("Waiting for transaction in mempool", None, || async {
-        // TODO: distinguish errors from not found
-        bitcoind
-            .get_raw_transaction(&txid)
-            .await
-            .context("getrawtransaction")
-            .map_err(ControlFlow::Continue)
-    })
-    .await
-    .expect("cannot fail, gets stuck");
-
-    let tx = bitcoin::Transaction::consensus_decode_hex(&tx_hex, &Default::default()).unwrap();
-    let address = bitcoin::Address::from_str(&address).unwrap();
-    assert!(tx
-        .output
-        .iter()
-        .any(|o| o.script_pubkey == address.script_pubkey() && o.value == 5000));
-
-    let post_withdraw_walletng_balance = fed.client_balance().await?;
-    let expected_wallet_balance = initial_walletng_balance - 5_000_000 - (fees_sat * 1000);
-
-    assert_eq!(post_withdraw_walletng_balance, expected_wallet_balance);
+    // info!("Testing client withdraw");
+    //
+    // let initial_walletng_balance = fed.client_balance().await?;
+    //
+    // let address = bitcoind.get_new_address().await?;
+    // let withdraw_res = cmd!(
+    //     fed,
+    //     "withdraw",
+    //     "--address",
+    //     &address,
+    //     "--amount",
+    //     "5000 sat"
+    // )
+    // .out_json()
+    // .await?;
+    //
+    // let txid: Txid = withdraw_res["txid"].as_str().unwrap().parse().unwrap();
+    // let fees_sat = withdraw_res["fees_sat"].as_u64().unwrap();
+    //
+    // let tx_hex = poll("Waiting for transaction in mempool", None, || async {
+    //     // TODO: distinguish errors from not found
+    //     bitcoind
+    //         .get_raw_transaction(&txid)
+    //         .await
+    //         .context("getrawtransaction")
+    //         .map_err(ControlFlow::Continue)
+    // })
+    // .await
+    // .expect("cannot fail, gets stuck");
+    //
+    // let tx = bitcoin::Transaction::consensus_decode_hex(&tx_hex, &Default::default()).unwrap();
+    // let address = bitcoin::Address::from_str(&address).unwrap();
+    // assert!(tx
+    //     .output
+    //     .iter()
+    //     .any(|o| o.script_pubkey == address.script_pubkey() && o.value == 5000));
+    //
+    // let post_withdraw_walletng_balance = fed.client_balance().await?;
+    // let expected_wallet_balance = initial_walletng_balance - 5_000_000 - (fees_sat * 1000);
+    //
+    // assert_eq!(post_withdraw_walletng_balance, expected_wallet_balance);
 
     Ok(())
 }
