@@ -169,6 +169,10 @@ impl Bitcoind {
         let addr = self.client().get_new_address(None, None)?;
         Ok(addr.to_string())
     }
+
+    pub async fn terminate(&self) -> Result<()> {
+        self._process.terminate().await
+    }
 }
 
 const GATEWAY_CLN_EXTENSION: &str = "gateway-cln-extension";

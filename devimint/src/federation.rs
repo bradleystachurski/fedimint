@@ -161,6 +161,17 @@ impl Federation {
         Ok(())
     }
 
+    pub async fn terminate_all_servers(&mut self) -> Result<()> {
+        futures::future::try_join_all(
+            self.members
+                .values()
+                .map(|server| server.clone().terminate()),
+        )
+        .await?;
+        self.members.clear();
+        Ok(())
+    }
+
     pub async fn cmd(&self) -> Command {
         let cfg_dir = env::var("FM_DATA_DIR").unwrap();
         cmd!("fedimint-cli", "--data-dir={cfg_dir}")

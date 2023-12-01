@@ -20,6 +20,7 @@ use fedimint_core::task::{timeout, TaskGroup};
 use fedimint_core::util::write_overwrite_async;
 use fedimint_logging::LOG_DEVIMINT;
 use ln_gateway::rpc::GatewayInfo;
+use serde_json::json;
 use tokio::fs;
 use tokio::net::TcpStream;
 use tracing::{debug, error, info, warn};
@@ -194,6 +195,315 @@ pub async fn latency_tests(dev_fed: DevFed) -> Result<()> {
     Ok(())
 }
 
+async fn recoverytool_test(dev_fed: DevFed) -> Result<()> {
+    let data_dir = env::var("FM_DATA_DIR")?;
+
+    #[allow(unused_variables)]
+    let DevFed {
+        bitcoind,
+        cln,
+        lnd,
+        fed,
+        gw_cln,
+        gw_lnd,
+        electrs,
+        esplora,
+    } = dev_fed;
+
+    fed.pegin(100_000).await?;
+    fed.pegin(200_000).await?;
+    fed.pegin(300_000).await?;
+    fed.await_block_sync().await?;
+
+    let mut fed = fed;
+    fed.terminate_all_servers().await?;
+
+    let bitcoin_dir = env::var("FM_BTC_DIR")?;
+    let datadir_flag = format!("-datadir={}", bitcoin_dir);
+    let server_0 = "server-0";
+    let server_1 = "server-1";
+    let server_2 = "server-2";
+    let server_3 = "server-3";
+    let all_servers = vec![server_0, server_1, server_2, server_3];
+
+    async fn bitcoind_createwallet(wallet_name: &str) -> Result<()> {
+        let datadir = format!("-datadir={}", env::var("FM_BTC_DIR")?);
+        cmd!("bitcoin-cli", datadir, "createwallet", wallet_name)
+            .run()
+            .await
+    }
+
+    for wallet in all_servers.clone().into_iter() {
+        bitcoind_createwallet(wallet).await?
+    }
+
+    let getbalances_res = cmd!(
+        "bitcoin-cli",
+        format!("-rpcwallet={}", server_0),
+        &datadir_flag,
+        "getbalances"
+    )
+    .out_json()
+    .await?;
+    info!(?getbalances_res);
+    let getbalances_res = cmd!(
+        "bitcoin-cli",
+        format!("-rpcwallet={}", server_1),
+        &datadir_flag,
+        "getbalances"
+    )
+    .out_json()
+    .await?;
+    info!(?getbalances_res);
+    let getbalances_res = cmd!(
+        "bitcoin-cli",
+        format!("-rpcwallet={}", server_2),
+        &datadir_flag,
+        "getbalances"
+    )
+    .out_json()
+    .await?;
+    info!(?getbalances_res);
+    let getbalances_res = cmd!(
+        "bitcoin-cli",
+        format!("-rpcwallet={}", server_3),
+        &datadir_flag,
+        "getbalances"
+    )
+    .out_json()
+    .await?;
+    info!(?getbalances_res);
+    let getbalances_res = cmd!(
+        "bitcoin-cli",
+        format!("-rpcwallet={}", ""),
+        &datadir_flag,
+        "getbalances"
+    )
+    .out_json()
+    .await?;
+    info!(?getbalances_res);
+
+    // let importdescriptors_res = cmd!(
+    //     "bitcoin-cli",
+    //     format!("-rpcwallet={}", server_0),
+    //     &datadir_flag,
+    //     "importdescriptors",
+    //     importdescriptors_arg
+    // )
+    // .out_json()
+    // .await?;
+    // info!(?importdescriptors_res);
+
+    // let getbalances_res = cmd!(
+    //     "bitcoin-cli",
+    //     format!("-rpcwallet={}", server_0),
+    //     &datadir_flag,
+    //     "getbalances"
+    // )
+    // .out_json()
+    // .await?;
+    // info!(?getbalances_res);
+
+    /////////////////////////////////////////////////////////////////////////////////
+    // try to load all descriptors in same wallet and send a transaction to ""
+    // wallet
+    /////////////////////////////////////////////////////////////////////////////////
+
+    let server_0_recoverytool_res = cmd!(
+        "recoverytool",
+        format!("--cfg={}/server-0", data_dir),
+        "utxos",
+        format!("--db={}/server-0/database", data_dir)
+    )
+    .env("FM_PASSWORD", "pass")
+    .out_json()
+    .await?;
+
+    info!(?server_0_recoverytool_res);
+
+    fn construct_import_descriptors_arg(recoverytool_res: serde_json::Value) -> String {
+        json!(recoverytool_res
+            .as_array()
+            .expect("recoverytool should return array of objects")
+            .iter()
+            .map(|object| {
+                json!({
+                    "desc": object["descriptor"],
+                    "timestamp": 0
+                })
+            })
+            .collect::<Vec<_>>())
+        .to_string()
+    }
+
+    let importdescriptors_arg = construct_import_descriptors_arg(server_0_recoverytool_res);
+
+    async fn recover_utxos(server: &str) -> Result<serde_json::Value> {
+        let data_dir = env::var("FM_DATA_DIR")?;
+        cmd!(
+            "recoverytool",
+            format!("--cfg={}/{}", data_dir, server),
+            "utxos",
+            format!("--db={}/{}/database", data_dir, server)
+        )
+        .env("FM_PASSWORD", "pass")
+        .out_json()
+        .await
+    }
+
+    async fn bitcoind_importdescriptors(server: &str, arg: &str) -> Result<()> {
+        let datadir = format!("-datadir={}", env::var("FM_BTC_DIR")?);
+        let importdescriptors_res = cmd!(
+            "bitcoin-cli",
+            format!("-rpcwallet={}", server),
+            datadir,
+            "importdescriptors",
+            arg
+        )
+        .out_json()
+        .await?;
+        info!(?importdescriptors_res);
+        Ok(())
+    }
+
+    for server in all_servers.clone().into_iter() {
+        let recover_utxo_res = recover_utxos(server).await?;
+        let importdescriptors_arg = construct_import_descriptors_arg(recover_utxo_res);
+        // testing importing all to server_0 wallet
+        let impordescriptors_res =
+            bitcoind_importdescriptors(server_0, &importdescriptors_arg).await;
+        info!(?impordescriptors_res)
+    }
+    let getbalances_res = cmd!(
+        "bitcoin-cli",
+        format!("-rpcwallet={}", server_0),
+        &datadir_flag,
+        "getbalances"
+    )
+    .out_json()
+    .await?;
+    info!(?getbalances_res);
+
+    let getnewaddress_res = cmd!(
+        "bitcoin-cli",
+        format!("-rpcwallet={}", ""),
+        &datadir_flag,
+        "getnewaddress"
+    )
+    .out_string()
+    .await?;
+    info!(?getnewaddress_res);
+
+    // this works! but I want to try a simple send all from server-0 wallet
+    // let walletcreatefundedpsbt_res = cmd!(
+    //     "bitcoin-cli",
+    //     format!("-rpcwallet={}", server_0),
+    //     &datadir_flag,
+    //     "walletcreatefundedpsbt",
+    //     "null",
+    //     json!([{getnewaddress_res: "0.004"}])
+    // )
+    // .out_string()
+    // .await?;
+    // info!(?walletcreatefundedpsbt_res);
+
+    let sendall_res = cmd!(
+        "bitcoin-cli",
+        format!("-rpcwallet={}", server_0),
+        &datadir_flag,
+        "sendall",
+        json!([getnewaddress_res])
+    )
+    .out_string()
+    .await?;
+    info!(?sendall_res);
+
+    // ooh this doesn't work since there are multiple wallets loaded
+    // worth creating a comment in the final work that I need to use CLI commands instead of rpc client since it doesn't support passing in a wallet flag
+    // bitcoind.mine_blocks(1).await?;
+    {
+        // mine blocks
+        let getnewaddress_res = cmd!(
+            "bitcoin-cli",
+            format!("-rpcwallet={}", ""),
+            &datadir_flag,
+            "getnewaddress"
+        )
+        .out_string()
+        .await?;
+        info!(?getnewaddress_res);
+
+        let generatetoaddress_res = cmd!(
+            "bitcoin-cli",
+            format!("-rpcwallet={}", ""),
+            &datadir_flag,
+            "generatetoaddress",
+            "1",
+            getnewaddress_res
+        )
+        .out_string()
+        .await?;
+        info!(?generatetoaddress_res);
+    }
+
+    let listreceivedbyaddress_res = cmd!(
+        "bitcoin-cli",
+        format!("-rpcwallet={}", ""),
+        &datadir_flag,
+        "listreceivedbyaddress"
+    )
+    .out_json()
+    .await?;
+    info!(?listreceivedbyaddress_res);
+    let address_res = listreceivedbyaddress_res
+        .as_array()
+        .unwrap()
+        .into_iter()
+        .find(|object| object["address"].as_str().unwrap() == getnewaddress_res.to_string());
+    info!(?address_res);
+
+    let getbalances_res = cmd!(
+        "bitcoin-cli",
+        format!("-rpcwallet={}", server_0),
+        &datadir_flag,
+        "getbalances"
+    )
+    .out_json()
+    .await?;
+    info!(?getbalances_res);
+
+    let listtransactions_res = cmd!(
+        "bitcoin-cli",
+        format!("-rpcwallet={}", server_0),
+        &datadir_flag,
+        "listtransactions"
+    )
+    .out_json()
+    .await?;
+    info!(?listtransactions_res);
+    /////////////////////////////////////////////////////////////////////////////////
+    // end
+    /////////////////////////////////////////////////////////////////////////////////
+
+    // let help_res = cmd!("bitcoin-cli", &datadir_flag, "help")
+    //     .out_string()
+    //     .await;
+    // info!(?help_res);
+
+    // send SIGTERM to bitcoind so it gracefully exits
+    // todo: consider adding a drop impl for SIGTERM
+    bitcoind.terminate().await?;
+    // gracefully stop bitcoind
+    // this flushes state to disk and allows restarting at the same block height
+    // critical for testing capability of recoverytool manually after test, but
+    // might be able to remove for CI let stop_res = cmd!("bitcoin-cli",
+    // &datadir_flag, "stop")     .out_string()
+    //     .await?;
+    // info!(?stop_res);
+
+    Ok(())
+}
+
 async fn cli_tests(dev_fed: DevFed) -> Result<()> {
     let data_dir = env::var("FM_DATA_DIR")?;
 
@@ -251,6 +561,7 @@ async fn cli_tests(dev_fed: DevFed) -> Result<()> {
         "config-decrypt/encrypt failed"
     );
 
+    // this amount shows for both utxos and epochs
     fed.pegin_gateway(99_999, &gw_cln).await?;
 
     let fed_id = fed.federation_id().await;
@@ -362,6 +673,7 @@ async fn cli_tests(dev_fed: DevFed) -> Result<()> {
     let initial_client_balance = fed.client_balance().await?;
     assert_eq!(initial_client_balance, 0);
 
+    // this amount shows for both utxos and epochs
     fed.pegin(CLIENT_START_AMOUNT / 1000).await?;
 
     // Check log contains deposit
@@ -697,6 +1009,7 @@ async fn cli_tests(dev_fed: DevFed) -> Result<()> {
     info!("Testing client deposit");
     let initial_walletng_balance = fed.client_balance().await?;
 
+    // this amount shows only for utxos, not epochs
     fed.pegin(100_000).await?; // deposit in sats
 
     let post_deposit_walletng_balance = fed.client_balance().await?;
@@ -705,6 +1018,11 @@ async fn cli_tests(dev_fed: DevFed) -> Result<()> {
         post_deposit_walletng_balance,
         initial_walletng_balance + 100_000_000 // deposit in msats
     );
+
+    let bitcoin_cli = env::var("FM_BTC_CLIENT")?;
+    // try calling bitcoin-cli with stop command
+    let stop_res = cmd!(bitcoin_cli, "stop").out_json().await?;
+    info!(?stop_res);
 
     // ## Withdraw
     // info!("Testing client withdraw");
@@ -737,15 +1055,16 @@ async fn cli_tests(dev_fed: DevFed) -> Result<()> {
     // .await
     // .expect("cannot fail, gets stuck");
     //
-    // let tx = bitcoin::Transaction::consensus_decode_hex(&tx_hex, &Default::default()).unwrap();
-    // let address = bitcoin::Address::from_str(&address).unwrap();
-    // assert!(tx
+    // let tx = bitcoin::Transaction::consensus_decode_hex(&tx_hex,
+    // &Default::default()).unwrap(); let address =
+    // bitcoin::Address::from_str(&address).unwrap(); assert!(tx
     //     .output
     //     .iter()
     //     .any(|o| o.script_pubkey == address.script_pubkey() && o.value == 5000));
     //
     // let post_withdraw_walletng_balance = fed.client_balance().await?;
-    // let expected_wallet_balance = initial_walletng_balance - 5_000_000 - (fees_sat * 1000);
+    // let expected_wallet_balance = initial_walletng_balance - 5_000_000 -
+    // (fees_sat * 1000);
     //
     // assert_eq!(post_withdraw_walletng_balance, expected_wallet_balance);
 
@@ -1417,6 +1736,7 @@ enum Cmd {
     /// `devfed` then pegin CLN & LND nodes and gateways. Kill the LN nodes,
     /// restart them, rejjoin fedimint and test payments still work
     LightningReconnectTest,
+    RecoverytoolTest,
     /// `devfed` then reboot gateway daemon for both CLN and LND. Test
     /// afterward.
     GatewayRebootTest,
@@ -1519,6 +1839,7 @@ async fn run_ui(process_mgr: &ProcessManager) -> Result<(Vec<Fedimintd>, Externa
     Ok((fedimintds, externals))
 }
 
+use futures::FutureExt;
 use std::fmt::Write;
 use std::str::FromStr;
 
@@ -1711,6 +2032,11 @@ async fn handle_command() -> Result<()> {
             let dev_fed = dev_fed(&process_mgr).await?;
             lightning_gw_reconnect_test(dev_fed, &process_mgr).await?;
         }
+        Cmd::RecoverytoolTest => {
+            let (process_mgr, _) = setup(args.common).await?;
+            let dev_fed = dev_fed(&process_mgr).await?;
+            recoverytool_test(dev_fed).await?;
+        }
         Cmd::GatewayRebootTest => {
             let (process_mgr, _) = setup(args.common).await?;
             let dev_fed = dev_fed(&process_mgr).await?;
@@ -1808,4 +2134,50 @@ async fn rpc_command(rpc: RpcCmd, common: CommonArgs) -> Result<()> {
             Ok(())
         }
     }
+}
+
+#[test]
+fn sandbox() {
+    use serde_json::json;
+
+    println!("cool");
+    (0..=3).for_each(|num| println!("num: {}", num));
+
+    let res = json!([{"outpoint": "b1053dda506dafa328c38e687a8adaa7e721f98a3905ec91b65c8fbeb4112a4b:1", "descriptor": "wsh(sortedmulti(3,cVH88JUx7fQD9CQDZz2RsCQyuVA1dBDkNtowrLTkhoVspNwUAQj3,034d895e42bec38be47fe726379ceb1bf10ab810b5e9ad669f12ba70cf39538fea,030e69fd46b12961d1014678ecadce25b8053453150a0c965ae42f44ddac2b7cfd,03bdd1c0d18b49582c53e976db2787f0f58b26debfaf90ad096ebee4dfc41359ed))#0f6srreg", "amount_sat": 300000}, {"outpoint": "edd8b85442f04611a03c827fb7be367ca8eb1f8b3980da9cf6fede42c39e7c7e:0", "descriptor": "wsh(sortedmulti(3,cMpyMmMMvW1cKEFxTiP56LznuFaNCASidWgBnoJ9fezcHqfd1Xfh,03bf3427d051c7eeb2c315ff1d0dd6596fd40ceb8632a4ce949a36f7151534f510,0354a0525b9d98c403ad93935a30bd3a7a7a0d84ba6fee34612898c9daea9d9a0d,02775c145debd424a332de94dc5ebfbdc108f25fcab288b27eb772dacdb820347c))#zz9xygfj", "amount_sat": 100000}, {"outpoint": "30a69ae94ad9470307c5b92f3d5a0615ffd47e4076bf96d3063a7de0689e10a3:0", "descriptor": "wsh(sortedmulti(3,cTqc62bFVSdpUA57eMoMGg2axJtkwRSyYFwgHzEpBZVfTgkB4PCJ,03df9e7710b114f73ab021c1455ac884146a4b4e1e9fafca59cd73389212ada0e6,03b4aefa810f359361326112ec9364124d63541caad7ce96267f88eb6e18316c17,038bd21b6b10188360190ab0e7ef2110266da96cbe85eafdbb5a49a63cef7e0c14))#u65gmcpk", "amount_sat": 200000}]);
+
+    // let res = json!([{"outpoint":
+    // "1d5d64993f684fc810ebce1bb006c158c9316eaed35b749339b16c113944743d:0",
+    // "descriptor":
+    // "wsh(sortedmulti(3,cRzJPwu4sk5foHea4zPWrMPhBUwZSxK7kuMdkUQmA8mxhPh3Fh6S,
+    // 03e1edb556fb7e52d4eec3173c9d8e668e4a3a55359c5090e0a5b9bfdf6e22eedc,
+    // 031ca241290d979b16d2977e0be97bcab80118b28236681f9d9d2ac84bf06e0b9b,
+    // 03dc5286a551ffe95feca0ba714ad508ae89532fc070c7426820c76deaff1b9f6a))#
+    // p5rtghma", "amount_sat": 100000}]);
+    println!("res: {:?}", res);
+    println!("playground: {:?}", res[0]["descriptor"]);
+    println!("playground: {:?}", res[0]["your_mom"]);
+    res.as_array()
+        .expect("recoverytool should return array of objects")
+        .iter()
+        .for_each(|object| {
+            println!("object: {:?}", object["descriptor"]);
+        });
+
+    let parsed: Vec<_> = res
+        .as_array()
+        .expect("recoverytool should return array of objects")
+        .iter()
+        .map(|object| {
+            println!("object: {:?}", object["descriptor"]);
+            json!({
+                "desc": object["descriptor"],
+                "timestamp": 0
+            })
+        })
+        .collect();
+
+    println!("parsed: {:?}", parsed);
+    let as_string = json!(parsed).to_string();
+    println!("as_string: {:?}", as_string);
+    assert!(true)
 }
