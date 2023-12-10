@@ -3,7 +3,7 @@ use fedimint_core::api::{FederationApiExt, FederationResult, IModuleFederationAp
 use fedimint_core::endpoint_constants::{BLOCK_COUNT_ENDPOINT, PEG_OUT_FEES_ENDPOINT};
 use fedimint_core::module::ApiRequestErased;
 use fedimint_core::task::{MaybeSend, MaybeSync};
-use fedimint_core::{apply, async_trait_maybe_send};
+use fedimint_core::{apply, async_trait_maybe_send, Feerate};
 use fedimint_wallet_common::PegOutFees;
 
 #[apply(async_trait_maybe_send!)]
@@ -13,6 +13,7 @@ pub trait WalletFederationApi {
         &self,
         address: &Address,
         amount: bitcoin::Amount,
+        feerate: Option<Feerate>,
     ) -> FederationResult<Option<PegOutFees>>;
 }
 
@@ -33,10 +34,11 @@ where
         &self,
         address: &Address,
         amount: bitcoin::Amount,
+        feerate: Option<Feerate>,
     ) -> FederationResult<Option<PegOutFees>> {
         self.request_current_consensus(
             PEG_OUT_FEES_ENDPOINT.to_string(),
-            ApiRequestErased::new((address, amount.to_sat())),
+            ApiRequestErased::new((address, amount.to_sat(), feerate)),
         )
         .await
     }

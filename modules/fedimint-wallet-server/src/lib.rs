@@ -650,9 +650,12 @@ impl ServerModule for Wallet {
             },
             api_endpoint! {
                 PEG_OUT_FEES_ENDPOINT,
-                async |module: &Wallet, context, params: (Address, u64)| -> Option<PegOutFees> {
-                    let (address, sats) = params;
-                    let feerate = module.consensus_fee_rate(&mut context.dbtx().into_nc()).await;
+                async |module: &Wallet, context, params: (Address, u64, Option<Feerate>)| -> Option<PegOutFees> {
+                    let (address, sats, user_defined_fee_rate) = params;
+                    let feerate = match user_defined_fee_rate {
+                        Some(fee_rate) => fee_rate,
+                        None =>  module.consensus_fee_rate(&mut context.dbtx().into_nc()).await
+                    };
 
                     // Since we are only calculating the tx size we can use an arbitrary dummy nonce.
                     let dummy_tweak = [0; 33];

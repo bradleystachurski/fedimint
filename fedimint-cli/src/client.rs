@@ -14,7 +14,8 @@ use fedimint_core::config::{ClientConfig, FederationId};
 use fedimint_core::core::{ModuleInstanceId, ModuleKind, OperationId};
 use fedimint_core::encoding::Encodable;
 use fedimint_core::time::now;
-use fedimint_core::{Amount, BitcoinAmountOrAll, ParseAmountError, TieredSummary};
+use fedimint_core::util::parse_feerate;
+use fedimint_core::{Amount, BitcoinAmountOrAll, Feerate, TieredSummary};
 use fedimint_ln_client::{
     InternalPayState, LightningClientModule, LnPayState, LnReceiveState, OutgoingLightningPayment,
     PayType,
@@ -30,6 +31,7 @@ use time::format_description::well_known::iso8601;
 use time::OffsetDateTime;
 use tracing::{debug, info};
 
+use crate::utils::{parse_fedimint_amount, parse_gateway_id};
 use crate::{metadata_from_clap_cli, LnInvoiceResponse};
 
 #[derive(Debug, Clone)]
@@ -110,6 +112,9 @@ pub enum ClientCmd {
         amount: BitcoinAmountOrAll,
         #[clap(long)]
         address: bitcoin::Address,
+        /// Fee amount, todo better docs
+        #[clap(long, value_parser = parse_feerate)]
+        feerate: Option<Feerate>,
     },
     /// Upload the (encrypted) snapshot of mint notes to federation
     Backup {
@@ -147,10 +152,6 @@ pub enum ClientCmd {
     },
     /// Returns the client config
     Config,
-}
-
-pub fn parse_gateway_id(s: &str) -> Result<secp256k1::PublicKey, secp256k1::Error> {
-    secp256k1::PublicKey::from_str(s)
 }
 
 pub async fn handle_command(
@@ -424,7 +425,11 @@ pub async fn handle_command(
                 "operations": operations,
             }))
         }
-        ClientCmd::Withdraw { amount, address } => {
+        ClientCmd::Withdraw {
+            amount,
+            address,
+            feerate: user_defined_feerate,
+        } => {
             let wallet_module = client.get_first_module::<WalletClientModule>();
             let (amount, fees) = match amount {
                 // If the amount is "all", then we need to subtract the fees from
@@ -433,7 +438,7 @@ pub async fn handle_command(
                     let balance =
                         bitcoin::Amount::from_sat(client.get_balance().await.msats / 1000);
                     let fees = wallet_module
-                        .get_withdraw_fees(address.clone(), balance)
+                        .get_withdraw_fees(address.clone(), balance, user_defined_feerate)
                         .await?;
                     let amount = balance.checked_sub(fees.amount());
                     if amount.is_none() {
@@ -444,7 +449,7 @@ pub async fn handle_command(
                 BitcoinAmountOrAll::Amount(amount) => (
                     amount,
                     wallet_module
-                        .get_withdraw_fees(address.clone(), amount)
+                        .get_withdraw_fees(address.clone(), amount, user_defined_feerate)
                         .await?,
                 ),
             };
@@ -669,16 +674,6 @@ struct InfoResponse {
     total_amount_msat: Amount,
     total_num_notes: usize,
     denominations_msat: TieredSummary,
-}
-
-pub fn parse_fedimint_amount(s: &str) -> Result<fedimint_core::Amount, ParseAmountError> {
-    if let Some(i) = s.find(char::is_alphabetic) {
-        let (amt, denom) = s.split_at(i);
-        fedimint_core::Amount::from_str_in(amt, denom.parse()?)
-    } else {
-        //default to millisatoshi
-        fedimint_core::Amount::from_str_in(s, bitcoin::Denomination::MilliSatoshi)
-    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

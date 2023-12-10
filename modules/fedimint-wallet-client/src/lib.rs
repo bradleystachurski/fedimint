@@ -31,7 +31,7 @@ use fedimint_core::module::{
     ApiVersion, CommonModuleInit, ModuleCommon, ModuleInit, MultiApiVersion, TransactionItemAmount,
 };
 use fedimint_core::task::{MaybeSend, MaybeSync, TaskGroup};
-use fedimint_core::{apply, async_trait_maybe_send, Amount, OutPoint};
+use fedimint_core::{apply, async_trait_maybe_send, Amount, Feerate, OutPoint};
 use fedimint_wallet_common::config::WalletClientConfig;
 use fedimint_wallet_common::tweakable::Tweakable;
 pub use fedimint_wallet_common::*;
@@ -324,11 +324,12 @@ impl WalletClientModule {
         &self,
         address: bitcoin::Address,
         amount: bitcoin::Amount,
+        feerate: Option<Feerate>,
     ) -> anyhow::Result<PegOutFees> {
         check_address(&address, self.cfg.network)?;
 
         self.module_api
-            .fetch_peg_out_fees(&address, amount)
+            .fetch_peg_out_fees(&address, amount, feerate)
             .await?
             .context("Federation didn't return peg-out fees")
     }

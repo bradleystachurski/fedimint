@@ -163,7 +163,7 @@ async fn on_chain_peg_in_and_peg_out_happy_case() -> anyhow::Result<()> {
     let peg_out = bsats(PEG_OUT_AMOUNT_SATS);
     let wallet_module = client.get_first_module::<WalletClientModule>();
     let fees = wallet_module
-        .get_withdraw_fees(address.clone(), peg_out)
+        .get_withdraw_fees(address.clone(), peg_out, None)
         .await?;
     assert_eq!(
         fees.total_weight, 871,
@@ -272,7 +272,7 @@ async fn peg_outs_support_rbf() -> anyhow::Result<()> {
     let peg_out = bsats(PEG_OUT_AMOUNT_SATS);
     let wallet_module = client.get_first_module::<WalletClientModule>();
     let fees = wallet_module
-        .get_withdraw_fees(address.clone(), peg_out)
+        .get_withdraw_fees(address.clone(), peg_out, None)
         .await?;
     let op = wallet_module
         .withdraw(address.clone(), peg_out, fees, ())
@@ -354,7 +354,7 @@ async fn peg_outs_must_wait_for_available_utxos() -> anyhow::Result<()> {
     let peg_out1 = PEG_OUT_AMOUNT_SATS;
     let wallet_module = client.get_first_module::<WalletClientModule>();
     let fees1 = wallet_module
-        .get_withdraw_fees(address.clone(), bsats(peg_out1))
+        .get_withdraw_fees(address.clone(), bsats(peg_out1), None)
         .await?;
     let op = wallet_module
         .withdraw(address.clone(), bsats(peg_out1), fees1, ())
@@ -380,7 +380,7 @@ async fn peg_outs_must_wait_for_available_utxos() -> anyhow::Result<()> {
     let address = bitcoin.get_new_address().await;
     let peg_out2 = PEG_OUT_AMOUNT_SATS;
     let fees2 = wallet_module
-        .get_withdraw_fees(address.clone(), bsats(peg_out2))
+        .get_withdraw_fees(address.clone(), bsats(peg_out2), None)
         .await;
     // Must fail because change UTXOs are still being confirmed
     assert!(fees2.is_err());
@@ -390,7 +390,7 @@ async fn peg_outs_must_wait_for_available_utxos() -> anyhow::Result<()> {
     await_consensus_to_catch_up(&client, current_block + 1).await?;
     // Now change UTXOs are available and we can peg-out again
     let fees2 = wallet_module
-        .get_withdraw_fees(address.clone(), bsats(peg_out2))
+        .get_withdraw_fees(address.clone(), bsats(peg_out2), None)
         .await?;
     let op = wallet_module
         .withdraw(address.clone(), bsats(peg_out2), fees2, ())

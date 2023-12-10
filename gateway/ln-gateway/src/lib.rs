@@ -688,6 +688,7 @@ impl Gateway {
             amount,
             address,
             federation_id,
+            feerate: user_defined_feerate,
         } = payload;
         let client = self.select_client(federation_id).await?;
         let wallet_module = client.get_first_module::<WalletClientModule>();
@@ -699,7 +700,7 @@ impl Gateway {
             BitcoinAmountOrAll::All => {
                 let balance = bitcoin::Amount::from_sat(client.get_balance().await.msats / 1000);
                 let fees = wallet_module
-                    .get_withdraw_fees(address.clone(), balance)
+                    .get_withdraw_fees(address.clone(), balance, user_defined_feerate)
                     .await?;
                 let withdraw_amount = balance.checked_sub(fees.amount());
                 if withdraw_amount.is_none() {
@@ -710,7 +711,7 @@ impl Gateway {
             BitcoinAmountOrAll::Amount(amount) => (
                 amount,
                 wallet_module
-                    .get_withdraw_fees(address.clone(), amount)
+                    .get_withdraw_fees(address.clone(), amount, user_defined_feerate)
                     .await?,
             ),
         };
