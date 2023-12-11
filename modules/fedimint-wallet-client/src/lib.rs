@@ -328,10 +328,30 @@ impl WalletClientModule {
     ) -> anyhow::Result<PegOutFees> {
         check_address(&address, self.cfg.network)?;
 
-        self.module_api
+        let res = self
+            .module_api
             .fetch_peg_out_fees(&address, amount, feerate)
-            .await?
-            .context("Federation didn't return peg-out fees")
+            .await?;
+
+        let consensus_fees = res
+            .consensus_fees
+            .context("Federation didn't return peg-out fees")?;
+
+        match feerate {
+            Some(_) => {
+                let user_defined_fees = res
+                    .user_defined_fees
+                    .context("Federation didn't return peg-out fees")?;
+                ensure!(
+                    user_defined_fees.fee_rate >= consensus_fees.fee_rate,
+                    "Provided fee {:?} below minimum feerate {:?}",
+                    user_defined_fees.fee_rate,
+                    consensus_fees.fee_rate
+                );
+                Ok(user_defined_fees)
+            }
+            None => Ok(consensus_fees),
+        }
     }
 
     pub async fn create_withdraw_output(

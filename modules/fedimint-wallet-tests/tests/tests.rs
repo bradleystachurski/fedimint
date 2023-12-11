@@ -165,6 +165,15 @@ async fn on_chain_peg_in_and_peg_out_happy_case() -> anyhow::Result<()> {
     let fees = wallet_module
         .get_withdraw_fees(address.clone(), peg_out, None)
         .await?;
+    info!(?fees);
+    let user_defined_fees = wallet_module
+        .get_withdraw_fees(
+            address.clone(),
+            peg_out,
+            Some(Feerate { sats_per_kvb: 1000 }),
+        )
+        .await;
+    info!(?user_defined_fees);
     assert_eq!(
         fees.total_weight, 871,
         "stateless wallet should have constructed a tx with a total weight=871"

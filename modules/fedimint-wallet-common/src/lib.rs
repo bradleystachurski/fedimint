@@ -172,6 +172,12 @@ pub struct PegOut {
     pub fees: PegOutFees,
 }
 
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash, Deserialize, Serialize, Encodable, Decodable)]
+pub struct PegOutFeesResponse {
+    pub consensus_fees: Option<PegOutFees>,
+    pub user_defined_fees: Option<PegOutFees>,
+}
+
 extensible_associated_module_type!(
     WalletOutputOutcome,
     WalletOutputOutcomeV0,
