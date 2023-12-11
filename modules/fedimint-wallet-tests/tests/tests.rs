@@ -210,6 +210,75 @@ async fn on_chain_peg_in_and_peg_out_happy_case() -> anyhow::Result<()> {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn user_defined_feerates() -> anyhow::Result<()> {
+    let fixtures = fixtures();
+    let fed = fixtures.new_fed().await;
+    let client = fed.new_client().await;
+    let bitcoin = fixtures.bitcoin();
+    let bitcoin = bitcoin.lock_exclusive().await;
+    let dyn_bitcoin_rpc = fixtures.dyn_bitcoin_rpc();
+    info!("Starting test on_chain_peg_in_and_peg_out_happy_case");
+
+    let finality_delay = 10;
+    bitcoin.mine_blocks(finality_delay).await;
+    await_consensus_to_catch_up(&client, 1).await?;
+
+    let mut balance_sub =
+        peg_in(&client, bitcoin.as_ref(), &dyn_bitcoin_rpc, finality_delay).await?;
+
+    info!("Peg-in finished for test on_chain_peg_in_and_peg_out_happy_case");
+    // Peg-out test, requires block to recognize change UTXOs
+    let address = bitcoin.get_new_address().await;
+    let peg_out = bsats(PEG_OUT_AMOUNT_SATS);
+    let wallet_module = client.get_first_module::<WalletClientModule>();
+    let fees = wallet_module
+        .get_withdraw_fees(address.clone(), peg_out, None)
+        .await?;
+    info!(?fees);
+    let user_defined_fees = wallet_module
+        .get_withdraw_fees(
+            address.clone(),
+            peg_out,
+            Some(Feerate { sats_per_kvb: 1000 }),
+        )
+        .await;
+    info!(?user_defined_fees);
+    assert_eq!(
+        fees.total_weight, 871,
+        "stateless wallet should have constructed a tx with a total weight=871"
+    );
+    let op = wallet_module
+        .withdraw(address.clone(), peg_out, fees, ())
+        .await?;
+
+    let balance_after_peg_out =
+        sats(PEG_IN_AMOUNT_SATS - PEG_OUT_AMOUNT_SATS - fees.amount().to_sat());
+    assert_eq!(client.get_balance().await, balance_after_peg_out);
+    assert_eq!(balance_sub.ok().await?, balance_after_peg_out);
+
+    let sub = wallet_module.subscribe_withdraw_updates(op).await?;
+    let mut sub = sub.into_stream();
+    assert_eq!(sub.ok().await?, WithdrawState::Created);
+    let txid = match sub.ok().await? {
+        WithdrawState::Succeeded(txid) => txid,
+        other => panic!("Unexpected state: {other:?}"),
+    };
+
+    let expected_tx_fee = {
+        let witness_scale_factor = 4;
+        let sats_per_vbyte = fees.fee_rate.sats_per_kvb / 1000;
+        let tx_vbytes = (fees.total_weight + witness_scale_factor - 1) / witness_scale_factor;
+        Amount::from_sats(sats_per_vbyte * tx_vbytes)
+    };
+    let tx_fee = bitcoin.get_mempool_tx_fee(&txid).await;
+    assert_eq!(tx_fee, expected_tx_fee);
+
+    let received = bitcoin.mine_block_and_get_received(&address).await;
+    assert_eq!(received, peg_out.into());
+    Ok(())
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn peg_out_fail_refund() -> anyhow::Result<()> {
     let fixtures = fixtures();
     let fed = fixtures.new_fed().await;
