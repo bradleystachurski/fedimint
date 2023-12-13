@@ -5,6 +5,7 @@ use std::fmt::{Debug, Display, Formatter};
 use std::future::Future;
 use std::hash::Hash;
 use std::io::Write;
+use std::num::ParseIntError;
 use std::path::Path;
 use std::pin::Pin;
 use std::str::FromStr;
@@ -18,7 +19,7 @@ use tracing::debug;
 use url::{Host, ParseError, Url};
 
 use crate::task::MaybeSend;
-use crate::{apply, async_trait_maybe_send, maybe_add_send};
+use crate::{apply, async_trait_maybe_send, maybe_add_send, Feerate};
 
 /// Future that is `Send` unless targeting WASM
 pub type BoxFuture<'a, T> = Pin<Box<maybe_add_send!(dyn Future<Output = T> + 'a)>>;
@@ -215,6 +216,15 @@ pub async fn write_new_async<P: AsRef<Path>, C: AsRef<[u8]>>(
         .await?
         .write_all(contents.as_ref())
         .await
+}
+
+// TODO: keep chewing on better place to share between both CLIs
+pub fn parse_feerate(s: &str) -> Result<Option<Feerate>, ParseIntError> {
+    if s.is_empty() {
+        Ok(None)
+    } else {
+        Ok(Some(Feerate::from_str(s)?))
+    }
 }
 
 #[cfg(test)]

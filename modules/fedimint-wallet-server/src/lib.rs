@@ -19,7 +19,7 @@ use common::db::{
     PegOutNonceKey,
 };
 use common::{
-    proprietary_tweak_key, PegOutFees, PegOutSignatureItem, PendingTransaction,
+    proprietary_tweak_key, PegOutFees, PegOutFeesResponse, PegOutSignatureItem, PendingTransaction,
     ProcessPegOutSigError, SpendableUTXO, UnsignedTransaction, WalletCommonInit,
     WalletConsensusItem, WalletCreationError, WalletInput, WalletModuleTypes, WalletOutput,
     WalletOutputOutcome, CONFIRMATION_TARGET,
@@ -650,34 +650,51 @@ impl ServerModule for Wallet {
             },
             api_endpoint! {
                 PEG_OUT_FEES_ENDPOINT,
-                async |module: &Wallet, context, params: (Address, u64)| -> Option<PegOutFees> {
-                    let (address, sats) = params;
-                    let feerate = module.consensus_fee_rate(&mut context.dbtx().into_nc()).await;
-
-                    // Since we are only calculating the tx size we can use an arbitrary dummy nonce.
-                    let dummy_tweak = [0; 33];
-
-                    let tx = module.offline_wallet().create_tx(
-                        bitcoin::Amount::from_sat(sats),
-                        address.script_pubkey(),
-                        vec![],
-                        module.available_utxos(&mut context.dbtx().into_nc()).await,
-                        feerate,
-                        &dummy_tweak,
-                        None
-                    );
-
-                    match tx {
-                        Err(error) => {
-                            // Usually from not enough spendable UTXOs
-                            warn!("Error returning peg-out fees {error}");
-                            Ok(None)
-                        }
-                        Ok(tx) => Ok(Some(tx.fees))
-                    }
+                async |module: &Wallet, context, params: (Address, u64, Option<Feerate>)| -> PegOutFeesResponse {
+                    let (address, sats, user_defined_fee_rate) = params;
+                    let consensus_feerate = module.consensus_fee_rate(&mut context.dbtx().into_nc()).await;
+                    let spendables = module.available_utxos(&mut context.dbtx().into_nc()).await;
+                    let wallet = module.offline_wallet();
+                    Ok(PegOutFeesResponse {
+                        consensus_fees: calculate_fees(&address, sats, consensus_feerate, &spendables, &wallet),
+                        user_defined_fees: user_defined_fee_rate.and_then(|feerate| {
+                            calculate_fees(&address, sats, feerate, &spendables, &wallet)
+                        }),
+                    })
                 }
             },
         ]
+    }
+}
+
+fn calculate_fees(
+    address: &Address,
+    sats: u64,
+    feerate: Feerate,
+    spendables: &[(UTXOKey, SpendableUTXO)],
+    offline_wallet: &StatelessWallet,
+) -> Option<PegOutFees> {
+    // Since we are only calculating the tx size we can use an arbitrary dummy
+    // nonce.
+    let dummy_tweak = [0; 33];
+
+    let tx = offline_wallet.create_tx(
+        bitcoin::Amount::from_sat(sats),
+        address.script_pubkey(),
+        vec![],
+        spendables.to_owned(),
+        feerate,
+        &dummy_tweak,
+        None,
+    );
+
+    match tx {
+        Err(error) => {
+            // Usually from not enough spendable UTXOs
+            warn!("Error returning peg-out fees {error}");
+            None
+        }
+        Ok(tx) => Some(tx.fees),
     }
 }
 

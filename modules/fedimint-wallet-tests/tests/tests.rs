@@ -52,7 +52,7 @@ async fn peg_in<'a>(
     let valid_until = SystemTime::now() + PEG_IN_TIMEOUT;
 
     let mut balance_sub = client.subscribe_balance_changes().await;
-    assert_eq!(balance_sub.ok().await?, sats(0));
+    let initial_balance = balance_sub.ok().await?;
 
     let wallet_module = &client.get_first_module::<WalletClientModule>();
     let (op, address) = wallet_module.get_deposit_address(valid_until, ()).await?;
@@ -70,11 +70,13 @@ async fn peg_in<'a>(
     assert_eq!(sub.ok().await?, DepositState::WaitingForTransaction);
     assert_matches!(sub.ok().await?, DepositState::WaitingForConfirmation { .. });
 
+    // TODO: if keeping this logic, rebase and use helpers for conversion
+    let expected_sats = sats(PEG_IN_AMOUNT_SATS + initial_balance.msats / 1000);
     bitcoin.mine_blocks(finality_delay).await;
     assert!(matches!(sub.ok().await?, DepositState::Confirmed(_)));
     assert!(matches!(sub.ok().await?, DepositState::Claimed(_)));
-    assert_eq!(client.get_balance().await, sats(PEG_IN_AMOUNT_SATS));
-    assert_eq!(balance_sub.ok().await?, sats(PEG_IN_AMOUNT_SATS));
+    assert_eq!(client.get_balance().await, expected_sats);
+    assert_eq!(balance_sub.ok().await?, expected_sats);
     info!(?height, ?tx, "Peg-in transaction claimed");
 
     Ok(balance_sub)
@@ -163,7 +165,7 @@ async fn on_chain_peg_in_and_peg_out_happy_case() -> anyhow::Result<()> {
     let peg_out = bsats(PEG_OUT_AMOUNT_SATS);
     let wallet_module = client.get_first_module::<WalletClientModule>();
     let fees = wallet_module
-        .get_withdraw_fees(address.clone(), peg_out)
+        .get_withdraw_fees(address.clone(), peg_out, None)
         .await?;
     assert_eq!(
         fees.total_weight, 871,
@@ -197,6 +199,68 @@ async fn on_chain_peg_in_and_peg_out_happy_case() -> anyhow::Result<()> {
 
     let received = bitcoin.mine_block_and_get_received(&address).await;
     assert_eq!(received, peg_out.into());
+    Ok(())
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn user_defined_feerates() -> anyhow::Result<()> {
+    let fixtures = fixtures();
+    let fed = fixtures.new_fed().await;
+    let client = fed.new_client().await;
+    let bitcoin = fixtures.bitcoin();
+    let bitcoin = bitcoin.lock_exclusive().await;
+    let dyn_bitcoin_rpc = fixtures.dyn_bitcoin_rpc();
+    info!("Starting test user_defined_feerates");
+
+    let finality_delay = 10;
+    bitcoin.mine_blocks(finality_delay).await;
+    await_consensus_to_catch_up(&client, 1).await?;
+
+    peg_in(&client, bitcoin.as_ref(), &dyn_bitcoin_rpc, finality_delay).await?;
+
+    peg_in(&client, bitcoin.as_ref(), &dyn_bitcoin_rpc, finality_delay).await?;
+
+    info!("Peg-in finished for test user_defined_feerates");
+    let address = bitcoin.get_new_address().await;
+    let peg_out = bsats(PEG_OUT_AMOUNT_SATS);
+    let wallet_module = client.get_first_module::<WalletClientModule>();
+    let consensus_fees = wallet_module
+        .get_withdraw_fees(address.clone(), peg_out, None)
+        .await?;
+    info!(?consensus_fees);
+    assert_eq!(
+        consensus_fees.total_weight, 871,
+        "stateless wallet should have constructed a tx with a total weight=871"
+    );
+    let user_defined_fees = wallet_module
+        .get_withdraw_fees(
+            address.clone(),
+            peg_out,
+            Some(Feerate {
+                sats_per_kvb: 17000,
+            }),
+        )
+        .await?;
+    assert_ne!(
+        consensus_fees.total_weight, user_defined_fees.total_weight,
+        "coin selection algo should choose different weight"
+    );
+
+    // if we simply rely on the existing peg out fees endpiont and replace with
+    // the user defined feerate, this will cause an issue due to the different tx
+    // weights
+    let bad_peg_out_fees = PegOutFees {
+        fee_rate: user_defined_fees.fee_rate,
+        total_weight: consensus_fees.total_weight,
+    };
+    let op = wallet_module
+        .withdraw(address.clone(), peg_out, bad_peg_out_fees, ())
+        .await?;
+
+    let sub = wallet_module.subscribe_withdraw_updates(op).await?;
+    let mut sub = sub.into_stream();
+    assert_eq!(sub.ok().await?, WithdrawState::Created);
+    assert!(matches!(sub.ok().await?, WithdrawState::Failed(_)));
     Ok(())
 }
 
@@ -272,7 +336,7 @@ async fn peg_outs_support_rbf() -> anyhow::Result<()> {
     let peg_out = bsats(PEG_OUT_AMOUNT_SATS);
     let wallet_module = client.get_first_module::<WalletClientModule>();
     let fees = wallet_module
-        .get_withdraw_fees(address.clone(), peg_out)
+        .get_withdraw_fees(address.clone(), peg_out, None)
         .await?;
     let op = wallet_module
         .withdraw(address.clone(), peg_out, fees, ())
@@ -354,7 +418,7 @@ async fn peg_outs_must_wait_for_available_utxos() -> anyhow::Result<()> {
     let peg_out1 = PEG_OUT_AMOUNT_SATS;
     let wallet_module = client.get_first_module::<WalletClientModule>();
     let fees1 = wallet_module
-        .get_withdraw_fees(address.clone(), bsats(peg_out1))
+        .get_withdraw_fees(address.clone(), bsats(peg_out1), None)
         .await?;
     let op = wallet_module
         .withdraw(address.clone(), bsats(peg_out1), fees1, ())
@@ -380,7 +444,7 @@ async fn peg_outs_must_wait_for_available_utxos() -> anyhow::Result<()> {
     let address = bitcoin.get_new_address().await;
     let peg_out2 = PEG_OUT_AMOUNT_SATS;
     let fees2 = wallet_module
-        .get_withdraw_fees(address.clone(), bsats(peg_out2))
+        .get_withdraw_fees(address.clone(), bsats(peg_out2), None)
         .await;
     // Must fail because change UTXOs are still being confirmed
     assert!(fees2.is_err());
@@ -390,7 +454,7 @@ async fn peg_outs_must_wait_for_available_utxos() -> anyhow::Result<()> {
     await_consensus_to_catch_up(&client, current_block + 1).await?;
     // Now change UTXOs are available and we can peg-out again
     let fees2 = wallet_module
-        .get_withdraw_fees(address.clone(), bsats(peg_out2))
+        .get_withdraw_fees(address.clone(), bsats(peg_out2), None)
         .await?;
     let op = wallet_module
         .withdraw(address.clone(), bsats(peg_out2), fees2, ())
