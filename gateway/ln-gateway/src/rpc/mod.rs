@@ -8,7 +8,7 @@ use bitcoin::{Address, Network, Txid};
 use bitcoin_hashes::hex::{FromHex, ToHex};
 use fedimint_core::config::{ClientConfig, FederationId};
 use fedimint_core::task::TaskGroup;
-use fedimint_core::{Amount, BitcoinAmountOrAll};
+use fedimint_core::{Amount, BitcoinAmountOrAll, Feerate};
 use fedimint_ln_client::pay::PayInvoicePayload;
 use fedimint_ln_common::contracts::Preimage;
 use fedimint_ln_common::{route_hints, serde_option_routing_fees};
@@ -57,6 +57,7 @@ pub struct WithdrawPayload {
     pub federation_id: FederationId,
     pub amount: BitcoinAmountOrAll,
     pub address: Address,
+    pub feerate: Option<Feerate>,
 }
 
 /// Information about one of the feds we are connected to

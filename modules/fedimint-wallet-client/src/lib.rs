@@ -31,7 +31,7 @@ use fedimint_core::module::{
     ApiVersion, CommonModuleInit, ModuleCommon, ModuleInit, MultiApiVersion, TransactionItemAmount,
 };
 use fedimint_core::task::{MaybeSend, MaybeSync, TaskGroup};
-use fedimint_core::{apply, async_trait_maybe_send, Amount, OutPoint};
+use fedimint_core::{apply, async_trait_maybe_send, Amount, Feerate, OutPoint};
 use fedimint_wallet_common::config::WalletClientConfig;
 use fedimint_wallet_common::tweakable::Tweakable;
 pub use fedimint_wallet_common::*;
@@ -324,13 +324,50 @@ impl WalletClientModule {
         &self,
         address: bitcoin::Address,
         amount: bitcoin::Amount,
+        feerate: Option<Feerate>,
     ) -> anyhow::Result<PegOutFees> {
         check_address(&address, self.cfg.network)?;
+        let failure_message = "Federation didn't return peg-out fees";
 
-        self.module_api
-            .fetch_peg_out_fees(&address, amount)
-            .await?
-            .context("Federation didn't return peg-out fees")
+        // Attempt to use v2 endpoint that supports user defined fees. If the federation doesn't support v2, fallback to v1 endpoint.
+        match self
+            .module_api
+            .fetch_peg_out_fees_v2(&address, amount, feerate)
+            .await
+        {
+            Ok(res) => {
+                let consensus_fees = res
+                    .consensus_fees
+                    .context(failure_message)?;
+
+                match feerate {
+                    Some(_) => {
+                        let user_defined_fees = res
+                            .user_defined_fees
+                            .context(failure_message)?;
+                        ensure!(
+                            user_defined_fees.fee_rate >= consensus_fees.fee_rate,
+                            "Provided fee {:?} below minimum feerate {:?}",
+                            user_defined_fees.fee_rate,
+                            consensus_fees.fee_rate
+                        );
+                        Ok(user_defined_fees)
+                    }
+                    None => Ok(consensus_fees),
+                }
+            }
+            Err(_) => {
+                ensure!(
+                    feerate.is_none(),
+                    "Federation doesn't support user defined feerates. Please try again without providing a feerate."
+                );
+
+                self.module_api
+                    .fetch_peg_out_fees(&address, amount)
+                    .await?
+                    .context(failure_message)
+            }
+        }
     }
 
     pub async fn create_withdraw_output(

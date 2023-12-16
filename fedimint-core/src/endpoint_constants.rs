@@ -19,6 +19,7 @@ pub const LIST_GATEWAYS_ENDPOINT: &str = "list_gateways";
 pub const MODULES_CONFIG_JSON_ENDPOINT: &str = "modules_config_json";
 pub const OFFER_ENDPOINT: &str = "offer";
 pub const PEG_OUT_FEES_ENDPOINT: &str = "peg_out_fees";
+pub const PEG_OUT_FEES_V2_ENDPOINT: &str = "peg_out_fees_v2";
 pub const RECOVER_ENDPOINT: &str = "recover";
 pub const REGISTER_GATEWAY_ENDPOINT: &str = "register_gateway";
 pub const RUN_DKG_ENDPOINT: &str = "run_dkg";

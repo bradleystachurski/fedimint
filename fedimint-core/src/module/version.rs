@@ -94,7 +94,7 @@ impl CoreConsensusVersion {
 /// same (both major and minor) across all corresponding instances on other
 /// nodes of the federation.
 ///
-/// When [`CoreConsensusVersion`] changes, this can but is not requires to be
+/// When [`CoreConsensusVersion`] changes, this can but is not required to be
 /// a breaking change for each module's [`ModuleConsensusVersion`].
 ///
 /// For many modules it might be preferable to implement a new

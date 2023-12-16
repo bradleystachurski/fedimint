@@ -1,8 +1,8 @@
 use bitcoin::Address;
 use clap::{CommandFactory, Parser, Subcommand};
 use fedimint_core::config::FederationId;
-use fedimint_core::util::SafeUrl;
-use fedimint_core::BitcoinAmountOrAll;
+use fedimint_core::util::{parse_feerate, SafeUrl};
+use fedimint_core::{BitcoinAmountOrAll, Feerate};
 use fedimint_logging::TracingSetup;
 use ln_gateway::rpc::rpc_client::GatewayRpcClient;
 use ln_gateway::rpc::{
@@ -50,6 +50,9 @@ pub enum Commands {
         /// The address to send the funds to
         #[clap(long)]
         address: Address,
+        /// TODO: docs
+        #[clap(long, value_parser = parse_feerate)]
+        feerate: Option<Feerate>,
     },
     /// Register federation with the gateway
     ConnectFed {
@@ -123,12 +126,14 @@ async fn main() -> anyhow::Result<()> {
             federation_id,
             amount,
             address,
+            feerate,
         } => {
             let response = client()
                 .withdraw(WithdrawPayload {
                     federation_id,
                     amount,
                     address,
+                    feerate,
                 })
                 .await?;
 

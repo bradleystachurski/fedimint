@@ -439,6 +439,17 @@ impl Feerate {
     }
 }
 
+impl FromStr for Feerate {
+    type Err = ParseIntError;
+
+    // TODO: might need to get a bit fancier with units, similar to Amount
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(Feerate {
+            sats_per_kvb: s.parse()?,
+        })
+    }
+}
+
 const WITNESS_SCALE_FACTOR: u64 = bitcoin::blockdata::constants::WITNESS_SCALE_FACTOR as u64;
 
 /// Converts weight to virtual bytes, defined in [BIP-141] as weight / 4
