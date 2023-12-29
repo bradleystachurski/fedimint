@@ -6,7 +6,6 @@ use std::collections::BTreeMap;
 use std::io::Cursor;
 
 use bitcoin::{Address, Network, Txid};
-use bitcoin_hashes::hex::{FromHex, ToHex};
 use fedimint_core::config::{ClientConfig, FederationId, JsonClientConfig};
 use fedimint_core::task::TaskGroup;
 use fedimint_core::{Amount, BitcoinAmountOrAll};
@@ -14,6 +13,7 @@ use fedimint_ln_client::pay::PayInvoicePayload;
 use fedimint_ln_common::contracts::Preimage;
 use fedimint_ln_common::{route_hints, serde_option_routing_fees};
 use futures::Future;
+use hex::{FromHex, ToHex};
 use lightning_invoice::RoutingFees;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use tokio::sync::oneshot;
@@ -197,7 +197,7 @@ pub fn serde_hex_deserialize<'d, T: bitcoin::consensus::Decodable, D: Deserializ
 ) -> std::result::Result<T, D::Error> {
     if d.is_human_readable() {
         let hex_str: Cow<str> = Deserialize::deserialize(d)?;
-        let bytes = Vec::from_hex(&hex_str).map_err(serde::de::Error::custom)?;
+        let bytes = Vec::from_hex(hex_str.as_ref()).map_err(serde::de::Error::custom)?;
         T::consensus_decode(&mut Cursor::new(&bytes)).map_err(serde::de::Error::custom)
     } else {
         let bytes: Vec<u8> = Deserialize::deserialize(d)?;
@@ -213,7 +213,7 @@ pub fn serde_hex_serialize<T: bitcoin::consensus::Encodable, S: Serializer>(
     T::consensus_encode(t, &mut bytes).map_err(serde::ser::Error::custom)?;
 
     if s.is_human_readable() {
-        s.serialize_str(&bytes.to_hex())
+        s.serialize_str(&bytes.encode_hex::<String>())
     } else {
         s.serialize_bytes(&bytes)
     }

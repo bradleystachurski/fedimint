@@ -5,7 +5,6 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use anyhow::{anyhow, Context, Result};
-use bitcoincore_rpc::bitcoin::hashes::hex::ToHex;
 use bitcoincore_rpc::{bitcoin, RpcApi};
 use cln_rpc::ClnRpc;
 use fedimint_core::encoding::Encodable;
@@ -14,6 +13,7 @@ use fedimint_core::util::write_overwrite_async;
 use fedimint_logging::LOG_DEVIMINT;
 use fedimint_testing::gateway::LightningNodeType;
 use futures::executor::block_on;
+use hex::ToHex;
 use tokio::fs;
 use tokio::sync::{MappedMutexGuard, Mutex, MutexGuard};
 use tonic_lnd::lnrpc::policy_update_request::Scope;
@@ -165,13 +165,13 @@ impl Bitcoind {
 
     pub async fn get_txout_proof(&self, txid: &bitcoin::Txid) -> Result<String> {
         let proof = self.client().get_tx_out_proof(&[*txid], None)?;
-        Ok(proof.to_hex())
+        Ok(proof.encode_hex())
     }
 
     pub async fn get_raw_transaction(&self, txid: &bitcoin::Txid) -> Result<String> {
         let tx = self.client().get_raw_transaction(txid, None)?;
         let bytes = tx.consensus_encode_to_vec();
-        Ok(bytes.to_hex())
+        Ok(bytes.encode_hex())
     }
 
     pub async fn get_new_address(&self) -> Result<String> {

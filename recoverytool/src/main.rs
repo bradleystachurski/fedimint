@@ -5,7 +5,6 @@ use std::hash::Hasher;
 use std::path::{Path, PathBuf};
 
 use anyhow::anyhow;
-use bitcoin::hashes::hex::FromHex;
 use bitcoin::hashes::sha256::Hash;
 use bitcoin::network::constants::Network;
 use bitcoin::OutPoint;
@@ -38,6 +37,7 @@ use fedimint_wallet_server::common::{
 };
 use fedimint_wallet_server::{nonce_from_idx, Wallet};
 use futures::stream::StreamExt;
+use hex::FromHex;
 use miniscript::{Descriptor, MiniscriptKey, ToPublicKey, TranslatePk, Translator};
 use secp256k1::SecretKey;
 use serde::Serialize;
@@ -468,12 +468,12 @@ impl Translator<CompressedPublicKey, Key, ()> for SecretKeyInjector {
 
 #[test]
 fn parses_valid_length_tweaks() {
-    use bitcoin::hashes::hex::ToHex;
+    use hex::ToHex;
 
-    let bad_length_tweak_hex = rand::random::<[u8; 32]>().to_hex();
+    let bad_length_tweak_hex = rand::random::<[u8; 32]>().encode_hex::<String>();
     // rand::random only supports random byte arrays up to 32 bytes
     let good_length_tweak: [u8; 33] = core::array::from_fn(|_| rand::random::<u8>());
-    let good_length_tweak_hex = good_length_tweak.to_hex();
+    let good_length_tweak_hex = good_length_tweak.encode_hex::<String>();
     assert_eq!(
         tweak_parser(good_length_tweak_hex.as_str()).expect("should parse valid length hex"),
         good_length_tweak

@@ -25,7 +25,6 @@ async-trait = "0.1.73"
 base64 = "0.20.0"
 bip39 = { version = "2.0.0", features = ["rand"] }
 bitcoin = "0.29.2"
-bitcoin_hashes = "0.11.0"
 time = { version = "0.3.25", features = [ "formatting" ] }
 clap = { version = "4.1.6", features = ["derive", "std", "help", "usage", "error-context", "suggestions", "env" ], default-features = false }
 futures = "0.3.28"
@@ -44,6 +43,7 @@ fedimint-wallet-client = { version = "0.3.0-alpha", path = "../modules/fedimint-
 fedimint-logging = { version = "0.3.0-alpha", path = "../fedimint-logging" }
 fedimint-server = { version = "0.3.0-alpha", path = "../fedimint-server" }
 fs-lock = "0.1.0"
+hex = "0.4.3"
 rand = "0.8"
 serde = { version = "1.0.149", features = [ "derive" ] }
 thiserror = "1.0.39"

@@ -6,7 +6,6 @@ use std::time::{Duration, UNIX_EPOCH};
 use anyhow::{bail, Context};
 use bip39::Mnemonic;
 use bitcoin::{secp256k1, Network};
-use bitcoin_hashes::hex::ToHex;
 use clap::Subcommand;
 use fedimint_client::backup::Metadata;
 use fedimint_client::ClientArc;
@@ -25,6 +24,7 @@ use fedimint_mint_client::{
 };
 use fedimint_wallet_client::{WalletClientModule, WithdrawState};
 use futures::StreamExt;
+use hex::ToHex;
 use itertools::Itertools;
 use lightning_invoice::Bolt11Invoice;
 use serde::{Deserialize, Serialize};
@@ -554,7 +554,7 @@ pub async fn handle_command(
                 match update {
                     WithdrawState::Succeeded(txid) => {
                         return Ok(json!({
-                            "txid": txid.to_hex(),
+                            "txid": txid.encode_hex::<String>(),
                             "fees_sat": absolute_fees.to_sat(),
                         }));
                     }

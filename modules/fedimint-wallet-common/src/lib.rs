@@ -1,6 +1,5 @@
 use std::hash::Hasher;
 
-use bitcoin::hashes::hex::ToHex;
 use bitcoin::util::psbt::raw::ProprietaryKey;
 use bitcoin::util::psbt::PartiallySignedTransaction;
 use bitcoin::{Address, Amount, BlockHash, Network, Script, Transaction, Txid};
@@ -11,6 +10,7 @@ use fedimint_core::module::{CommonModuleInit, ModuleCommon, ModuleConsensusVersi
 use fedimint_core::{
     extensible_associated_module_type, plugin_types_trait_impl_common, Feerate, PeerId,
 };
+use hex::ToHex;
 use impl_tools::autoimpl;
 use miniscript::Descriptor;
 use serde::{Deserialize, Serialize};
@@ -108,7 +108,7 @@ impl Serialize for PendingTransaction {
         self.consensus_encode(&mut bytes).unwrap();
 
         if serializer.is_human_readable() {
-            serializer.serialize_str(&bytes.to_hex())
+            serializer.serialize_str(&bytes.encode_hex::<String>())
         } else {
             serializer.serialize_bytes(&bytes)
         }
@@ -138,7 +138,7 @@ impl Serialize for UnsignedTransaction {
         self.consensus_encode(&mut bytes).unwrap();
 
         if serializer.is_human_readable() {
-            serializer.serialize_str(&bytes.to_hex())
+            serializer.serialize_str(&bytes.encode_hex::<String>())
         } else {
             serializer.serialize_bytes(&bytes)
         }
