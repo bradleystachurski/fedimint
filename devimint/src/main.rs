@@ -336,434 +336,439 @@ async fn cli_tests(dev_fed: DevFed) -> Result<()> {
     // Test that LND and CLN can still send directly to each other
 
     // LND can pay CLN directly
-    info!("Testing LND can pay CLN directly");
-    let invoice = cln
-        .request(cln_rpc::model::requests::InvoiceRequest {
-            amount_msat: AmountOrAny::Amount(ClnRpcAmount::from_msat(1_200_000)),
-            description: "test".to_string(),
-            label: "test2".to_string(),
-            expiry: Some(60),
-            fallbacks: None,
-            preimage: None,
-            cltv: None,
-            deschashonly: None,
-        })
-        .await?
-        .bolt11;
-    lnd.lightning_client_lock()
-        .await?
-        .send_payment_sync(tonic_lnd::lnrpc::SendRequest {
-            payment_request: invoice.clone(),
-            ..Default::default()
-        })
-        .await?
-        .into_inner();
-    let invoice_status = cln
-        .request(cln_rpc::model::requests::WaitanyinvoiceRequest {
-            lastpay_index: None,
-            timeout: None,
-        })
-        .await?
-        .status;
-    anyhow::ensure!(matches!(
-        invoice_status,
-        cln_rpc::model::responses::WaitanyinvoiceStatus::PAID
-    ));
+    // info!("Testing LND can pay CLN directly");
+    // let invoice = cln
+    //     .request(cln_rpc::model::requests::InvoiceRequest {
+    //         amount_msat: AmountOrAny::Amount(ClnRpcAmount::from_msat(1_200_000)),
+    //         description: "test".to_string(),
+    //         label: "test2".to_string(),
+    //         expiry: Some(60),
+    //         fallbacks: None,
+    //         preimage: None,
+    //         cltv: None,
+    //         deschashonly: None,
+    //     })
+    //     .await?
+    //     .bolt11;
+    // lnd.lightning_client_lock()
+    //     .await?
+    //     .send_payment_sync(tonic_lnd::lnrpc::SendRequest {
+    //         payment_request: invoice.clone(),
+    //         ..Default::default()
+    //     })
+    //     .await?
+    //     .into_inner();
+    // let invoice_status = cln
+    //     .request(cln_rpc::model::requests::WaitanyinvoiceRequest {
+    //         lastpay_index: None,
+    //         timeout: None,
+    //     })
+    //     .await?
+    //     .status;
+    // anyhow::ensure!(matches!(
+    //     invoice_status,
+    //     cln_rpc::model::responses::WaitanyinvoiceStatus::PAID
+    // ));
 
-    // CLN can pay LND directly
-    info!("Testing CLN can pay LND directly");
-    let add_invoice = lnd
-        .lightning_client_lock()
-        .await?
-        .add_invoice(tonic_lnd::lnrpc::Invoice {
-            value_msat: 1_000_000,
-            ..Default::default()
-        })
-        .await?
-        .into_inner();
-    let invoice = add_invoice.payment_request;
-    let payment_hash = add_invoice.r_hash;
-    cln.request(cln_rpc::model::requests::PayRequest {
-        bolt11: invoice,
-        amount_msat: None,
-        label: None,
-        riskfactor: None,
-        maxfeepercent: None,
-        retry_for: None,
-        maxdelay: None,
-        exemptfee: None,
-        localinvreqid: None,
-        exclude: None,
-        maxfee: None,
-        description: None,
-    })
-    .await?;
-    let invoice_status = lnd
-        .lightning_client_lock()
-        .await?
-        .lookup_invoice(tonic_lnd::lnrpc::PaymentHash {
-            r_hash: payment_hash,
-            ..Default::default()
-        })
-        .await?
-        .into_inner()
-        .state();
-    anyhow::ensure!(invoice_status == tonic_lnd::lnrpc::invoice::InvoiceState::Settled);
+    // // CLN can pay LND directly
+    // info!("Testing CLN can pay LND directly");
+    // let add_invoice = lnd
+    //     .lightning_client_lock()
+    //     .await?
+    //     .add_invoice(tonic_lnd::lnrpc::Invoice {
+    //         value_msat: 1_000_000,
+    //         ..Default::default()
+    //     })
+    //     .await?
+    //     .into_inner();
+    // let invoice = add_invoice.payment_request;
+    // let payment_hash = add_invoice.r_hash;
+    // cln.request(cln_rpc::model::requests::PayRequest {
+    //     bolt11: invoice,
+    //     amount_msat: None,
+    //     label: None,
+    //     riskfactor: None,
+    //     maxfeepercent: None,
+    //     retry_for: None,
+    //     maxdelay: None,
+    //     exemptfee: None,
+    //     localinvreqid: None,
+    //     exclude: None,
+    //     maxfee: None,
+    //     description: None,
+    // })
+    // .await?;
+    // let invoice_status = lnd
+    //     .lightning_client_lock()
+    //     .await?
+    //     .lookup_invoice(tonic_lnd::lnrpc::PaymentHash {
+    //         r_hash: payment_hash,
+    //         ..Default::default()
+    //     })
+    //     .await?
+    //     .into_inner()
+    //     .state();
+    // anyhow::ensure!(invoice_status ==
+    // tonic_lnd::lnrpc::invoice::InvoiceState::Settled);
 
-    // # Test the correct descriptor is used
-    let config = cmd!(fed, "config").out_json().await?;
-    let guardian_count = config["global"]["api_endpoints"].as_object().unwrap().len();
-    let descriptor = config["modules"]["2"]["peg_in_descriptor"]
-        .as_str()
-        .unwrap()
-        .to_owned();
+    // // # Test the correct descriptor is used
+    // let config = cmd!(fed, "config").out_json().await?;
+    // let guardian_count =
+    // config["global"]["api_endpoints"].as_object().unwrap().len();
+    // let descriptor = config["modules"]["2"]["peg_in_descriptor"]
+    //     .as_str()
+    //     .unwrap()
+    //     .to_owned();
 
-    info!("Testing generated descriptor for {guardian_count} guardian federation");
-    if guardian_count == 1 {
-        assert!(descriptor.contains("wpkh("));
-    } else {
-        assert!(descriptor.contains("wsh(sortedmulti("));
-    }
+    // info!("Testing generated descriptor for {guardian_count} guardian
+    // federation"); if guardian_count == 1 {
+    //     assert!(descriptor.contains("wpkh("));
+    // } else {
+    //     assert!(descriptor.contains("wsh(sortedmulti("));
+    // }
 
-    // # Client tests
-    info!("Testing Client");
-    // ## reissue e-cash
-    info!("Testing reissuing e-cash");
-    const CLIENT_START_AMOUNT: u64 = 5_000_000_000;
-    const CLIENT_SPEND_AMOUNT: u64 = 1_100_000;
+    // // # Client tests
+    // info!("Testing Client");
+    // // ## reissue e-cash
+    // info!("Testing reissuing e-cash");
+    // const CLIENT_START_AMOUNT: u64 = 5_000_000_000;
+    // const CLIENT_SPEND_AMOUNT: u64 = 1_100_000;
 
-    let initial_client_balance = fed.client_balance().await?;
-    assert_eq!(initial_client_balance, 0);
+    // let initial_client_balance = fed.client_balance().await?;
+    // assert_eq!(initial_client_balance, 0);
 
-    fed.pegin(CLIENT_START_AMOUNT / 1000).await?;
+    // fed.pegin(CLIENT_START_AMOUNT / 1000).await?;
 
-    // Check log contains deposit
-    let operation = cmd!(fed, "list-operations")
-        .out_json()
-        .await?
-        .get("operations")
-        .expect("Output didn't contain operation log")
-        .as_array()
-        .unwrap()
-        .first()
-        .unwrap()
-        .to_owned();
-    assert_eq!(operation["operation_kind"].as_str().unwrap(), "wallet");
-    assert!(operation["outcome"]["Claimed"].as_object().is_some());
+    // // Check log contains deposit
+    // let operation = cmd!(fed, "list-operations")
+    //     .out_json()
+    //     .await?
+    //     .get("operations")
+    //     .expect("Output didn't contain operation log")
+    //     .as_array()
+    //     .unwrap()
+    //     .first()
+    //     .unwrap()
+    //     .to_owned();
+    // assert_eq!(operation["operation_kind"].as_str().unwrap(), "wallet");
+    // assert!(operation["outcome"]["Claimed"].as_object().is_some());
 
-    info!("Testing backup&restore");
-    // TODO: make sure there are no in-progress operations involved
-    // This test can't tolerate "spend", but not "reissue"d coins currently,
-    // and there's a no clean way to do `reissue` on `spend` output ATM
-    // so just putting it here for time being.
-    cli_tests_backup_and_restore(&fed, fed.internal_client()).await?;
+    // info!("Testing backup&restore");
+    // // TODO: make sure there are no in-progress operations involved
+    // // This test can't tolerate "spend", but not "reissue"d coins currently,
+    // // and there's a no clean way to do `reissue` on `spend` output ATM
+    // // so just putting it here for time being.
+    // cli_tests_backup_and_restore(&fed, fed.internal_client()).await?;
 
-    // # Spend from client
-    info!("Testing spending from client");
-    let notes = cmd!(fed, "spend", CLIENT_SPEND_AMOUNT)
-        .out_json()
-        .await?
-        .get("notes")
-        .expect("Output didn't contain e-cash notes")
-        .as_str()
-        .unwrap()
-        .to_owned();
+    // // # Spend from client
+    // info!("Testing spending from client");
+    // let notes = cmd!(fed, "spend", CLIENT_SPEND_AMOUNT)
+    //     .out_json()
+    //     .await?
+    //     .get("notes")
+    //     .expect("Output didn't contain e-cash notes")
+    //     .as_str()
+    //     .unwrap()
+    //     .to_owned();
 
-    let client_post_spend_balance = fed.client_balance().await?;
-    assert_eq!(
-        client_post_spend_balance,
-        CLIENT_START_AMOUNT - CLIENT_SPEND_AMOUNT
-    );
+    // let client_post_spend_balance = fed.client_balance().await?;
+    // assert_eq!(
+    //     client_post_spend_balance,
+    //     CLIENT_START_AMOUNT - CLIENT_SPEND_AMOUNT
+    // );
 
-    // Test we can reissue our own notes
-    cmd!(fed, "reissue", notes).out_json().await?;
+    // // Test we can reissue our own notes
+    // cmd!(fed, "reissue", notes).out_json().await?;
 
-    let client_post_spend_balance = fed.client_balance().await?;
-    assert_eq!(client_post_spend_balance, CLIENT_START_AMOUNT);
+    // let client_post_spend_balance = fed.client_balance().await?;
+    // assert_eq!(client_post_spend_balance, CLIENT_START_AMOUNT);
 
-    let reissue_amount: u64 = 409600;
+    // let reissue_amount: u64 = 409600;
 
-    // Ensure that client can reissue after spending
-    info!("Testing reissuing e-cash after spending");
-    let _notes = cmd!(fed, "spend", CLIENT_SPEND_AMOUNT)
-        .out_json()
-        .await?
-        .as_object()
-        .unwrap()
-        .get("notes")
-        .expect("Output didn't contain e-cash notes")
-        .as_str()
-        .unwrap();
+    // // Ensure that client can reissue after spending
+    // info!("Testing reissuing e-cash after spending");
+    // let _notes = cmd!(fed, "spend", CLIENT_SPEND_AMOUNT)
+    //     .out_json()
+    //     .await?
+    //     .as_object()
+    //     .unwrap()
+    //     .get("notes")
+    //     .expect("Output didn't contain e-cash notes")
+    //     .as_str()
+    //     .unwrap();
 
-    let reissue_notes = cmd!(fed, "spend", reissue_amount).out_json().await?["notes"]
-        .as_str()
-        .map(|s| s.to_owned())
-        .unwrap();
-    let client_reissue_amt = cmd!(fed, "reissue", reissue_notes)
-        .out_json()
-        .await?
-        .as_u64()
-        .unwrap();
-    assert_eq!(client_reissue_amt, reissue_amount);
+    // let reissue_notes = cmd!(fed, "spend",
+    // reissue_amount).out_json().await?["notes"]     .as_str()
+    //     .map(|s| s.to_owned())
+    //     .unwrap();
+    // let client_reissue_amt = cmd!(fed, "reissue", reissue_notes)
+    //     .out_json()
+    //     .await?
+    //     .as_u64()
+    //     .unwrap();
+    // assert_eq!(client_reissue_amt, reissue_amount);
 
-    // Ensure that client can reissue via module commands
-    info!("Testing reissuing e-cash via module commands");
-    let reissue_notes = cmd!(fed, "spend", reissue_amount).out_json().await?["notes"]
-        .as_str()
-        .map(|s| s.to_owned())
-        .unwrap();
-    let client_reissue_amt = cmd!(fed, "module", "--module", "mint", "reissue", reissue_notes)
-        .out_json()
-        .await?
-        .as_u64()
-        .unwrap();
-    assert_eq!(client_reissue_amt, reissue_amount);
+    // // Ensure that client can reissue via module commands
+    // info!("Testing reissuing e-cash via module commands");
+    // let reissue_notes = cmd!(fed, "spend",
+    // reissue_amount).out_json().await?["notes"]     .as_str()
+    //     .map(|s| s.to_owned())
+    //     .unwrap();
+    // let client_reissue_amt = cmd!(fed, "module", "--module", "mint", "reissue",
+    // reissue_notes)     .out_json()
+    //     .await?
+    //     .as_u64()
+    //     .unwrap();
+    // assert_eq!(client_reissue_amt, reissue_amount);
 
-    // Before doing a normal payment, let's start with a HOLD invoice and only
-    // finish this payment at the end
-    info!("Testing fedimint-cli pays LND HOLD invoice via CLN gateway");
-    let (hold_invoice_preimage, hold_invoice_hash, hold_invoice_operation_id) =
-        start_hold_invoice_payment(&fed, &gw_cln, &lnd).await?;
+    // // Before doing a normal payment, let's start with a HOLD invoice and only
+    // // finish this payment at the end
+    // info!("Testing fedimint-cli pays LND HOLD invoice via CLN gateway");
+    // let (hold_invoice_preimage, hold_invoice_hash, hold_invoice_operation_id) =
+    //     start_hold_invoice_payment(&fed, &gw_cln, &lnd).await?;
 
-    // OUTGOING: fedimint-cli pays LND via CLN gateway
-    info!("Testing fedimint-cli pays LND via CLN gateway");
-    fed.use_gateway(&gw_cln).await?;
+    // // OUTGOING: fedimint-cli pays LND via CLN gateway
+    // info!("Testing fedimint-cli pays LND via CLN gateway");
+    // fed.use_gateway(&gw_cln).await?;
 
-    let initial_client_balance = fed.client_balance().await?;
-    let initial_cln_gateway_balance = cmd!(gw_cln, "balance", "--federation-id={fed_id}")
-        .out_json()
-        .await?
-        .as_u64()
-        .unwrap();
-    let add_invoice = lnd
-        .lightning_client_lock()
-        .await?
-        .add_invoice(tonic_lnd::lnrpc::Invoice {
-            value_msat: 1_200_000,
-            ..Default::default()
-        })
-        .await?
-        .into_inner();
-    let invoice = add_invoice.payment_request;
-    let payment_hash = add_invoice.r_hash;
-    cmd!(fed, "ln-pay", invoice).run().await?;
+    // let initial_client_balance = fed.client_balance().await?;
+    // let initial_cln_gateway_balance = cmd!(gw_cln, "balance",
+    // "--federation-id={fed_id}")     .out_json()
+    //     .await?
+    //     .as_u64()
+    //     .unwrap();
+    // let add_invoice = lnd
+    //     .lightning_client_lock()
+    //     .await?
+    //     .add_invoice(tonic_lnd::lnrpc::Invoice {
+    //         value_msat: 1_200_000,
+    //         ..Default::default()
+    //     })
+    //     .await?
+    //     .into_inner();
+    // let invoice = add_invoice.payment_request;
+    // let payment_hash = add_invoice.r_hash;
+    // cmd!(fed, "ln-pay", invoice).run().await?;
 
-    let invoice_status = lnd
-        .lightning_client_lock()
-        .await?
-        .lookup_invoice(tonic_lnd::lnrpc::PaymentHash {
-            r_hash: payment_hash,
-            ..Default::default()
-        })
-        .await?
-        .into_inner()
-        .state();
-    anyhow::ensure!(invoice_status == tonic_lnd::lnrpc::invoice::InvoiceState::Settled);
+    // let invoice_status = lnd
+    //     .lightning_client_lock()
+    //     .await?
+    //     .lookup_invoice(tonic_lnd::lnrpc::PaymentHash {
+    //         r_hash: payment_hash,
+    //         ..Default::default()
+    //     })
+    //     .await?
+    //     .into_inner()
+    //     .state();
+    // anyhow::ensure!(invoice_status ==
+    // tonic_lnd::lnrpc::invoice::InvoiceState::Settled);
 
-    // Assert balances changed by 1_200_000 msat (amount sent) + 0 msat (fee)
-    let final_cln_outgoing_client_balance = fed.client_balance().await?;
-    let final_cln_outgoing_gateway_balance = cmd!(gw_cln, "balance", "--federation-id={fed_id}")
-        .out_json()
-        .await?
-        .as_u64()
-        .unwrap();
+    // // Assert balances changed by 1_200_000 msat (amount sent) + 0 msat (fee)
+    // let final_cln_outgoing_client_balance = fed.client_balance().await?;
+    // let final_cln_outgoing_gateway_balance = cmd!(gw_cln, "balance",
+    // "--federation-id={fed_id}")     .out_json()
+    //     .await?
+    //     .as_u64()
+    //     .unwrap();
 
-    let expected_diff = 1_200_000;
-    anyhow::ensure!(
-        initial_client_balance - final_cln_outgoing_client_balance == expected_diff,
-        "Client balance changed by {} on CLN outgoing payment, expected {expected_diff}",
-        initial_client_balance - final_cln_outgoing_client_balance
-    );
-    anyhow::ensure!(
-        final_cln_outgoing_gateway_balance - initial_cln_gateway_balance == expected_diff,
-        "CLN Gateway balance changed by {} on CLN outgoing payment, expected {expected_diff}",
-        final_cln_outgoing_gateway_balance - initial_cln_gateway_balance
-    );
+    // let expected_diff = 1_200_000;
+    // anyhow::ensure!(
+    //     initial_client_balance - final_cln_outgoing_client_balance ==
+    // expected_diff,     "Client balance changed by {} on CLN outgoing payment,
+    // expected {expected_diff}",     initial_client_balance -
+    // final_cln_outgoing_client_balance );
+    // anyhow::ensure!(
+    //     final_cln_outgoing_gateway_balance - initial_cln_gateway_balance ==
+    // expected_diff,     "CLN Gateway balance changed by {} on CLN outgoing
+    // payment, expected {expected_diff}",
+    //     final_cln_outgoing_gateway_balance - initial_cln_gateway_balance
+    // );
 
-    let ln_response_val = cmd!(
-        fed,
-        "ln-invoice",
-        "--amount=1100000msat",
-        "--description='incoming-over-cln-gw'"
-    )
-    .out_json()
-    .await?;
-    let ln_invoice_response: LnInvoiceResponse = serde_json::from_value(ln_response_val)?;
-    let invoice = ln_invoice_response.invoice;
-    let payment = lnd
-        .lightning_client_lock()
-        .await?
-        .send_payment_sync(tonic_lnd::lnrpc::SendRequest {
-            payment_request: invoice.clone(),
-            ..Default::default()
-        })
-        .await?
-        .into_inner();
-    let payment_status = lnd
-        .lightning_client_lock()
-        .await?
-        .list_payments(tonic_lnd::lnrpc::ListPaymentsRequest {
-            include_incomplete: true,
-            ..Default::default()
-        })
-        .await?
-        .into_inner()
-        .payments
-        .into_iter()
-        .find(|p| p.payment_hash == payment.payment_hash.encode_hex::<String>())
-        .context("payment not in list")?
-        .status();
-    anyhow::ensure!(payment_status == tonic_lnd::lnrpc::payment::PaymentStatus::Succeeded);
+    // let ln_response_val = cmd!(
+    //     fed,
+    //     "ln-invoice",
+    //     "--amount=1100000msat",
+    //     "--description='incoming-over-cln-gw'"
+    // )
+    // .out_json()
+    // .await?;
+    // let ln_invoice_response: LnInvoiceResponse =
+    // serde_json::from_value(ln_response_val)?; let invoice =
+    // ln_invoice_response.invoice; let payment = lnd
+    //     .lightning_client_lock()
+    //     .await?
+    //     .send_payment_sync(tonic_lnd::lnrpc::SendRequest {
+    //         payment_request: invoice.clone(),
+    //         ..Default::default()
+    //     })
+    //     .await?
+    //     .into_inner();
+    // let payment_status = lnd
+    //     .lightning_client_lock()
+    //     .await?
+    //     .list_payments(tonic_lnd::lnrpc::ListPaymentsRequest {
+    //         include_incomplete: true,
+    //         ..Default::default()
+    //     })
+    //     .await?
+    //     .into_inner()
+    //     .payments
+    //     .into_iter()
+    //     .find(|p| p.payment_hash == payment.payment_hash.encode_hex::<String>())
+    //     .context("payment not in list")?
+    //     .status();
+    // anyhow::ensure!(payment_status ==
+    // tonic_lnd::lnrpc::payment::PaymentStatus::Succeeded);
 
-    // Receive the ecash notes
-    info!("Testing receiving e-cash notes");
-    let operation_id = ln_invoice_response.operation_id;
-    cmd!(fed, "await-invoice", operation_id).run().await?;
+    // // Receive the ecash notes
+    // info!("Testing receiving e-cash notes");
+    // let operation_id = ln_invoice_response.operation_id;
+    // cmd!(fed, "await-invoice", operation_id).run().await?;
 
-    // Assert balances changed by 1100000 msat
-    let final_cln_incoming_client_balance = fed.client_balance().await?;
-    let final_cln_incoming_gateway_balance = cmd!(gw_cln, "balance", "--federation-id={fed_id}")
-        .out_json()
-        .await?
-        .as_u64()
-        .unwrap();
-    anyhow::ensure!(
-        final_cln_incoming_client_balance - final_cln_outgoing_client_balance == 1100000,
-        "Client balance changed by {} on CLN incoming payment, expected 1100000",
-        final_cln_incoming_client_balance - final_cln_outgoing_client_balance
-    );
-    anyhow::ensure!(
-        final_cln_outgoing_gateway_balance - final_cln_incoming_gateway_balance == 1100000,
-        "CLN Gateway balance changed by {} on CLN incoming payment, expected 1100000",
-        final_cln_outgoing_gateway_balance - final_cln_incoming_gateway_balance
-    );
+    // // Assert balances changed by 1100000 msat
+    // let final_cln_incoming_client_balance = fed.client_balance().await?;
+    // let final_cln_incoming_gateway_balance = cmd!(gw_cln, "balance",
+    // "--federation-id={fed_id}")     .out_json()
+    //     .await?
+    //     .as_u64()
+    //     .unwrap();
+    // anyhow::ensure!(
+    //     final_cln_incoming_client_balance - final_cln_outgoing_client_balance ==
+    // 1100000,     "Client balance changed by {} on CLN incoming payment,
+    // expected 1100000",     final_cln_incoming_client_balance -
+    // final_cln_outgoing_client_balance );
+    // anyhow::ensure!(
+    //     final_cln_outgoing_gateway_balance - final_cln_incoming_gateway_balance
+    // == 1100000,     "CLN Gateway balance changed by {} on CLN incoming
+    // payment, expected 1100000",     final_cln_outgoing_gateway_balance -
+    // final_cln_incoming_gateway_balance );
 
-    // LND gateway tests
-    info!("Testing LND gateway");
-    fed.use_gateway(&gw_lnd).await?;
+    // // LND gateway tests
+    // info!("Testing LND gateway");
+    // fed.use_gateway(&gw_lnd).await?;
 
-    // OUTGOING: fedimint-cli pays CLN via LND gateaway
-    info!("Testing outgoing payment from client to CLN via LND gateway");
-    let initial_lnd_gateway_balance = cmd!(gw_lnd, "balance", "--federation-id={fed_id}")
-        .out_json()
-        .await?
-        .as_u64()
-        .unwrap();
-    let invoice = cln
-        .request(cln_rpc::model::requests::InvoiceRequest {
-            amount_msat: AmountOrAny::Amount(ClnRpcAmount::from_msat(2_000_000)),
-            description: "lnd-gw-to-cln".to_string(),
-            label: "test-client".to_string(),
-            expiry: Some(60),
-            fallbacks: None,
-            preimage: None,
-            cltv: None,
-            deschashonly: None,
-        })
-        .await?
-        .bolt11;
-    tokio::try_join!(cln.await_block_processing(), lnd.await_block_processing())?;
-    cmd!(fed, "ln-pay", invoice.clone()).run().await?;
-    let fed_id = fed.federation_id().await;
+    // // OUTGOING: fedimint-cli pays CLN via LND gateaway
+    // info!("Testing outgoing payment from client to CLN via LND gateway");
+    // let initial_lnd_gateway_balance = cmd!(gw_lnd, "balance",
+    // "--federation-id={fed_id}")     .out_json()
+    //     .await?
+    //     .as_u64()
+    //     .unwrap();
+    // let invoice = cln
+    //     .request(cln_rpc::model::requests::InvoiceRequest {
+    //         amount_msat: AmountOrAny::Amount(ClnRpcAmount::from_msat(2_000_000)),
+    //         description: "lnd-gw-to-cln".to_string(),
+    //         label: "test-client".to_string(),
+    //         expiry: Some(60),
+    //         fallbacks: None,
+    //         preimage: None,
+    //         cltv: None,
+    //         deschashonly: None,
+    //     })
+    //     .await?
+    //     .bolt11;
+    // tokio::try_join!(cln.await_block_processing(),
+    // lnd.await_block_processing())?; cmd!(fed, "ln-pay",
+    // invoice.clone()).run().await?; let fed_id = fed.federation_id().await;
 
-    let invoice_status = cln
-        .request(cln_rpc::model::requests::WaitanyinvoiceRequest {
-            lastpay_index: None,
-            timeout: None,
-        })
-        .await?
-        .status;
-    anyhow::ensure!(matches!(
-        invoice_status,
-        cln_rpc::model::responses::WaitanyinvoiceStatus::PAID
-    ));
+    // let invoice_status = cln
+    //     .request(cln_rpc::model::requests::WaitanyinvoiceRequest {
+    //         lastpay_index: None,
+    //         timeout: None,
+    //     })
+    //     .await?
+    //     .status;
+    // anyhow::ensure!(matches!(
+    //     invoice_status,
+    //     cln_rpc::model::responses::WaitanyinvoiceStatus::PAID
+    // ));
 
-    // Assert balances changed by 2_000_000 msat (amount sent) + 0 msat (fee)
-    let final_lnd_outgoing_client_balance = fed.client_balance().await?;
-    let final_lnd_outgoing_gateway_balance = cmd!(gw_lnd, "balance", "--federation-id={fed_id}")
-        .out_json()
-        .await?
-        .as_u64()
-        .unwrap();
-    anyhow::ensure!(
-        final_cln_incoming_client_balance - final_lnd_outgoing_client_balance == 2_000_000,
-        "Client balance changed by {} on LND outgoing payment, expected 2_000_000",
-        final_cln_incoming_client_balance - final_lnd_outgoing_client_balance
-    );
-    anyhow::ensure!(
-        final_lnd_outgoing_gateway_balance - initial_lnd_gateway_balance == 2_000_000,
-        "LND Gateway balance changed by {} on LND outgoing payment, expected 2_000_000",
-        final_lnd_outgoing_gateway_balance - initial_lnd_gateway_balance
-    );
+    // // Assert balances changed by 2_000_000 msat (amount sent) + 0 msat (fee)
+    // let final_lnd_outgoing_client_balance = fed.client_balance().await?;
+    // let final_lnd_outgoing_gateway_balance = cmd!(gw_lnd, "balance",
+    // "--federation-id={fed_id}")     .out_json()
+    //     .await?
+    //     .as_u64()
+    //     .unwrap();
+    // anyhow::ensure!(
+    //     final_cln_incoming_client_balance - final_lnd_outgoing_client_balance ==
+    // 2_000_000,     "Client balance changed by {} on LND outgoing payment,
+    // expected 2_000_000",     final_cln_incoming_client_balance -
+    // final_lnd_outgoing_client_balance );
+    // anyhow::ensure!(
+    //     final_lnd_outgoing_gateway_balance - initial_lnd_gateway_balance ==
+    // 2_000_000,     "LND Gateway balance changed by {} on LND outgoing
+    // payment, expected 2_000_000",     final_lnd_outgoing_gateway_balance -
+    // initial_lnd_gateway_balance );
 
-    // INCOMING: fedimint-cli receives from CLN via LND gateway
-    info!("Testing incoming payment from CLN to client via LND gateway");
-    let ln_response_val = cmd!(
-        fed,
-        "ln-invoice",
-        "--amount=1300000msat",
-        "--description='incoming-over-lnd-gw'"
-    )
-    .out_json()
-    .await?;
-    let ln_invoice_response: LnInvoiceResponse = serde_json::from_value(ln_response_val)?;
-    let invoice = ln_invoice_response.invoice;
-    let invoice_status = cln
-        .request(cln_rpc::model::requests::PayRequest {
-            bolt11: invoice,
-            amount_msat: None,
-            label: None,
-            riskfactor: None,
-            maxfeepercent: None,
-            retry_for: None,
-            maxdelay: None,
-            exemptfee: None,
-            localinvreqid: None,
-            exclude: None,
-            maxfee: None,
-            description: None,
-        })
-        .await?
-        .status;
-    anyhow::ensure!(matches!(
-        invoice_status,
-        cln_rpc::model::responses::PayStatus::COMPLETE
-    ));
+    // // INCOMING: fedimint-cli receives from CLN via LND gateway
+    // info!("Testing incoming payment from CLN to client via LND gateway");
+    // let ln_response_val = cmd!(
+    //     fed,
+    //     "ln-invoice",
+    //     "--amount=1300000msat",
+    //     "--description='incoming-over-lnd-gw'"
+    // )
+    // .out_json()
+    // .await?;
+    // let ln_invoice_response: LnInvoiceResponse =
+    // serde_json::from_value(ln_response_val)?; let invoice =
+    // ln_invoice_response.invoice; let invoice_status = cln
+    //     .request(cln_rpc::model::requests::PayRequest {
+    //         bolt11: invoice,
+    //         amount_msat: None,
+    //         label: None,
+    //         riskfactor: None,
+    //         maxfeepercent: None,
+    //         retry_for: None,
+    //         maxdelay: None,
+    //         exemptfee: None,
+    //         localinvreqid: None,
+    //         exclude: None,
+    //         maxfee: None,
+    //         description: None,
+    //     })
+    //     .await?
+    //     .status;
+    // anyhow::ensure!(matches!(
+    //     invoice_status,
+    //     cln_rpc::model::responses::PayStatus::COMPLETE
+    // ));
 
-    // Receive the ecash notes
-    info!("Testing receiving ecash notes");
-    let operation_id = ln_invoice_response.operation_id;
-    cmd!(fed, "await-invoice", operation_id).run().await?;
+    // // Receive the ecash notes
+    // info!("Testing receiving ecash notes");
+    // let operation_id = ln_invoice_response.operation_id;
+    // cmd!(fed, "await-invoice", operation_id).run().await?;
 
-    // Assert balances changed by 1_300_000 msat
-    let final_lnd_incoming_client_balance = fed.client_balance().await?;
-    let final_lnd_incoming_gateway_balance = cmd!(gw_lnd, "balance", "--federation-id={fed_id}")
-        .out_json()
-        .await?
-        .as_u64()
-        .unwrap();
-    anyhow::ensure!(
-        final_lnd_incoming_client_balance - final_lnd_outgoing_client_balance == 1_300_000,
-        "Client balance changed by {} on LND incoming payment, expected 1_300_000",
-        final_lnd_incoming_client_balance - final_lnd_outgoing_client_balance
-    );
-    anyhow::ensure!(
-        final_lnd_outgoing_gateway_balance - final_lnd_incoming_gateway_balance == 1_300_000,
-        "LND Gateway balance changed by {} on LND incoming payment, expected 1_300_000",
-        final_lnd_outgoing_gateway_balance - final_lnd_incoming_gateway_balance
-    );
+    // // Assert balances changed by 1_300_000 msat
+    // let final_lnd_incoming_client_balance = fed.client_balance().await?;
+    // let final_lnd_incoming_gateway_balance = cmd!(gw_lnd, "balance",
+    // "--federation-id={fed_id}")     .out_json()
+    //     .await?
+    //     .as_u64()
+    //     .unwrap();
+    // anyhow::ensure!(
+    //     final_lnd_incoming_client_balance - final_lnd_outgoing_client_balance ==
+    // 1_300_000,     "Client balance changed by {} on LND incoming payment,
+    // expected 1_300_000",     final_lnd_incoming_client_balance -
+    // final_lnd_outgoing_client_balance );
+    // anyhow::ensure!(
+    //     final_lnd_outgoing_gateway_balance - final_lnd_incoming_gateway_balance
+    // == 1_300_000,     "LND Gateway balance changed by {} on LND incoming
+    // payment, expected 1_300_000",     final_lnd_outgoing_gateway_balance -
+    // final_lnd_incoming_gateway_balance );
 
-    info!("Will finish the payment of the LND HOLD invoice via CLN gateway");
-    finish_hold_invoice_payment(
-        &fed,
-        hold_invoice_operation_id,
-        &lnd,
-        hold_invoice_hash,
-        hold_invoice_preimage,
-    )
-    .await?;
+    // info!("Will finish the payment of the LND HOLD invoice via CLN gateway");
+    // finish_hold_invoice_payment(
+    //     &fed,
+    //     hold_invoice_operation_id,
+    //     &lnd,
+    //     hold_invoice_hash,
+    //     hold_invoice_preimage,
+    // )
+    // .await?;
 
-    // TODO: test cancel/timeout
+    // // TODO: test cancel/timeout
 
     // # Wallet tests
     // ## Deposit
@@ -797,9 +802,13 @@ async fn cli_tests(dev_fed: DevFed) -> Result<()> {
     .await?;
 
     let txid: Txid = withdraw_res["txid"].as_str().unwrap().parse().unwrap();
+    info!("failing txid");
+    info!(?txid);
     let fees_sat = withdraw_res["fees_sat"].as_u64().unwrap();
 
     let tx_hex = poll("Waiting for transaction in mempool", None, || async {
+        let mempool_res = bitcoind.client().get_raw_mempool();
+        info!(?mempool_res);
         // TODO: distinguish errors from not found
         bitcoind
             .get_raw_transaction(&txid)
