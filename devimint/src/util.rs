@@ -6,10 +6,11 @@ use std::sync::Arc;
 use std::time::Duration;
 use std::{env, unreachable};
 
-use anyhow::{bail, format_err, Context, Result};
+use anyhow::{anyhow, bail, format_err, Context, Result};
 use fedimint_core::task::{self, block_in_place};
 use fedimint_logging::LOG_DEVIMINT;
 use futures::executor::block_on;
+use regex::Regex;
 use serde::de::DeserializeOwned;
 use tokio::fs::OpenOptions;
 use tokio::process::Child;
@@ -696,4 +697,99 @@ fn to_command(cli: Vec<String>) -> Command {
         cmd,
         args_debug: cli,
     }
+}
+
+/// Representation of a cargo package version
+#[derive(Debug, PartialEq)]
+struct CrateVersion {
+    major: u32,
+    minor: u32,
+    patch: u32,
+}
+
+/// Parses a crate version string returned from clap
+/// format: <package name> <version>
+/// ex: fedimintd 0.3.0-alpha
+fn parse_crate_version(version: &str) -> Result<CrateVersion> {
+    // from semver.org's recommended regex
+    // https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
+    let semver_pattern =
+        Regex::new(r"(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)")?;
+
+    let captured = semver_pattern
+        .captures(version)
+        .ok_or(anyhow!("Not a valid version string"))?;
+
+    Ok(CrateVersion {
+        major: captured["major"].parse()?,
+        minor: captured["minor"].parse()?,
+        patch: captured["patch"].parse()?,
+    })
+}
+
+/// Returns true if the provided version string is greater than or equal to the
+/// min version provided. If there's an error parsing the version, returns
+/// false.
+pub fn is_min_version(
+    min_major: u32,
+    min_minor: u32,
+    min_patch: u32,
+    version_res: Result<String, anyhow::Error>,
+) -> bool {
+    version_res.is_ok_and(|version| {
+        parse_crate_version(&version)
+            .is_ok_and(|v| v.major >= min_major && v.minor >= min_minor && v.patch >= min_patch)
+    })
+}
+
+#[test]
+fn test_parse_crate_versions() -> Result<()> {
+    let version_str = "fedimintd 0.3.0-alpha";
+    let expected_version = CrateVersion {
+        major: 0,
+        minor: 3,
+        patch: 0,
+    };
+    assert_eq!(expected_version, parse_crate_version(&version_str)?);
+
+    let version_str = "fedimintd 0.3.12";
+    let expected_version = CrateVersion {
+        major: 0,
+        minor: 3,
+        patch: 12,
+    };
+    assert_eq!(expected_version, parse_crate_version(&version_str)?);
+
+    let version_str = "fedimint-cli 2.12.2-rc22";
+    let expected_version = CrateVersion {
+        major: 2,
+        minor: 12,
+        patch: 2,
+    };
+    assert_eq!(expected_version, parse_crate_version(&version_str)?);
+
+    Ok(())
+}
+
+#[test]
+fn test_is_min_version() -> Result<()> {
+    let version_res = Ok("fedimintd 0.3.0-alpha".to_string());
+    assert!(is_min_version(0, 3, 0, version_res));
+
+    let version_res = Ok("fedimintd 0.3.1".to_string());
+    assert!(is_min_version(0, 3, 0, version_res));
+
+    let version_res = Ok("fedimintd 0.2.2-rc2".to_string());
+    assert!(is_min_version(0, 2, 2, version_res));
+
+    let version_res = Ok("fedimintd 0.2.2-rc2".to_string());
+    assert!(!is_min_version(0, 2, 3, version_res));
+
+    let version_res = Err(anyhow!(""));
+    assert!(!is_min_version(0, 2, 3, version_res));
+
+    let version_res = Ok("bad version".to_string());
+    assert!(!is_min_version(0, 2, 3, version_res));
+
+    Ok(())
 }
