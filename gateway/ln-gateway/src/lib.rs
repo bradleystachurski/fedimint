@@ -814,7 +814,7 @@ impl Gateway {
     async fn handle_connect_federation(
         &mut self,
         payload: ConnectFedPayload,
-    ) -> Result<FederationConnectionInfo> {
+    ) -> Result<FederationInfo> {
         if let GatewayState::Running {
             lnrpc,
             lightning_public_key,
@@ -871,12 +871,9 @@ impl Gateway {
                 )
                 .await?;
 
-            let federation_config = FederationConnectionInfo {
-                federation_id,
-                config: client.get_config().clone(),
-            };
+            let federation_info = self.make_federation_info(&client, federation_id).await;
 
-            self.check_federation_network(&federation_config, gateway_config.network)
+            self.check_federation_network(&federation_info, gateway_config.network)
                 .await?;
 
             client
@@ -899,7 +896,7 @@ impl Gateway {
                 .save_config(gw_client_cfg.clone(), dbtx)
                 .await?;
 
-            return Ok(federation_config);
+            return Ok(federation_info);
         }
 
         Err(GatewayError::Disconnected)
@@ -1250,16 +1247,18 @@ impl Gateway {
         federation_id: FederationId,
     ) -> FederationInfo {
         let balance_msat = client.get_balance().await;
+        let config = client.get_config().clone();
 
         FederationInfo {
             federation_id,
             balance_msat,
+            config,
         }
     }
 
     async fn check_federation_network(
         &self,
-        info: &FederationConnectionInfo,
+        info: &FederationInfo,
         network: Network,
     ) -> Result<()> {
         let cfg = info

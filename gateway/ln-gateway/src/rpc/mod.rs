@@ -76,6 +76,7 @@ pub struct FederationConnectionInfo {
 pub struct FederationInfo {
     pub federation_id: FederationId,
     pub balance_msat: Amount,
+    pub config: ClientConfig,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -150,7 +151,7 @@ impl_gateway_request_trait!(InfoPayload, GatewayInfo, GatewayRequest::Info);
 impl_gateway_request_trait!(ConfigPayload, GatewayFedConfig, GatewayRequest::Config);
 impl_gateway_request_trait!(
     ConnectFedPayload,
-    FederationConnectionInfo,
+    FederationInfo,
     GatewayRequest::ConnectFederation
 );
 impl_gateway_request_trait!(PayInvoicePayload, Preimage, GatewayRequest::PayInvoice);

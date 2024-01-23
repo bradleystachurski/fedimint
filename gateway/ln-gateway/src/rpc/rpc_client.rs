@@ -42,6 +42,11 @@ impl GatewayRpcClient {
         self.call_get(url).await
     }
 
+    pub async fn get_info_legacy(&self) -> GatewayRpcResult<GatewayInfo> {
+        let url = self.base_url.join("/info").expect("invalid base url");
+        self.call_post(url, ()).await
+    }
+
     pub async fn get_config(&self, payload: ConfigPayload) -> GatewayRpcResult<GatewayFedConfig> {
         let url = self.base_url.join("/config").expect("invalid base url");
         self.call_post(url, payload).await

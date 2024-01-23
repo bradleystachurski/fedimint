@@ -99,14 +99,18 @@ async fn main() -> anyhow::Result<()> {
     TracingSetup::default().init()?;
 
     let cli = Cli::parse();
-    let client = || GatewayRpcClient::new(cli.address, cli.rpcpassword);
+    let client = || GatewayRpcClient::new(cli.address.clone(), cli.rpcpassword.clone());
 
     match cli.command {
         Commands::VersionHash => {
             println!("{}", env!("FEDIMINT_BUILD_CODE_VERSION"));
         }
         Commands::Info => {
-            let response = client().get_info().await?;
+            let response = match client().get_info().await {
+                Ok(res) => res,
+                Err(_) => client().get_info_legacy().await?,
+            };
+            // let response = client().get_info().await?;
 
             print_response(response).await;
         }

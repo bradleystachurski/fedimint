@@ -13,8 +13,8 @@ use tower_http::validate_request::ValidateRequestHeaderLayer;
 use tracing::{error, instrument};
 
 use super::{
-    BackupPayload, BalancePayload, ConnectFedPayload, DepositAddressPayload, LeaveFedPayload,
-    RestorePayload, SetConfigurationPayload, WithdrawPayload,
+    BackupPayload, BalancePayload, ConnectFedPayload, DepositAddressPayload, InfoPayload,
+    LeaveFedPayload, RestorePayload, SetConfigurationPayload, WithdrawPayload,
 };
 use crate::db::GatewayConfiguration;
 use crate::rpc::ConfigPayload;
@@ -34,7 +34,9 @@ pub async fn run_webserver(
 
         // Authenticated, public routes used for gateway administration
         let admin_routes = Router::new()
-            .route("/info", get(info))
+            // FIXME: deprecated >= 0.3.0
+            .route("/info", post(info))
+            .route("/info", get(handle_get_info))
             .route("/config", post(configuration))
             .route("/balance", post(balance))
             .route("/address", post(address))
@@ -50,7 +52,9 @@ pub async fn run_webserver(
         let routes = Router::new()
             .route("/set_configuration", post(set_configuration))
             .route("/config", get(configuration))
-            .route("/info", get(info));
+            // FIXME: deprecated >= 0.3.0
+            .route("/info", post(info))
+            .route("/info", get(handle_get_info));
         (routes, Router::new())
     };
 
@@ -81,7 +85,20 @@ pub async fn run_webserver(
 /// Display high-level information about the Gateway
 #[debug_handler]
 #[instrument(skip_all, err)]
-async fn info(Extension(gateway): Extension<Gateway>) -> Result<impl IntoResponse, GatewayError> {
+async fn info(
+    Extension(gateway): Extension<Gateway>,
+    Json(payload): Json<InfoPayload>,
+) -> Result<impl IntoResponse, GatewayError> {
+    let info = gateway.handle_get_info().await?;
+    Ok(Json(json!(info)))
+}
+
+/// Display high-level information about the Gateway
+#[debug_handler]
+#[instrument(skip_all, err)]
+async fn handle_get_info(
+    Extension(gateway): Extension<Gateway>,
+) -> Result<impl IntoResponse, GatewayError> {
     let info = gateway.handle_get_info().await?;
     Ok(Json(json!(info)))
 }
