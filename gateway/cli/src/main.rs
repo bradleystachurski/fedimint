@@ -100,14 +100,18 @@ async fn main() -> anyhow::Result<()> {
 
     let cli = Cli::parse();
     let versioned_api = cli.address.join(V1_API_ENDPOINT)?;
-    let client = || GatewayRpcClient::new(versioned_api, cli.rpcpassword);
+    let client = || GatewayRpcClient::new(versioned_api.clone(), cli.rpcpassword.clone());
 
     match cli.command {
         Commands::VersionHash => {
             println!("{}", env!("FEDIMINT_BUILD_CODE_VERSION"));
         }
         Commands::Info => {
-            let response = client().get_info().await?;
+            let response = match client().get_info().await {
+                Ok(res) => res,
+                Err(_) => client().get_info_legacy().await?,
+            };
+            // let response = client().get_info().await?;
 
             print_response(response).await;
         }
