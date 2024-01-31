@@ -14,6 +14,7 @@ function nix_build_binary_for_version() {
   version="$2"
   echo "$(nix build 'github:fedimint/fedimint/'"$version"'#'"$binary" --no-link --print-out-paths)/bin/$binary"
 }
+export -f nix_build_binary_for_version
 
 function use_fed_binaries_for_version() {
   version=$1
@@ -25,6 +26,7 @@ function use_fed_binaries_for_version() {
     export FM_FEDIMINTD_BASE_EXECUTABLE
   fi
 }
+export -f use_fed_binaries_for_version
 
 function use_client_binaries_for_version() {
   version=$1
@@ -39,6 +41,7 @@ function use_client_binaries_for_version() {
     export FM_GATEWAY_CLI_BASE_EXECUTABLE
   fi
 }
+export -f use_client_binaries_for_version
 
 function use_gateway_binaries_for_version() {
   version=$1
@@ -50,10 +53,12 @@ function use_gateway_binaries_for_version() {
     export FM_GATEWAYD_BASE_EXECUTABLE
   fi
 }
+export -f use_gateway_binaries_for_version
 
 test_results="fed_version,client_version,gateway_version,exit_code\n"
 has_failure=false
 versions+=("current")
+version_matrix=()
 for fed_version in "${versions[@]}"; do
   for client_version in "${versions[@]}"; do
     for gateway_version in "${versions[@]}"; do
@@ -61,37 +66,73 @@ for fed_version in "${versions[@]}"; do
       if [[ "$fed_version" == "$client_version" && "$fed_version" == "$gateway_version" ]]; then
         continue
       fi
-
-      use_fed_binaries_for_version "$fed_version"
-      use_client_binaries_for_version "$client_version"
-      use_gateway_binaries_for_version "$gateway_version"
-
-      >&2 echo "========== Starting backwards-compatibility run ==========="
-      >&2 echo "fed version: $fed_version"
-      >&2 echo "client version: $client_version"
-      >&2 echo "gateway version: $gateway_version"
-
-      # continue running against other versions if there's a failure
-      set +e
-      (./scripts/tests/test-ci-all.sh)
-      exit_code=$?
-      set -e
-      test_results="$test_results$fed_version,$client_version,$gateway_version,$exit_code\n"
-      if [[ "$exit_code" -gt 0 ]]; then
-        has_failure=true
-      fi
-
-      # cleanup devimint dir
-      tmpdir=$(dirname "$(mktemp -u)")
-      rm -rf "$tmpdir"/devimint-*
-
-      >&2 echo "========== Finished backwards-compatibility run ==========="
-      >&2 echo "fed version: $fed_version"
-      >&2 echo "client version: $client_version"
-      >&2 echo "gateway version: $gateway_version"
+      version_matrix+=("$fed_version $client_version $gateway_version")
     done
   done
 done
+
+function run_test_for_versions() {
+  IFS=' ' read -r fed_version client_version gateway_version <<< "$1"
+  # fed_version="$1"
+  # client_version="$2"
+  # gateway_version="$3"
+  # echo "fed_version: $fed_version"
+  # echo "client_version: $client_version"
+  # echo "gateway_version: $gateway_version"
+
+  use_fed_binaries_for_version "$fed_version"
+  use_client_binaries_for_version "$client_version"
+  use_gateway_binaries_for_version "$gateway_version"
+
+  >&2 echo "========== Starting backwards-compatibility run ==========="
+  >&2 echo "fed version: $fed_version"
+  >&2 echo "client version: $client_version"
+  >&2 echo "gateway version: $gateway_version"
+
+  # continue running against other versions if there's a failure
+  set +e
+  (
+    ./scripts/tests/test-ci-all.sh
+  )
+  exit_code=$?
+  set -e
+  test_results="$test_results$fed_version,$client_version,$gateway_version,$exit_code\n"
+  if [[ "$exit_code" -gt 0 ]]; then
+    has_failure=true
+  fi
+
+  # cleanup devimint dir
+  # don't want to delete devimint dirs while running
+  # tmpdir=$(dirname "$(mktemp -u)")
+  # rm -rf "$tmpdir"/devimint-*
+
+  >&2 echo "========== Finished backwards-compatibility run ==========="
+  >&2 echo "fed version: $fed_version"
+  >&2 echo "client version: $client_version"
+  >&2 echo "gateway version: $gateway_version"
+}
+export -f run_test_for_versions
+
+export parallel_jobs='+0'
+tmpdir=$(dirname "$(mktemp -u)")
+joblog="$tmpdir/joblog"
+
+start_time=$(date +%s.%N)
+# parallel -j 3 run_test_for_versions ::: "${version_matrix[@]}"
+  # --halt-on-error 1 \
+parallel \
+  --joblog "$joblog" \
+  --timeout 600 \
+  --load 150% \
+  --delay 5 \
+  --jobs "$parallel_jobs" \
+  --memfree 1G \
+  run_test_for_versions ::: "${version_matrix[@]}"
+end_time=$(date +%s.%N)
+elapsed_time=$(echo "$end_time - $start_time" | bc)
+
+
+>&2 echo "Elapsed time: $elapsed_time seconds"
 
 >&2 echo "Backwards-compatibility tests summary:"
 echo -e "$test_results" | >&2 column -t -s ','
