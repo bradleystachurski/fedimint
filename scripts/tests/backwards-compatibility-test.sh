@@ -2,6 +2,14 @@
 
 set -euo pipefail
 
+tmpdir=$(dirname "$(mktemp -u)")
+export TEST_RESULTS_FILE="$tmpdir/test_results"
+echo "fed_version,client_version,gateway_version,exit_code" > "$TEST_RESULTS_FILE"
+
+# TODO: weird approach, but get it working then take a differnt
+export HAS_ERROR_FILE="$tmpdir/has_error"
+rm -rf "$HAS_ERROR_FILE"
+
 # all versions to use for testing
 versions=("v0.2.1")
 >&2 echo "Running backwards-compatibility tests for versions: ${versions[*]}"
@@ -55,8 +63,6 @@ function use_gateway_binaries_for_version() {
 }
 export -f use_gateway_binaries_for_version
 
-test_results="fed_version,client_version,gateway_version,exit_code\n"
-has_failure=false
 versions+=("current")
 version_matrix=()
 for fed_version in "${versions[@]}"; do
@@ -90,15 +96,17 @@ function run_test_for_versions() {
   >&2 echo "gateway version: $gateway_version"
 
   # continue running against other versions if there's a failure
+  # set +e
+  # (
+  #   ./scripts/tests/test-ci-all.sh
+  # ) 2>&1
   set +e
-  (
-    ./scripts/tests/test-ci-all.sh
-  )
+  ./scripts/tests/test-ci-all.sh
   exit_code=$?
   set -e
-  test_results="$test_results$fed_version,$client_version,$gateway_version,$exit_code\n"
+  echo "$fed_version,$client_version,$gateway_version,$exit_code" >> "$TEST_RESULTS_FILE"
   if [[ "$exit_code" -gt 0 ]]; then
-    has_failure=true
+    touch "$HAS_ERROR_FILE"
   fi
 
   # cleanup devimint dir
@@ -114,29 +122,33 @@ function run_test_for_versions() {
 export -f run_test_for_versions
 
 export parallel_jobs='+0'
-tmpdir=$(dirname "$(mktemp -u)")
-joblog="$tmpdir/joblog"
+# export parallel_jobs='2'
+joblog="$tmpdir/backwards-compatibility-joblog"
 
 start_time=$(date +%s.%N)
 # parallel -j 3 run_test_for_versions ::: "${version_matrix[@]}"
+  # --joblog "$joblog" \
   # --halt-on-error 1 \
+  # --nice 15 \
+  # --jobs "$parallel_jobs" \
+  # --timeout 600 \
+  # --load 80% \
+  # --delay 30 \
+  # --memfree 1G \
 parallel \
-  --joblog "$joblog" \
-  --timeout 600 \
-  --load 150% \
-  --delay 5 \
-  --jobs "$parallel_jobs" \
-  --memfree 1G \
   run_test_for_versions ::: "${version_matrix[@]}"
+
 end_time=$(date +%s.%N)
 elapsed_time=$(echo "$end_time - $start_time" | bc)
+
+rm -rf "$tmpdir"/devimint-*
 
 
 >&2 echo "Elapsed time: $elapsed_time seconds"
 
 >&2 echo "Backwards-compatibility tests summary:"
-echo -e "$test_results" | >&2 column -t -s ','
+>&2 column -t -s ',' "$TEST_RESULTS_FILE"
 
-if [[ "$has_failure" == "true" ]]; then
+if [[ -f "$HAS_ERROR_FILE" ]]; then
   exit 1
 fi
