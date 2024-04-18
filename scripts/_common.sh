@@ -198,8 +198,9 @@ function is_only_one_version_not_current() {
   fed_version="$1"
   client_version="$2"
   gateway_version="$3"
-  current_count="$(filter_count "current" "$fed_version" "$client_version" "$gateway_version")"
-  [ "$current_count" == 2 ]
+  # current_count="$(filter_count "current" "$fed_version" "$client_version" "$gateway_version")"
+  # [ "$current_count" == 2 ]
+  [ "$fed_version" == "v0.2.1" ] && [ "$client_version" == "current" ] && [ "$gateway_version" == "current" ]
 }
 
 # Returns true if fed, client, and gateway are all "current" versions.

@@ -507,20 +507,29 @@ impl Federation {
     pub async fn await_gateways_registered(&self) -> Result<()> {
         let start_time = Instant::now();
         debug!(target: LOG_DEVIMINT, "Awaiting LN gateways registration");
+        let fedimint_cli_version = crate::util::FedimintCli::version_or_default().await;
+        let fedimintd_version = crate::util::FedimintdCmd::version_or_default().await;
         poll("gateways registered", || async {
-            let num_gateways = cmd!(
-                self.internal_client()
-                    .await
-                    .map_err(ControlFlow::Continue)?,
-                "list-gateways"
-            )
-            .out_json()
-            .await
-            .map_err(ControlFlow::Continue)?
-            .as_array()
-            .context("invalid output")
-            .map_err(ControlFlow::Break)?
-            .len();
+            let client = self
+                .internal_client()
+                .await
+                .map_err(ControlFlow::Continue)?;
+            let command = if fedimintd_version < *VERSION_0_3_0_ALPHA
+                && fedimint_cli_version >= *VERSION_0_3_0_ALPHA
+            {
+                // cmd!(client, "list-gateways", "--no-update")
+                //     .out_json()
+                //     .await
+                cmd!(client, "list-gateways").out_json().await
+            } else {
+                cmd!(client, "list-gateways").out_json().await
+            };
+            let num_gateways = command
+                .map_err(ControlFlow::Continue)?
+                .as_array()
+                .context("invalid output")
+                .map_err(ControlFlow::Break)?
+                .len();
             poll_eq!(num_gateways, 2)
         })
         .await?;
