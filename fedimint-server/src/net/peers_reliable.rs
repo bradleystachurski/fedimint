@@ -254,6 +254,9 @@ where
 
     async fn receive(&mut self) -> Cancellable<(PeerId, T)> {
         // TODO: optimize, don't throw away remaining futures
+        if self.connections.is_empty() {
+            std::future::pending().await
+        }
 
         let futures_non_banned = self.connections.iter_mut().map(|(&peer, connection)| {
             let receive_future = async move {

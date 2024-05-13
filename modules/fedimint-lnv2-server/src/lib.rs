@@ -17,9 +17,9 @@ use fedimint_core::db::{
 };
 use fedimint_core::module::audit::Audit;
 use fedimint_core::module::{
-    api_endpoint, ApiEndpoint, ApiVersion, CoreConsensusVersion, InputMeta, ModuleConsensusVersion,
-    ModuleInit, PeerHandle, ServerModuleInit, ServerModuleInitArgs, SupportedModuleApiVersions,
-    TransactionItemAmount, CORE_CONSENSUS_VERSION,
+    api_endpoint, AccountingItem, ApiEndpoint, ApiVersion, CoreConsensusVersion, InputMeta,
+    ModuleConsensusVersion, ModuleInit, PeerHandle, ServerModuleInit, ServerModuleInitArgs,
+    SupportedModuleApiVersions, TransactionItemAmount, CORE_CONSENSUS_VERSION,
 };
 use fedimint_core::server::DynServerModule;
 use fedimint_core::task::{timeout, TaskGroup};
@@ -436,6 +436,7 @@ impl ServerModule for Lightning {
             amount: TransactionItemAmount {
                 amount,
                 fee: self.cfg.consensus.fee_consensus.input,
+                accounting_item: AccountingItem::Liability,
             },
             pub_key: bitcoin30_to_bitcoin29_secp256k1_public_key(pub_key),
         })
@@ -498,6 +499,7 @@ impl ServerModule for Lightning {
                 LightningOutputV0::Incoming(contract) => contract.commitment.amount,
             },
             fee: self.cfg.consensus.fee_consensus.output,
+            accounting_item: AccountingItem::Liability,
         })
     }
 

@@ -11,6 +11,8 @@ use fedimint_core::{Amount, OutPoint};
 
 use crate::metrics::{CONSENSUS_TX_PROCESSED_INPUTS, CONSENSUS_TX_PROCESSED_OUTPUTS};
 
+// potentially add fedimint consensus audit in here
+// need process input/output to get amounts per module
 pub async fn process_transaction_with_dbtx(
     modules: ServerModuleRegistry,
     dbtx: &mut DatabaseTransaction<'_>,

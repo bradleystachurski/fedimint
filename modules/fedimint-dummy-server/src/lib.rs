@@ -13,9 +13,9 @@ use fedimint_core::db::{
 };
 use fedimint_core::module::audit::Audit;
 use fedimint_core::module::{
-    ApiEndpoint, CoreConsensusVersion, InputMeta, ModuleConsensusVersion, ModuleInit, PeerHandle,
-    ServerModuleInit, ServerModuleInitArgs, SupportedModuleApiVersions, TransactionItemAmount,
-    CORE_CONSENSUS_VERSION,
+    AccountingItem, ApiEndpoint, CoreConsensusVersion, InputMeta, ModuleConsensusVersion,
+    ModuleInit, PeerHandle, ServerModuleInit, ServerModuleInitArgs, SupportedModuleApiVersions,
+    TransactionItemAmount, CORE_CONSENSUS_VERSION,
 };
 use fedimint_core::server::DynServerModule;
 use fedimint_core::{push_db_pair_items, Amount, OutPoint, PeerId, ServerModule};
@@ -247,10 +247,18 @@ impl ServerModule for Dummy {
         dbtx.insert_entry(&DummyFundsKeyV1(input.account), &updated_funds)
             .await;
 
+        let accounting_item =
+            if input.account == fed_public_key() || input.account == broken_fed_public_key() {
+                AccountingItem::Asset
+            } else {
+                AccountingItem::Liability
+            };
+
         Ok(InputMeta {
             amount: TransactionItemAmount {
                 amount: input.amount,
                 fee: self.cfg.consensus.tx_fee,
+                accounting_item,
             },
             // IMPORTANT: include the pubkey to validate the user signed this tx
             pub_key: bitcoin30_to_bitcoin29_secp256k1_public_key(input.account),
@@ -274,9 +282,17 @@ impl ServerModule for Dummy {
         dbtx.insert_entry(&DummyOutcomeKey(out_point), &outcome)
             .await;
 
+        let accounting_item =
+            if output.account == fed_public_key() || output.account == broken_fed_public_key() {
+                AccountingItem::Asset
+            } else {
+                AccountingItem::Liability
+            };
+
         Ok(TransactionItemAmount {
             amount: output.amount,
             fee: self.cfg.consensus.tx_fee,
+            accounting_item,
         })
     }
 

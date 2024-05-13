@@ -16,9 +16,10 @@ use fedimint_core::db::{
 use fedimint_core::encoding::Encodable;
 use fedimint_core::module::audit::Audit;
 use fedimint_core::module::{
-    api_endpoint, ApiEndpoint, ApiEndpointContext, ApiVersion, CoreConsensusVersion, InputMeta,
-    ModuleConsensusVersion, ModuleInit, PeerHandle, ServerModuleInit, ServerModuleInitArgs,
-    SupportedModuleApiVersions, TransactionItemAmount, CORE_CONSENSUS_VERSION,
+    api_endpoint, AccountingItem, ApiEndpoint, ApiEndpointContext, ApiVersion,
+    CoreConsensusVersion, InputMeta, ModuleConsensusVersion, ModuleInit, PeerHandle,
+    ServerModuleInit, ServerModuleInitArgs, SupportedModuleApiVersions, TransactionItemAmount,
+    CORE_CONSENSUS_VERSION,
 };
 use fedimint_core::server::DynServerModule;
 use fedimint_core::task::{sleep, TaskGroup};
@@ -593,6 +594,7 @@ impl ServerModule for Lightning {
             amount: TransactionItemAmount {
                 amount: input.amount,
                 fee: self.cfg.consensus.fee_consensus.contract_input,
+                accounting_item: AccountingItem::Liability,
             },
             pub_key,
         })
@@ -694,6 +696,7 @@ impl ServerModule for Lightning {
                 Ok(TransactionItemAmount {
                     amount: contract.amount,
                     fee: self.cfg.consensus.fee_consensus.contract_output,
+                    accounting_item: AccountingItem::Liability,
                 })
             }
             LightningOutputV0::Offer(offer) => {
@@ -1415,6 +1418,7 @@ mod tests {
             amount: TransactionItemAmount {
                 amount,
                 fee: Amount { msats: 0 },
+                accounting_item: fedimint_core::module::AccountingItem::Liability,
             },
             pub_key: preimage
                 .to_public_key()
@@ -1470,6 +1474,7 @@ mod tests {
             amount: TransactionItemAmount {
                 amount,
                 fee: Amount { msats: 0 },
+                accounting_item: fedimint_core::module::AccountingItem::Liability,
             },
             pub_key: gateway_key,
         };

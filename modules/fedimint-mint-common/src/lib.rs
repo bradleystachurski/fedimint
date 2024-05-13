@@ -178,7 +178,7 @@ impl std::fmt::Display for MintOutputOutcomeV0 {
 pub struct MintModuleTypes;
 
 impl Note {
-    /// Verify the note's validity under a mit key `pk`
+    /// Verify the note's validity under a mint key `pk`
     pub fn verify(&self, pk: tbs::AggregatePublicKey) -> bool {
         tbs::verify(self.nonce.to_message(), self.signature, pk)
     }

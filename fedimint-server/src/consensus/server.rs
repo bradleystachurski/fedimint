@@ -655,6 +655,22 @@ impl ConsensusServer {
         // item has been fully processed without errors
         dbtx.warn_uncommitted();
 
+        // doing this after process_consensus_item_with_db_transaction since we've then
+        // verified the tx is balanced and can update the fedimint consensus audit for
+        // the tx
+        //
+        // nah, I think we need to construct the audit from processing the transaction
+        // then we can compare the consensus audit to the module audit here
+        //////////
+        // sandbox
+        //////////
+        // if let ConsensusItem::Transaction(tx) = &item {
+        //     let inputs = tx.inputs;
+        // }
+        //////////
+        // sandbox
+        //////////
+
         dbtx.insert_entry(&AcceptedItemKey(item_index), &AcceptedItem { item, peer })
             .await;
 

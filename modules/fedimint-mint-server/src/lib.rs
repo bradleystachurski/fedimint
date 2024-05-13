@@ -13,9 +13,10 @@ use fedimint_core::core::ModuleInstanceId;
 use fedimint_core::db::{DatabaseTransaction, DatabaseVersion, IDatabaseTransactionOpsCoreTyped};
 use fedimint_core::module::audit::Audit;
 use fedimint_core::module::{
-    api_endpoint, ApiEndpoint, ApiError, ApiVersion, CoreConsensusVersion, InputMeta,
-    ModuleConsensusVersion, ModuleInit, PeerHandle, ServerModuleInit, ServerModuleInitArgs,
-    SupportedModuleApiVersions, TransactionItemAmount, CORE_CONSENSUS_VERSION,
+    api_endpoint, AccountingItem, ApiEndpoint, ApiError, ApiVersion, CoreConsensusVersion,
+    InputMeta, ModuleConsensusVersion, ModuleInit, PeerHandle, ServerModuleInit,
+    ServerModuleInitArgs, SupportedModuleApiVersions, TransactionItemAmount,
+    CORE_CONSENSUS_VERSION,
 };
 use fedimint_core::server::DynServerModule;
 use fedimint_core::{
@@ -398,9 +399,14 @@ impl ServerModule for Mint {
         .await;
         let amount = input.amount;
         let fee = self.cfg.consensus.fee_consensus.note_spend_abs;
+        let accounting_item = AccountingItem::Liability;
         calculate_mint_redeemed_ecash_metrics(dbtx, amount, fee);
         Ok(InputMeta {
-            amount: TransactionItemAmount { amount, fee },
+            amount: TransactionItemAmount {
+                amount,
+                fee,
+                accounting_item,
+            },
             pub_key: bitcoin30_to_bitcoin29_secp256k1_public_key(*input.note.spend_key()),
         })
     }
@@ -428,8 +434,13 @@ impl ServerModule for Mint {
             .await;
         let amount = output.amount;
         let fee = self.cfg.consensus.fee_consensus.note_issuance_abs;
+        let accounting_item = AccountingItem::Liability;
         calculate_mint_issued_ecash_metrics(dbtx, amount, fee);
-        Ok(TransactionItemAmount { amount, fee })
+        Ok(TransactionItemAmount {
+            amount,
+            fee,
+            accounting_item,
+        })
     }
 
     async fn output_status(

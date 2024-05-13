@@ -52,12 +52,22 @@ use crate::{
     PeerId,
 };
 
+// not my favorite approach, but worth playing with
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash, Encodable, Decodable)]
+pub enum AccountingItem {
+    Asset,
+    Liability,
+    Equity,
+}
+
+// hmm, perhaps we can add asset/liability here
 #[derive(Debug, PartialEq)]
 pub struct InputMeta {
     pub amount: TransactionItemAmount,
     pub pub_key: secp256k1_zkp::PublicKey,
 }
 
+// could also add asset/liability here
 /// Information about the amount represented by an input or output.
 ///
 /// * For **inputs** the amount is funding the transaction while the fee is
@@ -67,12 +77,14 @@ pub struct InputMeta {
 pub struct TransactionItemAmount {
     pub amount: Amount,
     pub fee: Amount,
+    pub accounting_item: AccountingItem,
 }
 
 impl TransactionItemAmount {
     pub const ZERO: TransactionItemAmount = TransactionItemAmount {
         amount: Amount::ZERO,
         fee: Amount::ZERO,
+        accounting_item: AccountingItem::Liability,
     };
 }
 

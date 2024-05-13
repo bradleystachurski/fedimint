@@ -258,6 +258,7 @@ impl_db_lookup!(
     query_prefix = ClientRecoverySnapshotPrefix
 );
 
+// here
 #[derive(Debug, Encodable, Decodable, Serialize)]
 pub struct ClientModuleRecovery {
     pub module_instance_id: ModuleInstanceId,

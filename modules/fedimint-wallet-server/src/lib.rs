@@ -39,9 +39,9 @@ use fedimint_core::encoding::{Decodable, Encodable};
 use fedimint_core::envs::is_running_in_test_env;
 use fedimint_core::module::audit::Audit;
 use fedimint_core::module::{
-    api_endpoint, ApiEndpoint, ApiVersion, CoreConsensusVersion, InputMeta, ModuleConsensusVersion,
-    ModuleInit, PeerHandle, ServerModuleInit, ServerModuleInitArgs, SupportedModuleApiVersions,
-    TransactionItemAmount, CORE_CONSENSUS_VERSION,
+    api_endpoint, AccountingItem, ApiEndpoint, ApiVersion, CoreConsensusVersion, InputMeta,
+    ModuleConsensusVersion, ModuleInit, PeerHandle, ServerModuleInit, ServerModuleInitArgs,
+    SupportedModuleApiVersions, TransactionItemAmount, CORE_CONSENSUS_VERSION,
 };
 use fedimint_core::server::DynServerModule;
 #[cfg(not(target_family = "wasm"))]
@@ -543,9 +543,14 @@ impl ServerModule for Wallet {
         }
         let amount = fedimint_core::Amount::from_sats(input.tx_output().value);
         let fee = self.cfg.consensus.fee_consensus.peg_in_abs;
+        let accounting_item = AccountingItem::Asset;
         calculate_pegin_metrics(dbtx, amount, fee);
         Ok(InputMeta {
-            amount: TransactionItemAmount { amount, fee },
+            amount: TransactionItemAmount {
+                amount,
+                fee,
+                accounting_item,
+            },
             pub_key: *input.tweak_contract_key(),
         })
     }
@@ -620,8 +625,13 @@ impl ServerModule for Wallet {
         .await;
         let amount: fedimint_core::Amount = output.amount().into();
         let fee = self.cfg.consensus.fee_consensus.peg_out_abs;
+        let accounting_item = AccountingItem::Asset;
         calculate_pegout_metrics(dbtx, amount, fee);
-        Ok(TransactionItemAmount { amount, fee })
+        Ok(TransactionItemAmount {
+            amount,
+            fee,
+            accounting_item,
+        })
     }
 
     async fn output_status(
