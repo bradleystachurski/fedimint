@@ -1,4 +1,5 @@
 use std::cmp;
+use std::io::Write;
 use std::sync::Arc;
 use std::time::{Duration, SystemTime};
 
@@ -14,7 +15,9 @@ use fedimint_wallet_common::tweakable::Tweakable;
 use fedimint_wallet_common::txoproof::PegInProof;
 use fedimint_wallet_common::WalletInput;
 use secp256k1::KeyPair;
-use tracing::{debug, instrument, trace, warn};
+use tokio::io::AsyncWriteExt;
+use tracing::instrument::WithSubscriber;
+use tracing::{debug, info, instrument, trace, warn};
 
 use crate::api::WalletFederationApi;
 use crate::{WalletClientContext, WalletClientStates};
@@ -30,6 +33,7 @@ const TRANSACTION_STATUS_FETCH_INTERVAL: Duration = Duration::from_secs(1);
 /// graph LR
 ///     Created -- Transaction seen --> AwaitingConfirmations["Waiting for confirmations"]
 ///     AwaitingConfirmations -- Confirmations received --> Claiming
+///     AwaitingConfirmations -- RBF seen --> AwaitingConfirmations
 ///     AwaitingConfirmations -- "Retransmit seen tx (planned)" --> AwaitingConfirmations
 ///     Created -- "No transactions seen for [time]" --> Timeout["Timed out"]
 /// ```
@@ -101,6 +105,19 @@ async fn await_created_btc_transaction_submitted(
     context: WalletClientContext,
     tweak: KeyPair,
 ) -> (bitcoin::Transaction, u32) {
+    let message = "inside await_created_btc_transaction_submitted";
+    let logs_dir = std::env::var("FM_LOGS_DIR").unwrap();
+    let path = format!("{logs_dir}/await_created_btc_transaction_submitted.log");
+    let mut log = tokio::fs::File::create(&path).await.unwrap();
+    // let mut log = tokio::fs::OpenOptions::new()
+    //     .append(true)
+    //     .create(true)
+    //     .open(&path)
+    //     .await
+    //     .unwrap();
+    log.write_all(message.as_bytes()).await.unwrap();
+    // log.flush().await.unwrap();
+
     let script = context
         .wallet_descriptor
         .tweak(&tweak.public_key(), &context.secp)
@@ -121,7 +138,24 @@ async fn await_created_btc_transaction_submitted(
 
         match context.rpc.get_script_history(&script).await {
             Ok(received) => {
+                info!("received script history");
+                info!(?received);
+                // let message = format!("received script history: {:?}", received);
+                // let logs_dir = std::env::var("FM_LOGS_DIR").unwrap();
+                // let path = format!("{logs_dir}/await_created_btc_transaction_submitted.log");
+                // let mut log = tokio::fs::OpenOptions::new()
+                //     .append(true)
+                //     .create(true)
+                //     .open(&path)
+                //     .await
+                //     .unwrap();
+                // log.write_all(message.as_bytes()).await.unwrap();
+                // let _ = log.flush().await;
+
                 // TODO: fix
+                // I'd expect the script history to have more than 1 tx since the RBF tx bumps
+                // it over so we likely need to solve both multiple deposits
+                // along with RBF
                 if received.len() > 1 {
                     warn!("More than one transaction was sent to deposit address, only considering the first one");
                 }
@@ -320,6 +354,15 @@ pub struct CreatedDepositState {
     pub(crate) tweak_key: KeyPair,
     pub(crate) timeout_at: SystemTime,
 }
+
+// #[derive(Debug, Clone, Eq, PartialEq, Hash, Decodable, Encodable)]
+// pub struct PendingDepositTransaction {
+//     /// The bitcoin transaction is saved as soon as we see it so the
+// transaction     /// can be re-transmitted if it's evicted from the mempool.
+//     pub(crate) btc_transaction: bitcoin::Transaction,
+//     /// Index of the deposit output
+//     pub(crate) out_idx: u32,
+// }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Decodable, Encodable)]
 pub struct WaitingForConfirmationsDepositState {

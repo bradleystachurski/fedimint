@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::io::Write;
 use std::ops::ControlFlow;
 use std::path::{Path, PathBuf};
@@ -2395,6 +2395,140 @@ pub async fn cannot_replay_tx_test(dev_fed: DevFed) -> Result<()> {
     Ok(())
 }
 
+// TODO: real test, this is just to repro
+pub async fn repro_stuck_rbf(dev_fed: DevFed) -> Result<()> {
+    log_binary_versions().await?;
+    let fedimint_cli_version = crate::util::FedimintCli::version_or_default().await;
+
+    #[allow(unused_variables)]
+    let DevFed {
+        bitcoind,
+        cln,
+        lnd,
+        fed,
+        gw_cln,
+        gw_lnd,
+        electrs,
+        esplora,
+    } = dev_fed;
+
+    let client = fed.new_joined_client("repro-stuck-rbf").await?;
+
+    let initial_walletng_balance = client.balance().await?;
+    info!(?initial_walletng_balance);
+
+    let deposit_fees_msat = fed.deposit_fees().await?.msats;
+    info!(?deposit_fees_msat);
+    let deposit_fees = deposit_fees_msat / 1000;
+    info!(?deposit_fees);
+    let (address, operation_id) = client.get_deposit_addr().await?;
+    info!(?address);
+    info!(?operation_id);
+    let amount = 100_000;
+    // fed.pegin_client(100_000, &client).await?; // deposit in sats
+    // let unspent = bitcoind.list_unspent().await?;
+    // info!(num_unspent = ?unspent.len());
+    // for coin in unspent {
+    //     let _ = coin.
+    // }
+    let first_txid = bitcoind.send_to(address, amount + deposit_fees).await?;
+    info!(?first_txid);
+    // how to rbf this txid?
+    let tx_res = bitcoind.get_transaction(&first_txid).await?;
+    info!(?tx_res);
+    let mempool_txs = bitcoind.get_raw_mempool().await?;
+    info!(?mempool_txs);
+
+    let raw_tx_res = bitcoind.get_raw_transaction(&first_txid).await?;
+    let decoded_raw_tx = bitcoind.decode_raw_transaction(&raw_tx_res).await?;
+    info!(?decoded_raw_tx);
+
+    for (out_idx, output) in decoded_raw_tx.vout.iter().enumerate() {
+        let value = output.value;
+        let address = output
+            .script_pub_key
+            .address
+            .as_ref()
+            .expect("outputs have an address");
+        info!(?out_idx);
+        info!(?value);
+        info!(?address);
+    }
+    // alright, good stopping point before nuggets game
+    // next steps
+    //   - add createrawtransaction call
+    //   - spend same input
+    //   - decrease change output amount
+    //   - sign/broadcast raw tx
+    //   - verify two transactions are associated with rbf'ed receive address/script
+
+    let rbf_tx_inputs = decoded_raw_tx
+        .vin
+        .iter()
+        .map(
+            |input| bitcoincore_rpc::bitcoincore_rpc_json::CreateRawTransactionInput {
+                txid: input.txid.expect("input previously constructed"),
+                vout: input.vout.expect("input previously contructed"),
+                sequence: Some(input.sequence),
+            },
+        )
+        .collect::<Vec<_>>();
+
+    // let _ = decoded_raw_tx.vout.iter().
+    // fold(std::collections::HashMap::new::<String, bitcoin::Amount>(), |acc,
+    // output| {     acc.insert(, )
+    // })
+    let mut rbf_tx_outputs: HashMap<String, bitcoin::Amount> = HashMap::new();
+    for (out_idx, output) in decoded_raw_tx.vout.iter().enumerate() {
+        let address_unchecked = output
+            .script_pub_key
+            .address
+            .as_ref()
+            .expect("output has an address");
+
+        let address = address_unchecked.clone().assume_checked().to_string();
+
+        let amount = if out_idx == 0 {
+            // first output is send address, use same amount
+            output.value
+        } else {
+            // second output is change address, use lower amount to increase fee for rbf
+            output
+                .value
+                .checked_sub(bitcoin::Amount::from_sat(100_000))
+                .expect("bad math")
+        };
+
+        let _ = rbf_tx_outputs.insert(address, amount);
+    }
+
+    let raw_tx = bitcoind
+        .create_raw_transaction(&rbf_tx_inputs, &rbf_tx_outputs)
+        .await?;
+    let signed_raw_tx = bitcoind.sign_raw_transaction_with_wallet(raw_tx).await?;
+    let rbf_txid = bitcoind.send_raw_transaction(signed_raw_tx).await?;
+    info!(?rbf_txid);
+    let mempool_txs = bitcoind.get_raw_mempool().await?;
+    info!(?mempool_txs);
+    // good, this shows wallet_conflicts with the rbf'ed tx
+    let tx_res = bitcoind.get_transaction(&first_txid).await?;
+    info!(?tx_res);
+    // let rbf_tx_outputs = decoded_raw_tx.vout.iter().map(|output| {
+    //     std::collections::HashMap::new();
+    // })
+
+    bitcoind.mine_blocks(21).await?;
+    let tx_res = bitcoind.get_transaction(&first_txid).await?;
+    info!(?tx_res);
+    let rbf_tx_res = bitcoind.get_transaction(&rbf_txid).await?;
+    info!(?rbf_tx_res);
+
+    let post_deposit_walletng_balance = client.balance().await?;
+    info!(?post_deposit_walletng_balance);
+
+    Ok(())
+}
+
 #[derive(Subcommand)]
 pub enum LatencyTest {
     Reissue,
@@ -2461,6 +2595,7 @@ pub enum TestCmd {
         #[clap(subcommand)]
         binary: UpgradeTest,
     },
+    ReproStuckRbf,
 }
 
 async fn wait_session(client: &federation::Client) -> anyhow::Result<()> {
@@ -2582,6 +2717,11 @@ pub async fn handle_command(cmd: TestCmd, common_args: CommonArgs) -> Result<()>
         TestCmd::UpgradeTests { binary } => {
             let (process_mgr, _) = setup(common_args).await?;
             upgrade_tests(&process_mgr, binary).await?;
+        }
+        TestCmd::ReproStuckRbf => {
+            let (process_mgr, _) = setup(common_args).await?;
+            let dev_fed = dev_fed(&process_mgr).await?;
+            repro_stuck_rbf(dev_fed).await?;
         }
     }
     Ok(())

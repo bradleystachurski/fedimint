@@ -27,17 +27,19 @@ on_error() {
   echo "## FAIL: $test_name$version_str"
 }
 
-on_exit() {
-    exit_status=$?
-    if [ $exit_status -eq 0 ]; then
-        # if successful, don't waste space keeping the test dir
-        rm -Rf "$FM_RUN_TEST_TMPDIR"
-    fi
-}
+# on_exit() {
+#     exit_status=$?
+#     if [ $exit_status -eq 0 ]; then
+#         # if successful, don't waste space keeping the test dir
+#         rm -Rf "$FM_RUN_TEST_TMPDIR"
+#     fi
+# }
 trap on_error ERR
-trap on_exit EXIT
+# trap on_exit EXIT
 
 command time -q --format="$time_fmt" -o "$time_out_path" timeout -k 230 245 "$@" 2>&1 | ts -s > "$test_out_path"
 
 awk 'BEGIN {FS="\t"} {printf "## STAT: %8.2fs %8dB %8dW %8dc\n", $1, $2, $3, $4}' < "$time_out_path"
 echo "## DONE: $test_name$version_str"
+echo "## OUT:  $test_name$version_str"
+cat "$test_out_path"
