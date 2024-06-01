@@ -30,6 +30,7 @@ const TRANSACTION_STATUS_FETCH_INTERVAL: Duration = Duration::from_secs(1);
 /// graph LR
 ///     Created -- Transaction seen --> AwaitingConfirmations["Waiting for confirmations"]
 ///     AwaitingConfirmations -- Confirmations received --> Claiming
+///     AwaitingConfirmations -- RBF seen --> AwaitingConfirmations
 ///     AwaitingConfirmations -- "Retransmit seen tx (planned)" --> AwaitingConfirmations
 ///     Created -- "No transactions seen for [time]" --> Timeout["Timed out"]
 /// ```
@@ -95,6 +96,18 @@ impl State for DepositStateMachine {
     fn operation_id(&self) -> OperationId {
         self.operation_id
     }
+}
+
+async fn write_log(message: &str) -> anyhow::Result<()> {
+    use std::fs::OpenOptions;
+    use std::io::Write;
+
+    let path = format!("/home/nix/fedimint/client.log");
+    let mut f = OpenOptions::new().append(true).create(true).open(path)?;
+
+    let message = format!("{message}\n");
+    f.write_all(message.as_bytes())?;
+    Ok(())
 }
 
 async fn await_created_btc_transaction_submitted(
@@ -318,6 +331,15 @@ pub struct CreatedDepositState {
     pub(crate) tweak_key: KeyPair,
     pub(crate) timeout_at: SystemTime,
 }
+
+// #[derive(Debug, Clone, Eq, PartialEq, Hash, Decodable, Encodable)]
+// pub struct PendingDepositTransaction {
+//     /// The bitcoin transaction is saved as soon as we see it so the
+// transaction     /// can be re-transmitted if it's evicted from the mempool.
+//     pub(crate) btc_transaction: bitcoin::Transaction,
+//     /// Index of the deposit output
+//     pub(crate) out_idx: u32,
+// }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Decodable, Encodable)]
 pub struct WaitingForConfirmationsDepositState {

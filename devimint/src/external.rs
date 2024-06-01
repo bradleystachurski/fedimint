@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::ops::{ControlFlow, Deref as _};
 use std::path::Path;
 use std::str::FromStr;
@@ -6,7 +7,10 @@ use std::time::Duration;
 
 use anyhow::{anyhow, Context, Result};
 use bitcoincore_rpc::bitcoin::{Address, BlockHash};
-use bitcoincore_rpc::bitcoincore_rpc_json::{GetBalancesResult, GetBlockchainInfoResult};
+use bitcoincore_rpc::bitcoincore_rpc_json::{
+    CreateRawTransactionInput, DecodeRawTransactionResult, GetBalancesResult,
+    GetBlockchainInfoResult, GetTransactionResult, ListUnspentResultEntry,
+};
 use bitcoincore_rpc::{bitcoin, RpcApi};
 use cln_rpc::ClnRpc;
 use fedimint_core::encoding::Encodable;
@@ -234,6 +238,57 @@ impl Bitcoind {
         let tx = block_in_place(|| self.client.get_raw_transaction(txid, None))?;
         let bytes = tx.consensus_encode_to_vec();
         Ok(bytes.encode_hex())
+    }
+
+    pub async fn get_transaction(&self, txid: &bitcoin::Txid) -> Result<GetTransactionResult> {
+        let tx = block_in_place(|| self.client.get_transaction(txid, None))?;
+        Ok(tx)
+    }
+
+    pub async fn list_unspent(&self) -> Result<Vec<ListUnspentResultEntry>> {
+        let unspents = block_in_place(|| self.client.list_unspent(None, None, None, None, None))?;
+        Ok(unspents)
+    }
+
+    pub async fn decode_raw_transaction(&self, tx: &str) -> Result<DecodeRawTransactionResult> {
+        let decoded = block_in_place(|| self.client.decode_raw_transaction(tx, None))?;
+        Ok(decoded)
+    }
+
+    pub async fn create_raw_transaction(
+        &self,
+        inputs: &[CreateRawTransactionInput],
+        outputs: &HashMap<String, bitcoin::Amount>,
+    ) -> Result<bitcoin::blockdata::transaction::Transaction> {
+        let tx = block_in_place(|| {
+            self.client
+                .create_raw_transaction(inputs, outputs, None, Some(true))
+        })?;
+        Ok(tx)
+    }
+
+    pub async fn sign_raw_transaction_with_wallet(
+        &self,
+        tx: bitcoincore_rpc::bitcoin::Transaction,
+    ) -> Result<bitcoincore_rpc::bitcoincore_rpc_json::SignRawTransactionResult> {
+        let signed_tx = block_in_place(|| {
+            self.client
+                .sign_raw_transaction_with_wallet(&tx, None, None)
+        })?;
+        Ok(signed_tx)
+    }
+
+    pub async fn send_raw_transaction(
+        &self,
+        tx: bitcoincore_rpc::bitcoincore_rpc_json::SignRawTransactionResult,
+    ) -> Result<bitcoin::Txid> {
+        let signed_tx = block_in_place(|| self.client.send_raw_transaction(&tx.transaction()?))?;
+        Ok(signed_tx)
+    }
+
+    pub async fn get_raw_mempool(&self) -> Result<Vec<bitcoin::Txid>> {
+        let mempool_txs = block_in_place(|| self.client.get_raw_mempool())?;
+        Ok(mempool_txs)
     }
 
     pub async fn get_new_address(&self) -> Result<Address> {
