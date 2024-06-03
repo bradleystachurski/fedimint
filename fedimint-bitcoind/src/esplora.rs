@@ -93,6 +93,11 @@ impl IBitcoindRpc for EsploraClient {
     }
 
     async fn get_tx_block_height(&self, txid: &Txid) -> anyhow::Result<Option<u64>> {
+        fedimint_core::util::write_log(&format!("inside get_tx_block_height")).await?;
+        let tx = self.0.get_tx(txid).await?;
+        fedimint_core::util::write_log(&format!("tx: {tx:?}")).await?;
+        let tx_status = self.0.get_tx_status(txid).await?;
+        fedimint_core::util::write_log(&format!("tx_status: {tx_status:?}")).await?;
         Ok(self
             .0
             .get_tx_status(txid)
@@ -135,6 +140,10 @@ impl IBitcoindRpc for EsploraClient {
         &self,
         script: &ScriptBuf,
     ) -> anyhow::Result<Vec<bitcoin::Transaction>> {
+        let esplora_tx_type = self.0.scripthash_txs(script, None).await?;
+        let num_transactions = esplora_tx_type.len();
+        fedimint_core::util::write_log(&format!("esplora_tx_type: {esplora_tx_type:?}")).await?;
+        fedimint_core::util::write_log(&format!("num_transactions: {num_transactions:?}")).await?;
         let transactions = self
             .0
             .scripthash_txs(script, None)
@@ -143,6 +152,11 @@ impl IBitcoindRpc for EsploraClient {
             .map(|tx| tx.to_tx())
             .collect::<Vec<_>>();
 
+        let num_transactions = transactions.len();
+        let txids = transactions.iter().map(|tx| tx.txid()).collect::<Vec<_>>();
+        fedimint_core::util::write_log(&format!("found transactions: {transactions:?}")).await?;
+        fedimint_core::util::write_log(&format!("num transactions: {num_transactions:?}")).await?;
+        fedimint_core::util::write_log(&format!("txids: {txids:?}")).await?;
         Ok(transactions)
     }
     async fn get_txout_proof(&self, txid: Txid) -> anyhow::Result<TxOutProof> {

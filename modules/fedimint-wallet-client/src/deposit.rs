@@ -98,18 +98,6 @@ impl State for DepositStateMachine {
     }
 }
 
-async fn write_log(message: &str) -> anyhow::Result<()> {
-    use std::fs::OpenOptions;
-    use std::io::Write;
-
-    let path = format!("/home/nix/fedimint/client.log");
-    let mut f = OpenOptions::new().append(true).create(true).open(path)?;
-
-    let message = format!("{message}\n");
-    f.write_all(message.as_bytes())?;
-    Ok(())
-}
-
 async fn await_created_btc_transaction_submitted(
     context: WalletClientContext,
     tweak: KeyPair,
@@ -228,6 +216,13 @@ async fn await_btc_transaction_confirmed(
             }
         };
         debug!(consensus_block_count, "Fetched consensus block count");
+
+        let script = context
+            .wallet_descriptor
+            .tweak(&waiting_state.tweak_key.public_key(), &context.secp)
+            .script_pubkey();
+
+        context.rpc.get_script_history(&script).await.unwrap();
 
         let confirmation_block_count = match context
             .rpc

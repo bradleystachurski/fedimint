@@ -2435,7 +2435,9 @@ pub async fn repro_stuck_rbf(dev_fed: DevFed) -> Result<()> {
     // for coin in unspent {
     //     let _ = coin.
     // }
-    let first_txid = bitcoind.send_to(address, amount + deposit_fees).await?;
+    let first_txid = bitcoind
+        .send_to(address.clone(), amount + deposit_fees)
+        .await?;
     info!(?first_txid);
     // how to rbf this txid?
     let tx_res = bitcoind.get_transaction(&first_txid).await?;
@@ -2510,15 +2512,31 @@ pub async fn repro_stuck_rbf(dev_fed: DevFed) -> Result<()> {
         .create_raw_transaction(&rbf_tx_inputs, &rbf_tx_outputs)
         .await?;
     let signed_raw_tx = bitcoind.sign_raw_transaction_with_wallet(raw_tx).await?;
+    // side quest to see if multiple non-conflicting mempool txs show in esplora
+    let non_conflicting_txid = bitcoind
+        .send_to(address.clone(), amount + deposit_fees)
+        .await?;
+    fedimint_core::util::write_log(&format!("non_conflicting_txid: {non_conflicting_txid:?}"))
+        .await?;
 
     // this sleep triggers the rbf failure, since it gives the client state machine
     // time to recognize the first tx
-    fedimint_core::task::sleep_in_test("waiting to send rbf", Duration::from_secs(2)).await;
+    fedimint_core::task::sleep_in_test("waiting to send rbf", Duration::from_secs(10)).await;
 
+    let mempool_txs = bitcoind.get_raw_mempool().await?;
+    info!(?mempool_txs);
+    fedimint_core::util::write_log(&format!(
+        "bitcoin core mempool before submitting rbf: {mempool_txs:?}"
+    ))
+    .await?;
     let rbf_txid = bitcoind.send_raw_transaction(signed_raw_tx).await?;
     info!(?rbf_txid);
     let mempool_txs = bitcoind.get_raw_mempool().await?;
     info!(?mempool_txs);
+    fedimint_core::util::write_log(&format!(
+        "bitcoin core mempool after submitting rbf: {mempool_txs:?}"
+    ))
+    .await?;
     // good, this shows wallet_conflicts with the rbf'ed tx
     let tx_res = bitcoind.get_transaction(&first_txid).await?;
     info!(?tx_res);
@@ -2526,15 +2544,17 @@ pub async fn repro_stuck_rbf(dev_fed: DevFed) -> Result<()> {
     //     std::collections::HashMap::new();
     // })
 
-    bitcoind.mine_blocks(21).await?;
+    // bitcoind.mine_blocks(21).await?;
     let tx_res = bitcoind.get_transaction(&first_txid).await?;
     info!(?tx_res);
     let rbf_tx_res = bitcoind.get_transaction(&rbf_txid).await?;
     info!(?rbf_tx_res);
 
+    fedimint_core::util::write_log(&format!("tx_res: {tx_res:?}")).await?;
+    fedimint_core::util::write_log(&format!("rbf_tx_res: {rbf_tx_res:?}")).await?;
     client.await_deposit(&operation_id).await?;
-    let post_deposit_walletng_balance = client.balance().await?;
-    info!(?post_deposit_walletng_balance);
+    // let post_deposit_walletng_balance = client.balance().await?;
+    // info!(?post_deposit_walletng_balance);
 
     Ok(())
 }
