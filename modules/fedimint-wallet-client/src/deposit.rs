@@ -196,6 +196,89 @@ async fn transition_deposit_timeout(old_state: DepositStateMachine) -> DepositSt
     }
 }
 
+async fn find_confirmed_rbf_tx(
+    context: &WalletClientContext,
+    waiting_state: &WaitingForConfirmationsDepositState,
+) -> anyhow::Result<Option<(Option<u64>, bitcoin::Transaction, u32)>> {
+    let script = context
+        .wallet_descriptor
+        .tweak(&waiting_state.tweak_key.public_key(), &context.secp)
+        .script_pubkey();
+
+    let ancestor_output = waiting_state
+        .btc_transaction
+        .output
+        .iter()
+        .nth(waiting_state.out_idx as usize)
+        .expect("Bad state: deposit transaction must contain output for out_idx: {out_idx}");
+
+    let script_history = context.rpc.get_script_history(&script).await.unwrap();
+    let filtered_script_history = script_history
+        .iter()
+        .filter(|tx| tx.txid() != waiting_state.btc_transaction.txid());
+    fedimint_core::util::write_log(&format!(
+        "filtered_script_history: {filtered_script_history:?}"
+    ))
+    .await
+    .unwrap();
+    // perhaps I can make this generic for bitcoind and esplora by iterating over
+    // all instead of just maybe
+    let rbf_transactions = script_history
+        .iter()
+        .filter(|tx| {
+            tx.txid() != waiting_state.btc_transaction.txid()
+                && tx.input.iter().any(|input| {
+                    waiting_state
+                        .btc_transaction
+                        .input
+                        .iter()
+                        .any(|ancestor_input| {
+                            ancestor_input.previous_output == input.previous_output
+                        })
+                })
+        })
+        .collect::<Vec<_>>();
+
+    let mut res: Option<(Option<u64>, bitcoin::Transaction, u32)> = None;
+    for rbf_tx in rbf_transactions.into_iter() {
+        let out_idx = rbf_tx
+            .output
+            .iter()
+            .position(|output| ancestor_output.script_pubkey == *output.script_pubkey)
+            .expect("must exist since script_history was retrieved for this script")
+            as u32;
+        fedimint_core::util::write_log(&format!("out_idx: {out_idx:?}"))
+            .await
+            .unwrap();
+        fedimint_core::util::write_log(&format!("rbf_txid: {:?}", rbf_tx.txid()))
+            .await
+            .unwrap();
+
+        match context.rpc.get_tx_block_height(&rbf_tx.txid()).await {
+            Ok(Some(confirmation_height)) => {
+                fedimint_core::util::write_log(&format!(
+                    "found confirmation height for rbf tx: {confirmation_height:?}"
+                ))
+                .await
+                .unwrap();
+                res = Some((Some(confirmation_height + 1), rbf_tx.clone(), out_idx));
+                break;
+            }
+            Ok(None) => {
+                res = Some((None, rbf_tx.clone(), out_idx));
+                break;
+            }
+            Err(e) => {
+                warn!("Failed to fetch confirmation height: {e:?}");
+                res = Some((None, rbf_tx.clone(), out_idx));
+                break;
+            }
+        }
+    }
+
+    Ok(res)
+}
+
 #[instrument(skip_all, level = "debug")]
 async fn await_btc_transaction_confirmed(
     context: WalletClientContext,
@@ -233,107 +316,16 @@ async fn await_btc_transaction_confirmed(
                 waiting_state.out_idx,
             ),
             Ok(None) => {
-                fedimint_core::util::write_log(&format!(
-                    "inside match arm for no confirmation height for ancestor"
-                ))
-                .await
-                .unwrap();
-
-                let script = context
-                    .wallet_descriptor
-                    .tweak(&waiting_state.tweak_key.public_key(), &context.secp)
-                    .script_pubkey();
-
-                let script_history = context.rpc.get_script_history(&script).await.unwrap();
-                let filtered_script_history = script_history
-                    .iter()
-                    .filter(|tx| tx.txid() != waiting_state.btc_transaction.txid());
-                fedimint_core::util::write_log(&format!(
-                    "filtered_script_history: {filtered_script_history:?}"
-                ))
-                .await
-                .unwrap();
-                // perhaps I can make this generic for bitcoind and esplora by iterating over
-                // all instead of just maybe
-                let maybe_rbf_tx = script_history
-                    .iter()
-                    .filter(|tx| tx.txid() != waiting_state.btc_transaction.txid())
-                    // .find(|tx| {
-                    //     tx.input.iter().any(|input| {
-                    //         waiting_state
-                    //             .btc_transaction
-                    //             .input
-                    //             .iter()
-                    //             .any(|ancestor_input| ancestor_input == input)
-                    //     })
-                    // });
-                    // this works, need to compare specifically outpoints not full input
-                    .find(|tx| {
-                        tx.input.iter().any(|input| {
-                            waiting_state
-                                .btc_transaction
-                                .input
-                                .iter()
-                                .any(|ancestor_input| {
-                                    ancestor_input.previous_output == input.previous_output
-                                })
-                        })
-                    });
-
-                fedimint_core::util::write_log(&format!("maybe_rbf_tx: {maybe_rbf_tx:?}"))
+                match find_confirmed_rbf_tx(&context, &waiting_state)
                     .await
-                    .unwrap();
-
-                let ancestor_output = waiting_state
-                    .btc_transaction
-                    .output
-                    .iter()
-                    .nth(waiting_state.out_idx as usize)
-                    .expect(
-                        "Bad state: deposit transaction must contain output for out_idx: {out_idx}",
-                    );
-
-                fedimint_core::util::write_log(&format!("ancestor_output: {ancestor_output:?}"))
-                    .await
-                    .unwrap();
-                match maybe_rbf_tx {
+                    .unwrap()
+                {
+                    Some(stuff) => stuff,
                     None => (
                         None,
                         waiting_state.btc_transaction.clone(),
                         waiting_state.out_idx,
                     ),
-                    Some(rbf_tx) => {
-                        let out_idx = rbf_tx
-                            .output
-                            .iter()
-                            .position(|output| {
-                                ancestor_output.script_pubkey == *output.script_pubkey
-                            })
-                            .expect("must exist since script_history was retrieved for this script")
-                            as u32;
-                        fedimint_core::util::write_log(&format!("out_idx: {out_idx:?}"))
-                            .await
-                            .unwrap();
-                        fedimint_core::util::write_log(&format!("rbf_txid: {:?}", rbf_tx.txid()))
-                            .await
-                            .unwrap();
-
-                        match context.rpc.get_tx_block_height(&rbf_tx.txid()).await {
-                            Ok(Some(confirmation_height)) => {
-                                fedimint_core::util::write_log(&format!(
-                                    "found confirmation height for rbf tx: {confirmation_height:?}"
-                                ))
-                                .await
-                                .unwrap();
-                                (Some(confirmation_height + 1), rbf_tx.clone(), out_idx)
-                            }
-                            Ok(None) => (None, rbf_tx.clone(), out_idx),
-                            Err(e) => {
-                                warn!("Failed to fetch confirmation height: {e:?}");
-                                (None, rbf_tx.clone(), out_idx)
-                            }
-                        }
-                    }
                 }
             }
             Err(e) => {
