@@ -196,10 +196,16 @@ async fn transition_deposit_timeout(old_state: DepositStateMachine) -> DepositSt
     }
 }
 
+struct TxDetails {
+    confirmation_block_count: Option<u64>,
+    tx: bitcoin::Transaction,
+    out_idx: u32,
+}
+
 async fn find_confirmed_rbf_tx(
     context: &WalletClientContext,
     waiting_state: &WaitingForConfirmationsDepositState,
-) -> anyhow::Result<Option<(Option<u64>, bitcoin::Transaction, u32)>> {
+) -> anyhow::Result<Option<TxDetails>> {
     let script = context
         .wallet_descriptor
         .tweak(&waiting_state.tweak_key.public_key(), &context.secp)
@@ -238,9 +244,11 @@ async fn find_confirmed_rbf_tx(
                 as u32;
 
             match context.rpc.get_tx_block_height(&rbf_tx.txid()).await {
-                Ok(Some(confirmation_height)) => {
-                    Some((Some(confirmation_height + 1), rbf_tx.clone(), out_idx))
-                }
+                Ok(Some(confirmation_height)) => Some(TxDetails {
+                    confirmation_block_count: Some(confirmation_height + 1),
+                    tx: rbf_tx.clone(),
+                    out_idx,
+                }),
                 Ok(None) => None,
                 Err(_) => None,
             }
@@ -278,36 +286,40 @@ async fn await_btc_transaction_confirmed(
         };
         debug!(consensus_block_count, "Fetched consensus block count");
 
-        let (confirmation_block_count, confirmed_tx, confirmed_out_idx) = match context
+        let TxDetails {
+            confirmation_block_count,
+            tx: confirmed_tx,
+            out_idx: confirmed_out_idx,
+        } = match context
             .rpc
             .get_tx_block_height(&waiting_state.btc_transaction.txid())
             .await
         {
-            Ok(Some(confirmation_height)) => (
-                Some(confirmation_height + 1),
-                waiting_state.btc_transaction.clone(),
-                waiting_state.out_idx,
-            ),
+            Ok(Some(confirmation_height)) => TxDetails {
+                confirmation_block_count: Some(confirmation_height + 1),
+                tx: waiting_state.btc_transaction.clone(),
+                out_idx: waiting_state.out_idx,
+            },
             Ok(None) => {
                 match find_confirmed_rbf_tx(&context, &waiting_state)
                     .await
                     .unwrap()
                 {
-                    Some(stuff) => stuff,
-                    None => (
-                        None,
-                        waiting_state.btc_transaction.clone(),
-                        waiting_state.out_idx,
-                    ),
+                    Some(tx_details) => tx_details,
+                    None => TxDetails {
+                        confirmation_block_count: None,
+                        tx: waiting_state.btc_transaction.clone(),
+                        out_idx: waiting_state.out_idx,
+                    },
                 }
             }
             Err(e) => {
                 warn!("Failed to fetch confirmation height: {e:?}");
-                (
-                    None,
-                    waiting_state.btc_transaction.clone(),
-                    waiting_state.out_idx,
-                )
+                TxDetails {
+                    confirmation_block_count: None,
+                    tx: waiting_state.btc_transaction.clone(),
+                    out_idx: waiting_state.out_idx,
+                }
             }
         };
 
