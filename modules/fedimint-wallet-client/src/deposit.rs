@@ -212,69 +212,42 @@ async fn find_confirmed_rbf_tx(
         .nth(waiting_state.out_idx as usize)
         .expect("Bad state: deposit transaction must contain output for out_idx: {out_idx}");
 
-    let script_history = context.rpc.get_script_history(&script).await.unwrap();
-    let filtered_script_history = script_history
-        .iter()
-        .filter(|tx| tx.txid() != waiting_state.btc_transaction.txid());
-    fedimint_core::util::write_log(&format!(
-        "filtered_script_history: {filtered_script_history:?}"
-    ))
-    .await
-    .unwrap();
-    // perhaps I can make this generic for bitcoind and esplora by iterating over
-    // all instead of just maybe
-    let rbf_transactions = script_history
-        .iter()
-        .filter(|tx| {
-            tx.txid() != waiting_state.btc_transaction.txid()
-                && tx.input.iter().any(|input| {
-                    waiting_state
-                        .btc_transaction
-                        .input
-                        .iter()
-                        .any(|ancestor_input| {
-                            ancestor_input.previous_output == input.previous_output
-                        })
-                })
+    // TODO: paging to ensure we check script's full history
+    let script_history = context.rpc.get_script_history(&script).await?;
+    let rbf_transactions = script_history.iter().filter(|tx| {
+        // rbf transactions have a different txid
+        tx.txid() != waiting_state.btc_transaction.txid()
+            // any input spent by another unconfirmed tx is an rbf tx
+            && tx.input.iter().any(|input| {
+                waiting_state
+                    .btc_transaction
+                    .input
+                    .iter()
+                    .any(|ancestor_input| ancestor_input.previous_output == input.previous_output)
+            })
+    });
+
+    use futures::StreamExt;
+    let res = futures::stream::iter(rbf_transactions)
+        .filter_map(|rbf_tx| async {
+            let out_idx = rbf_tx
+                .output
+                .iter()
+                .position(|output| ancestor_output.script_pubkey == *output.script_pubkey)
+                .expect("must exist since script_history was retrieved for this script")
+                as u32;
+
+            match context.rpc.get_tx_block_height(&rbf_tx.txid()).await {
+                Ok(Some(confirmation_height)) => {
+                    Some((Some(confirmation_height + 1), rbf_tx.clone(), out_idx))
+                }
+                Ok(None) => None,
+                Err(_) => None,
+            }
         })
-        .collect::<Vec<_>>();
-
-    let mut res: Option<(Option<u64>, bitcoin::Transaction, u32)> = None;
-    for rbf_tx in rbf_transactions.into_iter() {
-        let out_idx = rbf_tx
-            .output
-            .iter()
-            .position(|output| ancestor_output.script_pubkey == *output.script_pubkey)
-            .expect("must exist since script_history was retrieved for this script")
-            as u32;
-        fedimint_core::util::write_log(&format!("out_idx: {out_idx:?}"))
-            .await
-            .unwrap();
-        fedimint_core::util::write_log(&format!("rbf_txid: {:?}", rbf_tx.txid()))
-            .await
-            .unwrap();
-
-        match context.rpc.get_tx_block_height(&rbf_tx.txid()).await {
-            Ok(Some(confirmation_height)) => {
-                fedimint_core::util::write_log(&format!(
-                    "found confirmation height for rbf tx: {confirmation_height:?}"
-                ))
-                .await
-                .unwrap();
-                res = Some((Some(confirmation_height + 1), rbf_tx.clone(), out_idx));
-                break;
-            }
-            Ok(None) => {
-                res = Some((None, rbf_tx.clone(), out_idx));
-                break;
-            }
-            Err(e) => {
-                warn!("Failed to fetch confirmation height: {e:?}");
-                res = Some((None, rbf_tx.clone(), out_idx));
-                break;
-            }
-        }
-    }
+        .boxed()
+        .next()
+        .await;
 
     Ok(res)
 }
