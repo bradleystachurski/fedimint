@@ -1,6 +1,7 @@
 use std::sync::Arc;
 use std::time::{Duration, SystemTime};
 
+use anyhow::Context;
 use fedimint_client::sm::{ClientSMDatabaseTransaction, State, StateTransition};
 use fedimint_client::transaction::ClientInput;
 use fedimint_client::DynGlobalClientContext;
@@ -13,15 +14,13 @@ use fedimint_core::{Amount, OutPoint, TransactionId};
 use fedimint_wallet_common::tweakable::Tweakable;
 use fedimint_wallet_common::txoproof::PegInProof;
 use fedimint_wallet_common::WalletInput;
+use futures::StreamExt;
 use secp256k1::KeyPair;
-use tracing::{debug, instrument, trace, warn};
+use tracing::{debug, instrument, warn};
 
 use crate::api::WalletFederationApi;
 use crate::{WalletClientContext, WalletClientStates};
 
-const TRANSACTION_STATUS_FETCH_INTERVAL: Duration = Duration::from_secs(1);
-
-// FIXME: deal with RBF
 // FIXME: deal with multiple deposits
 #[cfg_attr(doc, aquamarine::aquamarine)]
 /// The state machine driving forward a deposit (aka peg-in).
@@ -196,8 +195,8 @@ async fn transition_deposit_timeout(old_state: DepositStateMachine) -> DepositSt
     }
 }
 
-struct TxDetails {
-    confirmation_block_count: u64,
+struct ConfirmedTxDetails {
+    block_count: u64,
     tx: bitcoin::Transaction,
     out_idx: u32,
 }
@@ -205,7 +204,7 @@ struct TxDetails {
 async fn find_confirmed_rbf_tx(
     context: &WalletClientContext,
     waiting_state: &WaitingForConfirmationsDepositState,
-) -> anyhow::Result<Option<TxDetails>> {
+) -> anyhow::Result<Option<ConfirmedTxDetails>> {
     let script = context
         .wallet_descriptor
         .tweak(&waiting_state.tweak_key.public_key(), &context.secp)
@@ -233,7 +232,6 @@ async fn find_confirmed_rbf_tx(
             })
     });
 
-    use futures::StreamExt;
     let maybe_rbf_tx = futures::stream::iter(rbf_transactions)
         .filter_map(|rbf_tx| async {
             let out_idx = rbf_tx
@@ -244,8 +242,8 @@ async fn find_confirmed_rbf_tx(
                 as u32;
 
             match context.rpc.get_tx_block_height(&rbf_tx.txid()).await {
-                Ok(Some(confirmation_height)) => Some(TxDetails {
-                    confirmation_block_count: confirmation_height + 1,
+                Ok(Some(confirmation_height)) => Some(ConfirmedTxDetails {
+                    block_count: confirmation_height + 1,
                     tx: rbf_tx.clone(),
                     out_idx,
                 }),
@@ -266,58 +264,42 @@ async fn await_btc_transaction_confirmed(
     global_context: DynGlobalClientContext,
     waiting_state: WaitingForConfirmationsDepositState,
 ) -> (TxOutProof, bitcoin::Transaction, u32) {
-    loop {
-        fedimint_core::util::write_log(&format!("starting loop of await confirmed"))
-            .await
-            .unwrap();
+    let find_confirmed_tx = || async {
         // TODO: make everything subscriptions
         // Wait for confirmation
-        let consensus_block_count = match global_context
+        let consensus_block_count = global_context
             .module_api()
             .fetch_consensus_block_count()
             .await
-        {
-            Ok(consensus_block_count) => consensus_block_count,
-            Err(e) => {
-                warn!("Failed to fetch consensus block count from federation: {e}");
-                sleep(TRANSACTION_STATUS_FETCH_INTERVAL).await;
-                continue;
-            }
-        };
+            .context("Failed to fetch consensus block count from federation")?;
+
         debug!(consensus_block_count, "Fetched consensus block count");
 
-        let TxDetails {
-            confirmation_block_count,
+        let ConfirmedTxDetails {
+            block_count: confirmation_block_count,
             tx: confirmed_tx,
             out_idx: confirmed_out_idx,
         } = match context
             .rpc
             .get_tx_block_height(&waiting_state.btc_transaction.txid())
             .await
-        {
-            Ok(Some(confirmation_height)) => TxDetails {
-                confirmation_block_count: confirmation_height + 1,
+            .context(format!(
+                "Failed to fetch tx block height for txid {:?}",
+                waiting_state.btc_transaction.txid()
+            ))?
+            .map(|confirmation_height| ConfirmedTxDetails {
+                block_count: confirmation_height + 1,
                 tx: waiting_state.btc_transaction.clone(),
                 out_idx: waiting_state.out_idx,
-            },
-            Ok(None) => {
-                match find_confirmed_rbf_tx(&context, &waiting_state)
-                    .await
-                    .unwrap()
-                {
-                    Some(tx_details) => tx_details,
-                    None => {
-                        trace!("Not included in block yet");
-                        sleep(TRANSACTION_STATUS_FETCH_INTERVAL).await;
-                        continue;
-                    }
-                }
-            }
-            Err(e) => {
-                warn!("Failed to fetch confirmation height: {e:?}");
-                sleep(TRANSACTION_STATUS_FETCH_INTERVAL).await;
-                continue;
-            }
+            }) {
+            Some(original_tx_details) => original_tx_details,
+            // If the original transaction doesn't have any confirmations, check for any confirmed
+            // rbf transactions
+            None => find_confirmed_rbf_tx(&context, &waiting_state)
+                .await?
+                // If there are no rbf transactions, we error, causing another iteration of the
+                // retry fn
+                .ok_or(anyhow::anyhow!("No confirmed transactions"))?,
         };
 
         debug!(
@@ -325,26 +307,38 @@ async fn await_btc_transaction_confirmed(
             "Fetched confirmation block count"
         );
 
-        if consensus_block_count < confirmation_block_count {
-            trace!("Not confirmed yet, confirmation_block_count={confirmation_block_count:?}, consensus_block_count={consensus_block_count}");
-            sleep(TRANSACTION_STATUS_FETCH_INTERVAL).await;
-            continue;
-        }
+        anyhow::ensure!(
+            consensus_block_count >= confirmation_block_count,
+            "Not enough confirmations yet, confirmation_block_count={:?}, consensus_block_count={:?}",
+            confirmation_block_count,
+            consensus_block_count
+        );
 
         // Get txout proof
-        let txout_proof = match context.rpc.get_txout_proof(confirmed_tx.txid()).await {
-            Ok(txout_proof) => txout_proof,
-            Err(e) => {
-                warn!("Failed to fetch transaction proof: {e:?}");
-                sleep(TRANSACTION_STATUS_FETCH_INTERVAL).await;
-                continue;
-            }
-        };
+        let txout_proof = context
+            .rpc
+            .get_txout_proof(confirmed_tx.txid())
+            .await
+            .context(format!(
+                "Failed to fetch transaction proof for txid {:?}",
+                confirmed_tx.txid()
+            ))?;
 
         debug!(proof_block_hash = ?txout_proof.block_header.block_hash(), "Generated merkle proof");
 
-        return (txout_proof, confirmed_tx, confirmed_out_idx);
-    }
+        Ok((txout_proof, confirmed_tx, confirmed_out_idx))
+    };
+
+    retry(
+        "await_btc_transaction_confirmed",
+        FibonacciBackoff::default()
+            .with_min_delay(Duration::from_secs(1))
+            .with_max_delay(Duration::from_secs(15 * 60))
+            .with_max_times(usize::MAX),
+        find_confirmed_tx,
+    )
+    .await
+    .expect("never fails")
 }
 
 async fn transition_btc_tx_confirmed(
