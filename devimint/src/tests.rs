@@ -2544,7 +2544,7 @@ pub async fn repro_stuck_rbf(dev_fed: DevFed) -> Result<()> {
     //     std::collections::HashMap::new();
     // })
 
-    // bitcoind.mine_blocks(21).await?;
+    bitcoind.mine_blocks(21).await?;
     let tx_res = bitcoind.get_transaction(&first_txid).await?;
     info!(?tx_res);
     let rbf_tx_res = bitcoind.get_transaction(&rbf_txid).await?;

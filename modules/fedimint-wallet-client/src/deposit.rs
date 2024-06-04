@@ -74,12 +74,14 @@ impl State for DepositStateMachine {
                         global_context.clone(),
                         waiting_state.clone(),
                     ),
-                    move |dbtx, txout_proof, old_state| {
+                    move |dbtx, (txout_proof, confirmed_tx, confirmed_out_idx), old_state| {
                         Box::pin(transition_btc_tx_confirmed(
                             dbtx,
                             global_context.clone(),
                             old_state,
                             txout_proof,
+                            confirmed_tx,
+                            confirmed_out_idx,
                         ))
                     },
                 )]
@@ -199,8 +201,11 @@ async fn await_btc_transaction_confirmed(
     context: WalletClientContext,
     global_context: DynGlobalClientContext,
     waiting_state: WaitingForConfirmationsDepositState,
-) -> TxOutProof {
+) -> (TxOutProof, bitcoin::Transaction, u32) {
     loop {
+        fedimint_core::util::write_log(&format!("starting loop of await confirmed"))
+            .await
+            .unwrap();
         // TODO: make everything subscriptions
         // Wait for confirmation
         let consensus_block_count = match global_context
@@ -217,24 +222,127 @@ async fn await_btc_transaction_confirmed(
         };
         debug!(consensus_block_count, "Fetched consensus block count");
 
-        let script = context
-            .wallet_descriptor
-            .tweak(&waiting_state.tweak_key.public_key(), &context.secp)
-            .script_pubkey();
-
-        context.rpc.get_script_history(&script).await.unwrap();
-
-        let confirmation_block_count = match context
+        let (confirmation_block_count, confirmed_tx, confirmed_out_idx) = match context
             .rpc
             .get_tx_block_height(&waiting_state.btc_transaction.txid())
             .await
         {
-            Ok(Some(confirmation_height)) => Some(confirmation_height + 1),
-            Ok(None) => None,
+            Ok(Some(confirmation_height)) => (
+                Some(confirmation_height + 1),
+                waiting_state.btc_transaction.clone(),
+                waiting_state.out_idx,
+            ),
+            Ok(None) => {
+                fedimint_core::util::write_log(&format!(
+                    "inside match arm for no confirmation height for ancestor"
+                ))
+                .await
+                .unwrap();
+
+                let script = context
+                    .wallet_descriptor
+                    .tweak(&waiting_state.tweak_key.public_key(), &context.secp)
+                    .script_pubkey();
+
+                let script_history = context.rpc.get_script_history(&script).await.unwrap();
+                let filtered_script_history = script_history
+                    .iter()
+                    .filter(|tx| tx.txid() != waiting_state.btc_transaction.txid());
+                fedimint_core::util::write_log(&format!(
+                    "filtered_script_history: {filtered_script_history:?}"
+                ))
+                .await
+                .unwrap();
+                // perhaps I can make this generic for bitcoind and esplora by iterating over
+                // all instead of just maybe
+                let maybe_rbf_tx = script_history
+                    .iter()
+                    .filter(|tx| tx.txid() != waiting_state.btc_transaction.txid())
+                    // .find(|tx| {
+                    //     tx.input.iter().any(|input| {
+                    //         waiting_state
+                    //             .btc_transaction
+                    //             .input
+                    //             .iter()
+                    //             .any(|ancestor_input| ancestor_input == input)
+                    //     })
+                    // });
+                    // this works, need to compare specifically outpoints not full input
+                    .find(|tx| {
+                        tx.input.iter().any(|input| {
+                            waiting_state
+                                .btc_transaction
+                                .input
+                                .iter()
+                                .any(|ancestor_input| {
+                                    ancestor_input.previous_output == input.previous_output
+                                })
+                        })
+                    });
+
+                fedimint_core::util::write_log(&format!("maybe_rbf_tx: {maybe_rbf_tx:?}"))
+                    .await
+                    .unwrap();
+
+                let ancestor_output = waiting_state
+                    .btc_transaction
+                    .output
+                    .iter()
+                    .nth(waiting_state.out_idx as usize)
+                    .expect(
+                        "Bad state: deposit transaction must contain output for out_idx: {out_idx}",
+                    );
+
+                fedimint_core::util::write_log(&format!("ancestor_output: {ancestor_output:?}"))
+                    .await
+                    .unwrap();
+                match maybe_rbf_tx {
+                    None => (
+                        None,
+                        waiting_state.btc_transaction.clone(),
+                        waiting_state.out_idx,
+                    ),
+                    Some(rbf_tx) => {
+                        let out_idx = rbf_tx
+                            .output
+                            .iter()
+                            .position(|output| {
+                                ancestor_output.script_pubkey == *output.script_pubkey
+                            })
+                            .expect("must exist since script_history was retrieved for this script")
+                            as u32;
+                        fedimint_core::util::write_log(&format!("out_idx: {out_idx:?}"))
+                            .await
+                            .unwrap();
+                        fedimint_core::util::write_log(&format!("rbf_txid: {:?}", rbf_tx.txid()))
+                            .await
+                            .unwrap();
+
+                        match context.rpc.get_tx_block_height(&rbf_tx.txid()).await {
+                            Ok(Some(confirmation_height)) => {
+                                fedimint_core::util::write_log(&format!(
+                                    "found confirmation height for rbf tx: {confirmation_height:?}"
+                                ))
+                                .await
+                                .unwrap();
+                                (Some(confirmation_height + 1), rbf_tx.clone(), out_idx)
+                            }
+                            Ok(None) => (None, rbf_tx.clone(), out_idx),
+                            Err(e) => {
+                                warn!("Failed to fetch confirmation height: {e:?}");
+                                (None, rbf_tx.clone(), out_idx)
+                            }
+                        }
+                    }
+                }
+            }
             Err(e) => {
                 warn!("Failed to fetch confirmation height: {e:?}");
-                sleep(TRANSACTION_STATUS_FETCH_INTERVAL).await;
-                continue;
+                (
+                    None,
+                    waiting_state.btc_transaction.clone(),
+                    waiting_state.out_idx,
+                )
             }
         };
 
@@ -253,11 +361,7 @@ async fn await_btc_transaction_confirmed(
         }
 
         // Get txout proof
-        let txout_proof = match context
-            .rpc
-            .get_txout_proof(waiting_state.btc_transaction.txid())
-            .await
-        {
+        let txout_proof = match context.rpc.get_txout_proof(confirmed_tx.txid()).await {
             Ok(txout_proof) => txout_proof,
             Err(e) => {
                 warn!("Failed to fetch transaction proof: {e:?}");
@@ -268,7 +372,7 @@ async fn await_btc_transaction_confirmed(
 
         debug!(proof_block_hash = ?txout_proof.block_header.block_hash(), "Generated merkle proof");
 
-        return txout_proof;
+        return (txout_proof, confirmed_tx, confirmed_out_idx);
     }
 }
 
@@ -277,6 +381,8 @@ async fn transition_btc_tx_confirmed(
     global_context: DynGlobalClientContext,
     old_state: DepositStateMachine,
     txout_proof: TxOutProof,
+    confirmed_tx: bitcoin::Transaction,
+    confirmed_out_idx: u32,
 ) -> DepositStateMachine {
     let awaiting_confirmation_state = match old_state.state {
         DepositStates::WaitingForConfirmations(s) => s,
@@ -285,8 +391,8 @@ async fn transition_btc_tx_confirmed(
 
     let pegin_proof = PegInProof::new(
         txout_proof,
-        awaiting_confirmation_state.btc_transaction,
-        awaiting_confirmation_state.out_idx,
+        confirmed_tx,
+        confirmed_out_idx,
         awaiting_confirmation_state.tweak_key.public_key(),
     )
     .expect("TODO: handle API returning faulty proofs");
