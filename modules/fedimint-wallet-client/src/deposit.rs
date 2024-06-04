@@ -197,7 +197,7 @@ async fn transition_deposit_timeout(old_state: DepositStateMachine) -> DepositSt
 }
 
 struct TxDetails {
-    confirmation_block_count: Option<u64>,
+    confirmation_block_count: u64,
     tx: bitcoin::Transaction,
     out_idx: u32,
 }
@@ -234,7 +234,7 @@ async fn find_confirmed_rbf_tx(
     });
 
     use futures::StreamExt;
-    let res = futures::stream::iter(rbf_transactions)
+    let maybe_rbf_tx = futures::stream::iter(rbf_transactions)
         .filter_map(|rbf_tx| async {
             let out_idx = rbf_tx
                 .output
@@ -245,7 +245,7 @@ async fn find_confirmed_rbf_tx(
 
             match context.rpc.get_tx_block_height(&rbf_tx.txid()).await {
                 Ok(Some(confirmation_height)) => Some(TxDetails {
-                    confirmation_block_count: Some(confirmation_height + 1),
+                    confirmation_block_count: confirmation_height + 1,
                     tx: rbf_tx.clone(),
                     out_idx,
                 }),
@@ -257,7 +257,7 @@ async fn find_confirmed_rbf_tx(
         .next()
         .await;
 
-    Ok(res)
+    Ok(maybe_rbf_tx)
 }
 
 #[instrument(skip_all, level = "debug")]
@@ -296,7 +296,7 @@ async fn await_btc_transaction_confirmed(
             .await
         {
             Ok(Some(confirmation_height)) => TxDetails {
-                confirmation_block_count: Some(confirmation_height + 1),
+                confirmation_block_count: confirmation_height + 1,
                 tx: waiting_state.btc_transaction.clone(),
                 out_idx: waiting_state.out_idx,
             },
@@ -306,20 +306,17 @@ async fn await_btc_transaction_confirmed(
                     .unwrap()
                 {
                     Some(tx_details) => tx_details,
-                    None => TxDetails {
-                        confirmation_block_count: None,
-                        tx: waiting_state.btc_transaction.clone(),
-                        out_idx: waiting_state.out_idx,
-                    },
+                    None => {
+                        trace!("Not included in block yet");
+                        sleep(TRANSACTION_STATUS_FETCH_INTERVAL).await;
+                        continue;
+                    }
                 }
             }
             Err(e) => {
                 warn!("Failed to fetch confirmation height: {e:?}");
-                TxDetails {
-                    confirmation_block_count: None,
-                    tx: waiting_state.btc_transaction.clone(),
-                    out_idx: waiting_state.out_idx,
-                }
+                sleep(TRANSACTION_STATUS_FETCH_INTERVAL).await;
+                continue;
             }
         };
 
@@ -328,10 +325,7 @@ async fn await_btc_transaction_confirmed(
             "Fetched confirmation block count"
         );
 
-        if !confirmation_block_count
-            .map(|confirmation_block_count| consensus_block_count >= confirmation_block_count)
-            .unwrap_or(false)
-        {
+        if consensus_block_count < confirmation_block_count {
             trace!("Not confirmed yet, confirmation_block_count={confirmation_block_count:?}, consensus_block_count={consensus_block_count}");
             sleep(TRANSACTION_STATUS_FETCH_INTERVAL).await;
             continue;
