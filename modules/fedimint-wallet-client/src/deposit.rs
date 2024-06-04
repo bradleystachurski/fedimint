@@ -1,4 +1,3 @@
-use std::cmp;
 use std::sync::Arc;
 use std::time::{Duration, SystemTime};
 
@@ -9,6 +8,7 @@ use fedimint_core::core::OperationId;
 use fedimint_core::encoding::{Decodable, Encodable};
 use fedimint_core::task::sleep;
 use fedimint_core::txoproof::TxOutProof;
+use fedimint_core::util::{retry, FibonacciBackoff};
 use fedimint_core::{Amount, OutPoint, TransactionId};
 use fedimint_wallet_common::tweakable::Tweakable;
 use fedimint_wallet_common::txoproof::PegInProof;
@@ -105,53 +105,51 @@ async fn await_created_btc_transaction_submitted(
         .wallet_descriptor
         .tweak(&tweak.public_key(), &context.secp)
         .script_pubkey();
-    loop {
-        match context.rpc.watch_script_history(&script).await {
-            Ok(_) => break,
-            Err(e) => warn!("Error while awaiting btc tx submitting: {e}"),
+
+    retry(
+        "watch_script_history",
+        FibonacciBackoff::default()
+            .with_min_delay(Duration::from_secs(1))
+            .with_max_delay(Duration::from_secs(10 * 60))
+            .with_max_times(usize::MAX),
+        || async {
+            context.rpc.watch_script_history(&script).await?;
+            Ok(())
+        },
+    )
+    .await
+    .expect("never fails");
+
+    let find_submitted_tx = || async {
+        let script_history = context.rpc.get_script_history(&script).await?;
+
+        if script_history.len() > 1 {
+            warn!("More than one transaction was sent to deposit address, only considering the first one");
         }
-        sleep(TRANSACTION_STATUS_FETCH_INTERVAL).await;
-    }
-    for attempt in 0u32.. {
-        sleep(cmp::min(
-            TRANSACTION_STATUS_FETCH_INTERVAL * attempt,
-            Duration::from_secs(60 * 15),
-        ))
-        .await;
 
-        match context.rpc.get_script_history(&script).await {
-            Ok(received) => {
-                // TODO: fix
-                if received.len() > 1 {
-                    warn!("More than one transaction was sent to deposit address, only considering the first one");
-                }
+        let transaction = script_history.into_iter().next().ok_or(anyhow::anyhow!(
+            "No transactions received yet for script {script:?}"
+        ))?;
 
-                if let Some(transaction) = received.into_iter().next() {
-                    let out_idx = transaction
-                        .output
-                        .iter()
-                        .enumerate()
-                        .find_map(|(idx, output)| {
-                            if output.script_pubkey == script {
-                                Some(idx as u32)
-                            } else {
-                                None
-                            }
-                        })
-                        .expect("TODO: handle invalid tx returned by API");
+        let out_idx = transaction
+            .output
+            .iter()
+            .position(|output| output.script_pubkey == script)
+            .expect("TODO: handle invalid tx returned by API") as u32;
 
-                    return (transaction, out_idx);
-                } else {
-                    trace!("No transactions received yet for script {script:?}");
-                }
-            }
-            Err(e) => {
-                warn!("Error fetching transaction history for {script:?}: {e}");
-            }
-        }
-    }
+        Ok((transaction, out_idx))
+    };
 
-    unreachable!()
+    retry(
+        "await_created_btc_transaction_submitted",
+        FibonacciBackoff::default()
+            .with_min_delay(Duration::from_secs(1))
+            .with_max_delay(Duration::from_secs(15 * 60))
+            .with_max_times(usize::MAX),
+        find_submitted_tx,
+    )
+    .await
+    .expect("never fails")
 }
 
 async fn transition_tx_seen(
