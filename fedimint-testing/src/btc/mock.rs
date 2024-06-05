@@ -231,6 +231,18 @@ impl BitcoinTest for FakeBitcoinTest {
         (proof, transaction)
     }
 
+    async fn send_tx(
+        &self,
+        address: &Address,
+        amount: bitcoin::Amount,
+    ) -> anyhow::Result<bitcoin::Txid> {
+        todo!()
+    }
+
+    async fn submit_rbf_tx(&self, txid: &bitcoin::Txid) -> anyhow::Result<bitcoin::Txid> {
+        todo!()
+    }
+
     async fn get_new_address(&self) -> Address {
         let ctx = bitcoin::secp256k1::Secp256k1::new();
         let (_, public_key) = ctx.generate_keypair(&mut OsRng);

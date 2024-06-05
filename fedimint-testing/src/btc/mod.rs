@@ -32,6 +32,14 @@ pub trait BitcoinTest {
         amount: bitcoin::Amount,
     ) -> (TxOutProof, Transaction);
 
+    async fn send_tx(
+        &self,
+        address: &Address,
+        amount: bitcoin::Amount,
+    ) -> anyhow::Result<bitcoin::Txid>;
+
+    async fn submit_rbf_tx(&self, txid: &bitcoin::Txid) -> anyhow::Result<bitcoin::Txid>;
+
     /// Returns a new address.
     async fn get_new_address(&self) -> Address;
 

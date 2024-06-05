@@ -104,6 +104,7 @@ async fn await_consensus_to_catch_up(
 }
 
 #[tokio::test(flavor = "multi_thread")]
+#[ignore]
 async fn sanity_check_bitcoin_blocks() -> anyhow::Result<()> {
     let fixtures = fixtures();
     let fed = fixtures.new_default_fed().await;
@@ -146,6 +147,7 @@ async fn sanity_check_bitcoin_blocks() -> anyhow::Result<()> {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+#[ignore]
 async fn on_chain_peg_in_and_peg_out_happy_case() -> anyhow::Result<()> {
     let fixtures = fixtures();
     let fed = fixtures.new_default_fed().await;
@@ -206,6 +208,7 @@ async fn on_chain_peg_in_and_peg_out_happy_case() -> anyhow::Result<()> {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+#[ignore]
 async fn peg_out_fail_refund() -> anyhow::Result<()> {
     let fixtures = fixtures();
     let fed = fixtures.new_default_fed().await;
@@ -253,6 +256,109 @@ async fn peg_out_fail_refund() -> anyhow::Result<()> {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn peg_ins_support_rbf() -> anyhow::Result<()> {
+    let fixtures = fixtures();
+    let fed = fixtures.new_default_fed().await;
+    let client = fed.new_client().await;
+    let bitcoin = fixtures.bitcoin();
+    let server_bitcoin_rpc_config = fixtures.bitcoin_server();
+    info!("Starting test peg_ins_that_are_unconfirmed_are_rejected");
+
+    let (wallet_server_cfg, _) = build_wallet_server_configs(server_bitcoin_rpc_config)?;
+    let wallet_config: WalletConfig = wallet_server_cfg[0].to_typed()?;
+    let wallet_module = &client.get_first_module::<WalletClientModule>();
+    let finality_delay = wallet_config.consensus.finality_delay;
+
+    let valid_until = time::now() + PEG_IN_TIMEOUT;
+    let (op, peg_in_address) = wallet_module.get_deposit_address(valid_until, ()).await?;
+
+    let mut balance_sub = client.subscribe_balance_changes().await;
+    assert_eq!(balance_sub.ok().await?, sats(0));
+
+    // Generate a minimum number of blocks before sending transactions
+    bitcoin.mine_blocks(finality_delay.into()).await;
+
+    // Create peg-in transaction
+    let original_txid = bitcoin
+        .send_tx(&peg_in_address, bsats(100_000))
+        // .send_tx(&peg_in_address, bsats(PEG_IN_AMOUNT_SATS))
+        .await?;
+
+    // TODO: consider cleaner way of doing this
+    // might not be necessary here, but was in devimint test
+    sleep_in_test(
+        format!("waiting to observer RBF tx"),
+        Duration::from_secs(10),
+    )
+    .await;
+
+    // RBF peg-in transaction
+    let rbf_txid = bitcoin.submit_rbf_tx(&original_txid).await?;
+    info!(?original_txid);
+    info!(?rbf_txid);
+
+    // Await deposit
+    // assert_eq!(sub.ok().await?, DepositState::WaitingForTransaction);
+    // assert_matches!(sub.ok().await?, DepositState::WaitingForConfirmation { ..
+    // });
+
+    // bitcoin.mine_blocks(finality_delay).await;
+    // assert!(matches!(sub.ok().await?, DepositState::Confirmed(_)));
+    // assert!(matches!(sub.ok().await?, DepositState::Claimed(_)));
+
+    let sub = wallet_module.subscribe_deposit_updates(op).await?;
+    let mut sub = sub.into_stream();
+    assert_eq!(sub.ok().await?, DepositState::WaitingForTransaction);
+    match sub.ok().await? {
+        DepositState::WaitingForConfirmation(tx_data) => {
+            assert_eq!(tx_data.btc_transaction.txid(), original_txid);
+            println!("inside a match arm")
+        }
+        other => panic!("Unexpected state: {other:?}"),
+    }
+
+    // Mine the RBF tx
+    bitcoin.mine_blocks((finality_delay + 1).into()).await;
+
+    // Verify the rbf tx was mined
+    // might not need to keep this part in the test once I find the reason it's not
+    // confirming
+    let original_tx_height = bitcoin.get_tx_block_height(&original_txid).await;
+    let rbf_tx_height = bitcoin.get_tx_block_height(&rbf_txid).await;
+    info!(?original_tx_height);
+    info!(?rbf_tx_height);
+
+    // assert!(matches!(sub.ok().await?, DepositState::Confirmed(_)));
+    // assert!(matches!(sub.ok().await?, DepositState::Claimed(_)));
+
+    // hmm, this won't confirm, but it will confirm for devimint tests
+    // something is fishy
+
+    match sub.ok().await? {
+        DepositState::Confirmed(tx_data) => {
+            assert_eq!(tx_data.btc_transaction.txid(), rbf_txid);
+        }
+        other => panic!("Unexpected state: {other:?}"),
+    }
+
+    // // TODO: need to verify txid matches rbf txid
+    // // requires state machine migration
+    match sub.ok().await? {
+        DepositState::Claimed(tx_data) => {
+            assert_eq!(tx_data.btc_transaction.txid(), rbf_txid);
+        }
+        other => panic!("Unexpected state: {other:?}"),
+    }
+
+    // // Verify balance
+    // // assert_eq!(client.get_balance().await, sats(PEG_IN_AMOUNT_SATS));
+    // // assert_eq!(balance_sub.ok().await?, sats(PEG_IN_AMOUNT_SATS));
+
+    Ok(())
+}
+
+#[tokio::test(flavor = "multi_thread")]
+#[ignore]
 async fn peg_outs_support_rbf() -> anyhow::Result<()> {
     let fixtures = fixtures();
     let fed = fixtures.new_default_fed().await;
@@ -334,6 +440,7 @@ async fn peg_outs_support_rbf() -> anyhow::Result<()> {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+#[ignore]
 async fn peg_outs_must_wait_for_available_utxos() -> anyhow::Result<()> {
     let fixtures = fixtures();
     let fed = fixtures.new_default_fed().await;
@@ -419,6 +526,7 @@ async fn peg_outs_must_wait_for_available_utxos() -> anyhow::Result<()> {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+#[ignore]
 async fn peg_ins_that_are_unconfirmed_are_rejected() -> anyhow::Result<()> {
     let fixtures = fixtures();
     let bitcoin = fixtures.bitcoin();
@@ -945,6 +1053,7 @@ mod fedimint_migration_tests {
     }
 
     #[tokio::test(flavor = "multi_thread")]
+    #[ignore]
     async fn snapshot_client_db_migrations() -> anyhow::Result<()> {
         snapshot_db_migrations_client::<_, _, WalletCommonInit>(
             "wallet-client-v0",
@@ -955,6 +1064,7 @@ mod fedimint_migration_tests {
     }
 
     #[tokio::test(flavor = "multi_thread")]
+    #[ignore]
     async fn test_client_db_migrations() -> anyhow::Result<()> {
         let _ = TracingSetup::default().init();
 

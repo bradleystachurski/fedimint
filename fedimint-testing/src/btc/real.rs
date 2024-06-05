@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::io::Cursor;
 use std::sync::Arc;
 use std::time::Duration;
@@ -132,6 +133,76 @@ impl BitcoinTest for RealBitcoinTestNoLock {
 
         (proof, tx)
     }
+
+    async fn send_tx(
+        &self,
+        address: &Address,
+        amount: bitcoin::Amount,
+    ) -> anyhow::Result<bitcoin::Txid> {
+        Ok(self
+            .client
+            .send_to_address(address, amount, None, None, None, None, None, None)
+            .expect(Self::ERROR))
+    }
+
+    async fn submit_rbf_tx(&self, txid: &bitcoin::Txid) -> anyhow::Result<bitcoin::Txid> {
+        let raw_tx_res = self.client.get_raw_transaction(&txid, None)?;
+
+        let decoded_raw_tx = self.client.decode_raw_transaction(&raw_tx_res, None)?;
+
+        // Use the same inputs as the original tx
+        let rbf_tx_inputs = decoded_raw_tx
+            .vin
+            .iter()
+            .map(
+                |input| bitcoincore_rpc::bitcoincore_rpc_json::CreateRawTransactionInput {
+                    txid: input.txid.expect("input previously constructed"),
+                    vout: input.vout.expect("input previously contructed"),
+                    sequence: Some(input.sequence),
+                },
+            )
+            .collect::<Vec<_>>();
+
+        let mut rbf_tx_outputs: HashMap<String, bitcoin::Amount> = HashMap::new();
+        for (out_idx, output) in decoded_raw_tx.vout.iter().enumerate() {
+            let address_unchecked = output
+                .script_pub_key
+                .address
+                .as_ref()
+                .expect("output has an address");
+
+            let address = address_unchecked.clone().assume_checked().to_string();
+
+            let amount = if out_idx == 0 {
+                // first output is send address, use same amount
+                output.value
+            } else {
+                // second output is change address, use lower amount to increase fee for rbf
+                // TODO: more elegant way to handle subtraction
+                output
+                    .value
+                    .checked_sub(bitcoin::Amount::from_sat(10_000))
+                    .expect("bad math")
+            };
+
+            let _ = rbf_tx_outputs.insert(address, amount);
+        }
+
+        let raw_tx = self.client.create_raw_transaction(
+            &rbf_tx_inputs,
+            &rbf_tx_outputs,
+            None,
+            Some(true),
+        )?;
+
+        let signed_raw_tx = self
+            .client
+            .sign_raw_transaction_with_wallet(&raw_tx, None, None)?
+            .transaction()?;
+
+        Ok(self.client.send_raw_transaction(&signed_raw_tx)?)
+    }
+
     async fn mine_block_and_get_received(&self, address: &Address) -> Amount {
         self.mine_blocks(1).await;
         self.client
@@ -253,6 +324,20 @@ impl BitcoinTest for RealBitcoinTest {
         self.inner.send_and_mine_block(address, amount).await
     }
 
+    async fn send_tx(
+        &self,
+        address: &Address,
+        amount: bitcoin::Amount,
+    ) -> anyhow::Result<bitcoin::Txid> {
+        let _lock = self.lock_exclusive().await;
+        self.inner.send_tx(address, amount).await
+    }
+
+    async fn submit_rbf_tx(&self, txid: &bitcoin::Txid) -> anyhow::Result<bitcoin::Txid> {
+        let _lock = self.lock_exclusive().await;
+        self.inner.submit_rbf_tx(txid).await
+    }
+
     async fn get_new_address(&self) -> Address {
         let _lock = self.lock_exclusive().await;
         self.inner.get_new_address().await
@@ -298,6 +383,18 @@ impl BitcoinTest for RealBitcoinTestLocked {
         amount: bitcoin::Amount,
     ) -> (TxOutProof, Transaction) {
         self.inner.send_and_mine_block(address, amount).await
+    }
+
+    async fn send_tx(
+        &self,
+        address: &Address,
+        amount: bitcoin::Amount,
+    ) -> anyhow::Result<bitcoin::Txid> {
+        self.inner.send_tx(address, amount).await
+    }
+
+    async fn submit_rbf_tx(&self, txid: &bitcoin::Txid) -> anyhow::Result<bitcoin::Txid> {
+        self.inner.submit_rbf_tx(txid).await
     }
 
     async fn get_new_address(&self) -> Address {

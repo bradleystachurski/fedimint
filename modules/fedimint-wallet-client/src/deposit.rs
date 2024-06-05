@@ -356,7 +356,7 @@ async fn transition_btc_tx_confirmed(
 
     let pegin_proof = PegInProof::new(
         txout_proof,
-        confirmed_tx,
+        confirmed_tx.clone(),
         confirmed_out_idx,
         awaiting_confirmation_state.tweak_key.public_key(),
     )
@@ -380,6 +380,8 @@ async fn transition_btc_tx_confirmed(
         state: DepositStates::Claiming(ClaimingDepositState {
             transaction_id: fm_txid,
             change,
+            btc_transaction: confirmed_tx,
+            btc_out_idx: confirmed_out_idx,
         }),
     }
 }
@@ -425,6 +427,8 @@ pub struct ClaimingDepositState {
     /// Fedimint transaction id in which the deposit is being claimed.
     pub(crate) transaction_id: TransactionId,
     pub(crate) change: Vec<OutPoint>,
+    pub(crate) btc_transaction: bitcoin::Transaction,
+    pub(crate) btc_out_idx: u32,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Decodable, Encodable)]

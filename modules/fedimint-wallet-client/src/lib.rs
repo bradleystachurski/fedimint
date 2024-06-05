@@ -497,6 +497,10 @@ impl WalletClientModule {
                         },
                         None => return,
                     };
+                    let tx_data = BitcoinTransactionData {
+                        btc_transaction: claiming.btc_transaction,
+                        out_idx: claiming.btc_out_idx
+                    };
                     yield DepositState::Confirmed(tx_data.clone());
 
                     if let Err(e) = tx_subscriber.await_tx_accepted(claiming.transaction_id).await {
