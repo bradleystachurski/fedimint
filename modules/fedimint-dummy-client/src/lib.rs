@@ -373,8 +373,14 @@ impl ClientModuleInit for DummyClientInit {
 
         migrations.insert(
             DatabaseVersion(1),
-            move |_, active_states, inactive_states| {
-                migrate_state(active_states, inactive_states, db::get_v1_migrated_state).boxed()
+            move |dbtx, active_states, inactive_states| {
+                migrate_state(
+                    active_states,
+                    inactive_states,
+                    db::get_v1_migrated_state,
+                    dbtx,
+                )
+                .boxed()
             },
         );
 

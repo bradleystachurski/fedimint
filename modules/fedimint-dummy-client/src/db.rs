@@ -75,6 +75,7 @@ pub async fn migrate_to_v1(
 pub(crate) fn get_v1_migrated_state(
     operation_id: OperationId,
     cursor: &mut Cursor<&[u8]>,
+    _dbtx: &mut DatabaseTransaction<'_>,
 ) -> anyhow::Result<Option<(Vec<u8>, OperationId)>> {
     let decoders = ModuleDecoderRegistry::default();
     let dummy_sm_variant = u16::consensus_decode(cursor, &decoders)?;

@@ -345,22 +345,40 @@ impl ClientModuleInit for LightningClientInit {
 
         migrations.insert(
             DatabaseVersion(1),
-            move |_, active_states, inactive_states| {
-                migrate_state(active_states, inactive_states, db::get_v1_migrated_state).boxed()
+            move |dbtx, active_states, inactive_states| {
+                migrate_state(
+                    active_states,
+                    inactive_states,
+                    db::get_v1_migrated_state,
+                    dbtx,
+                )
+                .boxed()
             },
         );
 
         migrations.insert(
             DatabaseVersion(2),
-            move |_, active_states, inactive_states| {
-                migrate_state(active_states, inactive_states, db::get_v2_migrated_state).boxed()
+            move |dbtx, active_states, inactive_states| {
+                migrate_state(
+                    active_states,
+                    inactive_states,
+                    db::get_v2_migrated_state,
+                    dbtx,
+                )
+                .boxed()
             },
         );
 
         migrations.insert(
             DatabaseVersion(3),
-            move |_, active_states, inactive_states| {
-                migrate_state(active_states, inactive_states, db::get_v3_migrated_state).boxed()
+            move |dbtx, active_states, inactive_states| {
+                migrate_state(
+                    active_states,
+                    inactive_states,
+                    db::get_v3_migrated_state,
+                    dbtx,
+                )
+                .boxed()
             },
         );
 

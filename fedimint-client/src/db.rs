@@ -632,8 +632,11 @@ pub async fn remove_old_and_persist_new_inactive_states(
 }
 
 /// Helper function definition for migrating a single state.
-type MigrateStateFn =
-    fn(OperationId, &mut Cursor<&[u8]>) -> anyhow::Result<Option<(Vec<u8>, OperationId)>>;
+type MigrateStateFn = fn(
+    OperationId,
+    &mut Cursor<&[u8]>,
+    &mut DatabaseTransaction<'_>,
+) -> anyhow::Result<Option<(Vec<u8>, OperationId)>>;
 
 /// Migrates a particular state by looping over all active and inactive states.
 /// If the `migrate` closure returns `None`, this state was not migrated and
@@ -642,6 +645,7 @@ pub async fn migrate_state(
     active_states: Vec<(Vec<u8>, OperationId)>,
     inactive_states: Vec<(Vec<u8>, OperationId)>,
     migrate: MigrateStateFn,
+    dbtx: &mut DatabaseTransaction<'_>,
 ) -> anyhow::Result<Option<(Vec<(Vec<u8>, OperationId)>, Vec<(Vec<u8>, OperationId)>)>> {
     let mut new_active_states = Vec::with_capacity(active_states.len());
     for (active_state, operation_id) in active_states {
@@ -652,7 +656,7 @@ pub async fn migrate_state(
         let module_instance_id =
             fedimint_core::core::ModuleInstanceId::consensus_decode(&mut cursor, &decoders)?;
 
-        let state = match migrate(operation_id, &mut cursor)? {
+        let state = match migrate(operation_id, &mut cursor, dbtx)? {
             Some((mut state, operation_id)) => {
                 let mut final_state = module_instance_id.to_bytes();
                 final_state.append(&mut state);
@@ -673,7 +677,7 @@ pub async fn migrate_state(
         let module_instance_id =
             fedimint_core::core::ModuleInstanceId::consensus_decode(&mut cursor, &decoders)?;
 
-        let state = match migrate(operation_id, &mut cursor)? {
+        let state = match migrate(operation_id, &mut cursor, dbtx)? {
             Some((mut state, operation_id)) => {
                 let mut final_state = module_instance_id.to_bytes();
                 final_state.append(&mut state);

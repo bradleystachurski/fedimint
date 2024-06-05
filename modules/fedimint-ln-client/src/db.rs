@@ -2,6 +2,7 @@ use std::io::Cursor;
 
 use bitcoin::hashes::sha256;
 use fedimint_core::core::OperationId;
+use fedimint_core::db::DatabaseTransaction;
 use fedimint_core::encoding::{Decodable, Encodable};
 use fedimint_core::module::registry::ModuleDecoderRegistry;
 use fedimint_core::{impl_db_lookup, impl_db_record, OutPoint, TransactionId};
@@ -96,6 +97,7 @@ impl_db_lookup!(
 pub(crate) fn get_v1_migrated_state(
     operation_id: OperationId,
     cursor: &mut Cursor<&[u8]>,
+    _dbtx: &mut DatabaseTransaction<'_>,
 ) -> anyhow::Result<Option<(Vec<u8>, OperationId)>> {
     #[derive(Debug, Clone, Decodable)]
     pub struct LightningReceiveConfirmedInvoiceV0 {
@@ -158,6 +160,7 @@ pub(crate) fn get_v1_migrated_state(
 pub(crate) fn get_v2_migrated_state(
     operation_id: OperationId,
     cursor: &mut Cursor<&[u8]>,
+    _dbtx: &mut DatabaseTransaction<'_>,
 ) -> anyhow::Result<Option<(Vec<u8>, OperationId)>> {
     let decoders = ModuleDecoderRegistry::default();
     let ln_sm_variant = u16::consensus_decode(cursor, &decoders)?;
@@ -191,6 +194,7 @@ pub(crate) fn get_v2_migrated_state(
 pub(crate) fn get_v3_migrated_state(
     operation_id: OperationId,
     cursor: &mut Cursor<&[u8]>,
+    _dbtx: &mut DatabaseTransaction<'_>,
 ) -> anyhow::Result<Option<(Vec<u8>, OperationId)>> {
     let decoders = ModuleDecoderRegistry::default();
     let ln_sm_variant = u16::consensus_decode(cursor, &decoders)?;
@@ -265,6 +269,7 @@ mod tests {
 
     use fedimint_client::db::migrate_state;
     use fedimint_core::core::{IntoDynInstance, OperationId};
+    use fedimint_core::db::{DatabaseTransaction, IRawDatabaseExt};
     use fedimint_core::encoding::Encodable;
     use fedimint_core::{BitcoinHash, TransactionId};
     use lightning_invoice::Bolt11Invoice;
@@ -333,6 +338,9 @@ mod tests {
 
         let old_states = vec![(old_state, operation_id)];
 
+        let db = fedimint_core::db::mem_impl::MemDatabase::new().into_database();
+        let dbtx = db.begin_transaction().await;
+
         let new_state = LightningClientStateMachines::Receive(LightningReceiveStateMachine {
             operation_id,
             state: LightningReceiveStates::SubmittedOffer(LightningReceiveSubmittedOffer {
@@ -343,11 +351,15 @@ mod tests {
         })
         .into_dyn(instance_id);
 
-        let (new_active_states, new_inactive_states) =
-            migrate_state(old_states.clone(), old_states, get_v1_migrated_state)
-                .await
-                .expect("Migration failed")
-                .expect("Migration produced output");
+        let (new_active_states, new_inactive_states) = migrate_state(
+            old_states.clone(),
+            old_states,
+            get_v1_migrated_state,
+            &mut dbtx.into_nc(),
+        )
+        .await
+        .expect("Migration failed")
+        .expect("Migration produced output");
 
         assert_eq!(new_inactive_states.len(), 1);
         assert_eq!(
@@ -407,11 +419,18 @@ mod tests {
         })
         .into_dyn(instance_id);
 
-        let (new_active_states, new_inactive_states) =
-            migrate_state(old_states.clone(), old_states, get_v1_migrated_state)
-                .await
-                .expect("Migration failed")
-                .expect("Migration produced output");
+        let db = fedimint_core::db::mem_impl::MemDatabase::new().into_database();
+        let dbtx = db.begin_transaction().await;
+
+        let (new_active_states, new_inactive_states) = migrate_state(
+            old_states.clone(),
+            old_states,
+            get_v1_migrated_state,
+            &mut dbtx.into_nc(),
+        )
+        .await
+        .expect("Migration failed")
+        .expect("Migration produced output");
 
         assert_eq!(new_inactive_states.len(), 1);
         assert_eq!(
@@ -493,11 +512,18 @@ mod tests {
         })
         .into_dyn(instance_id);
 
-        let (new_active_states, new_inactive_states) =
-            migrate_state(old_states.clone(), old_states, get_v2_migrated_state)
-                .await
-                .expect("Migration failed")
-                .expect("Migration produced output");
+        let db = fedimint_core::db::mem_impl::MemDatabase::new().into_database();
+        let dbtx = db.begin_transaction().await;
+
+        let (new_active_states, new_inactive_states) = migrate_state(
+            old_states.clone(),
+            old_states,
+            get_v2_migrated_state,
+            &mut dbtx.into_nc(),
+        )
+        .await
+        .expect("Migration failed")
+        .expect("Migration produced output");
 
         assert_eq!(new_inactive_states.len(), 1);
         assert_eq!(
