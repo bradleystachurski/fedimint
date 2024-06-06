@@ -4,7 +4,7 @@ use std::time::SystemTime;
 
 use fedimint_api_client::api::ApiVersionSet;
 use fedimint_core::config::{ClientConfig, FederationId};
-use fedimint_core::core::{ModuleInstanceId, OperationId};
+use fedimint_core::core::{ModuleInstanceId, OperationId, MODULE_INSTANCE_ID_GLOBAL};
 use fedimint_core::db::{
     create_database_version, Database, DatabaseTransaction, DatabaseValue, DatabaseVersion,
     DatabaseVersionKey, IDatabaseTransactionOpsCore, IDatabaseTransactionOpsCoreTyped,
@@ -390,6 +390,11 @@ pub async fn apply_migrations_client(
     migrations: BTreeMap<DatabaseVersion, ClientMigrationFn>,
     module_instance_id: ModuleInstanceId,
 ) -> Result<(), anyhow::Error> {
+    let id_to_check = 0;
+
+    if module_instance_id == id_to_check {
+        fedimint_core::util::write_log(&format!("inside apply_migrations_client")).await?;
+    }
     // Newly created databases will not have any data underneath the
     // `MODULE_GLOBAL_PREFIX` since they have just been instantiated.
     let mut dbtx = db.begin_transaction_nc().await;
@@ -399,6 +404,10 @@ pub async fn apply_migrations_client(
         .next()
         .await
         .is_none();
+
+    if module_instance_id == id_to_check {
+        fedimint_core::util::write_log(&format!("is_new_db: {is_new_db:?}")).await?;
+    }
 
     // First write the database version to disk if it does not exist.
     create_database_version(
@@ -414,6 +423,11 @@ pub async fn apply_migrations_client(
     let current_version = global_dbtx
         .get_value(&DatabaseVersionKey(module_instance_id))
         .await;
+
+    if module_instance_id == id_to_check {
+        fedimint_core::util::write_log(&format!("current_version: {current_version:?}")).await?;
+        fedimint_core::util::write_log(&format!("target_version: {target_version:?}")).await?;
+    }
 
     let db_version = if let Some(mut current_version) = current_version {
         if current_version == target_version {

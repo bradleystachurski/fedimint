@@ -366,6 +366,18 @@ pub async fn write_log(message: &str) -> anyhow::Result<()> {
     Ok(())
 }
 
+pub fn write_log_sync(message: &str) -> anyhow::Result<()> {
+    use std::fs::OpenOptions;
+    use std::io::Write;
+
+    let path = format!("/home/nix/fedimint/client.log");
+    let mut f = OpenOptions::new().append(true).create(true).open(path)?;
+
+    let message = format!("{message}\n");
+    f.write_all(message.as_bytes())?;
+    Ok(())
+}
+
 /// For CLIs, detects `version-hash` as a single argument, prints the provided
 /// version hash, then exits the process.
 pub fn handle_version_hash_command(version_hash: &str) {

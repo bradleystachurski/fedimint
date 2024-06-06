@@ -15,6 +15,7 @@ use bitcoin::{Address, Network};
 use client_db::DbKeyPrefix;
 use fedimint_api_client::api::DynModuleApi;
 use fedimint_bitcoind::{create_bitcoind, DynBitcoindRpc};
+use fedimint_client::db::{migrate_state, ClientMigrationFn};
 use fedimint_client::derivable_secret::{ChildId, DerivableSecret};
 use fedimint_client::module::init::{ClientModuleInit, ClientModuleInitArgs};
 use fedimint_client::module::recovery::NoModuleBackup;
@@ -39,7 +40,7 @@ use fedimint_core::{apply, async_trait_maybe_send, Amount, OutPoint};
 use fedimint_wallet_common::config::{FeeConsensus, WalletClientConfig};
 use fedimint_wallet_common::tweakable::Tweakable;
 pub use fedimint_wallet_common::*;
-use futures::{Stream, StreamExt};
+use futures::{FutureExt, Stream, StreamExt};
 use rand::{thread_rng, Rng};
 use secp256k1::{All, Secp256k1};
 use serde::{Deserialize, Serialize};
@@ -116,7 +117,8 @@ impl WalletClientInit {
 
 impl ModuleInit for WalletClientInit {
     type Common = WalletCommonInit;
-    const DATABASE_VERSION: DatabaseVersion = DatabaseVersion(0);
+    // target_version
+    const DATABASE_VERSION: DatabaseVersion = DatabaseVersion(1);
 
     async fn dump_database(
         &self,
@@ -174,6 +176,29 @@ impl ClientModuleInit for WalletClientInit {
             secp: Default::default(),
             client_ctx: args.context(),
         })
+    }
+
+    fn get_database_migrations(&self) -> BTreeMap<DatabaseVersion, ClientMigrationFn> {
+        fedimint_core::util::write_log_sync("inside get_database_migrations for wallet client")
+            .unwrap();
+
+        let mut migrations: BTreeMap<DatabaseVersion, ClientMigrationFn> = BTreeMap::new();
+
+        migrations.insert(
+            // TODO: verify we should start 0
+            DatabaseVersion(0),
+            move |dbtx, active_states, inactive_states| {
+                migrate_state(
+                    active_states,
+                    inactive_states,
+                    client_db::get_v0_migrated_state,
+                    dbtx,
+                )
+                .boxed()
+            },
+        );
+
+        migrations
     }
 }
 

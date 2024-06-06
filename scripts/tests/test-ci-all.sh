@@ -272,7 +272,7 @@ tests_to_run_in_parallel+=(
   # "wasm_test"
   # "bckn_bitcoind_dummy"
   # "bckn_bitcoind_mint"
-  "bckn_bitcoind_wallet"
+  # "bckn_bitcoind_wallet"
   # "bckn_bitcoind_ln"
   # "bckn_bitcoind_lnv2"
   # "bckn_gw_client"
@@ -296,7 +296,7 @@ tests_to_run_in_parallel+=(
   # "mint_client_sanity"
   # "cannot_replay_tx"
   # "circular_deposit"
-  # "repro_stuck_rbf"
+  "repro_stuck_rbf"
 )
 done
 
