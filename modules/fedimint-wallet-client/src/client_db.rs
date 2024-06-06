@@ -5,6 +5,7 @@ use fedimint_core::db::DatabaseTransaction;
 use fedimint_core::encoding::{Decodable, Encodable};
 use fedimint_core::impl_db_record;
 use fedimint_core::module::registry::ModuleDecoderRegistry;
+use fedimint_core::util::BoxFuture;
 use serde::Serialize;
 use strum_macros::EnumIter;
 

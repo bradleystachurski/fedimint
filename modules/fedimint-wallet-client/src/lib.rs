@@ -5,6 +5,7 @@ mod deposit;
 mod withdraw;
 
 use std::collections::BTreeMap;
+use std::io::Cursor;
 use std::sync::Arc;
 use std::time::SystemTime;
 
@@ -15,7 +16,7 @@ use bitcoin::{Address, Network};
 use client_db::DbKeyPrefix;
 use fedimint_api_client::api::DynModuleApi;
 use fedimint_bitcoind::{create_bitcoind, DynBitcoindRpc};
-use fedimint_client::db::{migrate_state, ClientMigrationFn};
+use fedimint_client::db::ClientMigrationFn;
 use fedimint_client::derivable_secret::{ChildId, DerivableSecret};
 use fedimint_client::module::init::{ClientModuleInit, ClientModuleInitArgs};
 use fedimint_client::module::recovery::NoModuleBackup;
@@ -28,10 +29,12 @@ use fedimint_client::{sm_enum_variant_translation, DynGlobalClientContext};
 use fedimint_core::bitcoin_migration::checked_address_to_unchecked_address;
 use fedimint_core::core::{Decoder, IntoDynInstance, ModuleInstanceId, OperationId};
 use fedimint_core::db::{
-    AutocommitError, DatabaseTransaction, DatabaseVersion, IDatabaseTransactionOpsCoreTyped,
+    AutocommitError, DatabaseTransaction, DatabaseValue, DatabaseVersion,
+    IDatabaseTransactionOpsCoreTyped,
 };
 use fedimint_core::encoding::{Decodable, Encodable};
 use fedimint_core::envs::BitcoinRpcConfig;
+use fedimint_core::module::registry::ModuleDecoderRegistry;
 use fedimint_core::module::{
     ApiVersion, CommonModuleInit, ModuleCommon, ModuleInit, MultiApiVersion,
 };
@@ -182,21 +185,219 @@ impl ClientModuleInit for WalletClientInit {
         fedimint_core::util::write_log_sync("inside get_database_migrations for wallet client")
             .unwrap();
 
+        async fn migrate(
+            operation_id: OperationId,
+            cursor: &mut Cursor<&[u8]>,
+            _dbtx: &mut DatabaseTransaction<'_>,
+        ) -> anyhow::Result<Option<(Vec<u8>, OperationId)>> {
+            fedimint_core::util::write_log_sync(&format!("inside get_v0_migrated_state"))?;
+            // fedimint_core::runtime::block_on(fedimint_core::util::write_log(&format!(
+            // "inside get_v1_migrated_state" )))?;
+
+            // fedimint_core::util::write_log(&format!("inside
+            // get_v1_migrated_state")).await?;
+            let decoders = ModuleDecoderRegistry::default();
+            let wallet_sm_variant = u16::consensus_decode(cursor, &decoders)?;
+
+            fedimint_core::util::write_log_sync(&format!(
+                "wallet_sm_variant: {wallet_sm_variant:?}"
+            ))?;
+
+            let wallet_sm_len = u16::consensus_decode(cursor, &decoders)?;
+            let operation_id = OperationId::consensus_decode(cursor, &decoders)?;
+
+            fedimint_core::util::write_log_sync(&format!("wallet_sm_len: {wallet_sm_len:?}"))?;
+            fedimint_core::util::write_log_sync(&format!("operation_id: {operation_id:?}"))?;
+
+            // think I found the issue! need to consider Deposit/Withdraw, was skipping
+            // assuming Deposit
+            match wallet_sm_variant {
+                0 => {
+                    fedimint_core::util::write_log_sync(&format!(
+                        "matched 0 wallet_sm_variant, Deposit"
+                    ))?;
+
+                    let deposit_sm_variant = u16::consensus_decode(cursor, &decoders)?;
+
+                    match deposit_sm_variant {
+                        0 => {
+                            let created_sm_len = u16::consensus_decode(cursor, &decoders)?;
+                            fedimint_core::util::write_log_sync(&format!(
+                                "created_sm_len: {created_sm_len:?}"
+                            ))?;
+
+                            let created_deposit_state =
+                                crate::deposit::CreatedDepositState::consensus_decode(
+                                    cursor, &decoders,
+                                )?;
+                            fedimint_core::util::write_log_sync(&format!(
+                                "created_deposit_state: {created_deposit_state:?}"
+                            ))?;
+                        }
+                        1 => {
+                            fedimint_core::util::write_log_sync(&format!(
+                                "matched 1 wallet_sm_variant, WaitingForConfirmations"
+                            ))?;
+                            let waiting_for_confirmations_sm_len =
+                                u16::consensus_decode(cursor, &decoders)?;
+                            fedimint_core::util::write_log_sync(&format!(
+                        "waiting_for_confirmations_sm_len: {waiting_for_confirmations_sm_len:?}"
+                    ))?;
+
+                            let waiting_for_confirmations_deposit_state =
+                        crate::deposit::WaitingForConfirmationsDepositState::consensus_decode(
+                            cursor, &decoders,
+                        )?;
+                            fedimint_core::util::write_log_sync(&format!(
+                        "waiting_for_confirmations_deposit_state: {waiting_for_confirmations_deposit_state:?}"
+                    ))?;
+                        }
+                        2 => {
+                            fedimint_core::util::write_log_sync(&format!(
+                                "matched 2 wallet_sm_variant, Claiming"
+                            ))?;
+                            let created_sm_len = u16::consensus_decode(cursor, &decoders)?;
+                            fedimint_core::util::write_log_sync(&format!(
+                                "created_sm_len: {created_sm_len:?}"
+                            ))?;
+
+                            #[derive(Debug, Clone, Eq, PartialEq, Hash, Decodable, Encodable)]
+                            pub struct ClaimingDepositStateV0 {
+                                /// Fedimint transaction id in which the deposit
+                                /// is
+                                /// being claimed.
+                                pub(crate) transaction_id: fedimint_core::TransactionId,
+                                pub(crate) change: Vec<fedimint_core::OutPoint>,
+                            }
+
+                            let claiming_deposit_state =
+                                ClaimingDepositStateV0::consensus_decode(cursor, &decoders)?;
+                            fedimint_core::util::write_log_sync(&format!(
+                                "claiming_deposit_state: {claiming_deposit_state:?}"
+                            ))?;
+
+                            // TODO: query dbtx to get btc tx details using
+                            // operation_id
+                        }
+                        other => panic!("unknown variant: {other:?}"),
+                    }
+                }
+                1 => {
+                    fedimint_core::util::write_log_sync(&format!(
+                        "matched 1 wallet_sm_variant, Withdraw"
+                    ))?;
+
+                    let withdraw_sm_variant = u16::consensus_decode(cursor, &decoders)?;
+                    fedimint_core::util::write_log_sync(&format!(
+                        "withdraw_sm_variant: {withdraw_sm_variant:?}"
+                    ))?;
+                }
+                other => {
+                    panic!("recived other wallet state variant: {other}");
+                }
+            }
+
+            Ok(None)
+        }
+
         let mut migrations: BTreeMap<DatabaseVersion, ClientMigrationFn> = BTreeMap::new();
 
+        // migrations.insert(
+        //     // TODO: verify we should start 0
+        //     DatabaseVersion(0),
+        //     move |dbtx, active_states, inactive_states| {
+        //         // let migrate_pointer_fn = Box::pin(async {
+        //         //     client_db::get_v0_migrated_state
+        //         // });
+
+        //         // let migrate_fn_pointer: MigrateStateFn =
+        // client_db::get_v0_migrated_state;
+
+        //         migrate_state(
+        //             active_states,
+        //             inactive_states,
+        //             move |op_id, &mut cursor, &mut dbtx| async {
+        //                 client_db::get_v0_migrated_state(op_id, &mut cursor, &mut
+        // dbtx).await             },
+        //             dbtx,
+        //         )
+        //         .boxed()
+        //     },
+        // );
+
+        // other approach mimicing the first migration in ln-client
         migrations.insert(
-            // TODO: verify we should start 0
             DatabaseVersion(0),
             move |dbtx, active_states, inactive_states| {
-                migrate_state(
-                    active_states,
-                    inactive_states,
-                    client_db::get_v0_migrated_state,
-                    dbtx,
-                )
-                .boxed()
+                Box::pin(async {
+                    let mut new_active_states = Vec::with_capacity(active_states.len());
+                    for (active_state, operation_id) in active_states {
+                        let bytes = active_state.as_slice();
+
+                        let decoders = ModuleDecoderRegistry::default();
+                        let mut cursor = std::io::Cursor::new(bytes);
+                        let module_instance_id =
+                            fedimint_core::core::ModuleInstanceId::consensus_decode(
+                                &mut cursor,
+                                &decoders,
+                            )?;
+
+                        let state = match migrate(operation_id, &mut cursor, dbtx).await? {
+                            Some((mut state, operation_id)) => {
+                                let mut final_state = module_instance_id.to_bytes();
+                                final_state.append(&mut state);
+                                (final_state, operation_id)
+                            }
+                            None => (active_state, operation_id),
+                        };
+
+                        new_active_states.push(state);
+                    }
+
+                    let mut new_inactive_states = Vec::with_capacity(inactive_states.len());
+                    for (inactive_state, operation_id) in inactive_states {
+                        let bytes = inactive_state.as_slice();
+
+                        let decoders = ModuleDecoderRegistry::default();
+                        let mut cursor = std::io::Cursor::new(bytes);
+                        let module_instance_id =
+                            fedimint_core::core::ModuleInstanceId::consensus_decode(
+                                &mut cursor,
+                                &decoders,
+                            )?;
+
+                        let state = match migrate(operation_id, &mut cursor, dbtx).await? {
+                            Some((mut state, operation_id)) => {
+                                let mut final_state = module_instance_id.to_bytes();
+                                final_state.append(&mut state);
+                                (final_state, operation_id)
+                            }
+                            None => (inactive_state, operation_id),
+                        };
+
+                        new_inactive_states.push(state);
+                    }
+
+                    Ok(Some((new_active_states, new_inactive_states)))
+                })
             },
         );
+        // migrations.insert(
+        //     // TODO: verify we should start 0
+        //     DatabaseVersion(0),
+        //     move |dbtx, active_states, inactive_states| {
+        //         Box::pin(async {
+
+        //         })
+        //         migrate_state(
+        //             active_states,
+        //             inactive_states,
+        //             client_db::get_v0_migrated_state,
+        //             dbtx,
+        //         )
+        //         .boxed()
+        //     },
+        // );
 
         migrations
     }

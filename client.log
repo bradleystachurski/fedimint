@@ -1,0 +1,1360 @@
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: true
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: true
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: true
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: true
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(0))
+target_version: DatabaseVersion(1)
+inside get_v0_migrated_state
+wallet_sm_variant: 1
+wallet_sm_len: 66
+operation_id: OperationId(1ff3c0f2_b0d1c220)
+matched 1 wallet_sm_variant, Withdraw
+withdraw_sm_variant: 1
+inside get_v0_migrated_state
+wallet_sm_variant: 1
+wallet_sm_len: 67
+operation_id: OperationId(1ff3c0f2_b0d1c220)
+matched 1 wallet_sm_variant, Withdraw
+withdraw_sm_variant: 0
+inside get_v0_migrated_state
+wallet_sm_variant: 0
+wallet_sm_len: 76
+operation_id: OperationId(a42c8206_7f12c5b3)
+matched 0 wallet_sm_variant, Deposit
+created_sm_len: 42
+created_deposit_state: CreatedDepositState { tweak_key: KeyPair(#b9538f5eeab4ed3b), timeout_at: SystemTime { tv_sec: 1718293810, tv_nsec: 30630234 } }
+inside get_v0_migrated_state
+wallet_sm_variant: 0
+wallet_sm_len: 272
+operation_id: OperationId(a42c8206_7f12c5b3)
+matched 0 wallet_sm_variant, Deposit
+matched 1 wallet_sm_variant, WaitingForConfirmations
+waiting_for_confirmations_sm_len: 238
+waiting_for_confirmations_deposit_state: WaitingForConfirmationsDepositState { tweak_key: KeyPair(#b9538f5eeab4ed3b), btc_transaction: Transaction { version: 2, lock_time: Blocks(Height(278)), input: [TxIn { previous_output: OutPoint { txid: 0xb52a98551baf96b8c091adbc4265bc7075d64d54381b1272741dc3f52aac9508, vout: 0 }, script_sig: Script(), sequence: Sequence(4294967293), witness: Witness { content: [64, 215, 94, 156, 233, 7, 182, 151, 120, 48, 189, 77, 95, 209, 50, 7, 235, 106, 218, 103, 31, 239, 97, 196, 246, 203, 204, 201, 22, 12, 222, 173, 210, 118, 82, 178, 253, 215, 119, 176, 82, 67, 94, 12, 30, 168, 33, 194, 79, 122, 97, 223, 82, 203, 136, 155, 111, 134, 241, 247, 209, 254, 130, 127, 55, 0, 0, 0, 0], witness_elements: 1, indices_start: 65 } }], output: [TxOut { value: 101000, script_pubkey: Script(OP_0 OP_PUSHBYTES_32 d40bc2d15f243820ec3608003aa047a61758e88d48f526ae76bab4023e902631) }, TxOut { value: 4499536360, script_pubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 96e5a698683dd823ec8d735536e59368fc928d84a88774372a9b578dae3495fe) }] }, out_idx: 0 }
+inside get_v0_migrated_state
+wallet_sm_variant: 0
+wallet_sm_len: 465
+operation_id: OperationId(a42c8206_7f12c5b3)
+matched 0 wallet_sm_variant, Deposit
+matched 2 wallet_sm_variant, Claiming
+created_sm_len: 429
+claiming_deposit_state: ClaimingDepositStateV0 { transaction_id: 0x7a40cd1d332a84325fa6817493bdbbcb4f4e268b0bd90a9efad7057835a67178, change: [OutPoint { txid: 0x7a40cd1d332a84325fa6817493bdbbcb4f4e268b0bd90a9efad7057835a67178, out_idx: 0 }, OutPoint { txid: 0x7a40cd1d332a84325fa6817493bdbbcb4f4e268b0bd90a9efad7057835a67178, out_idx: 1 }, OutPoint { txid: 0x7a40cd1d332a84325fa6817493bdbbcb4f4e268b0bd90a9efad7057835a67178, out_idx: 2 }, OutPoint { txid: 0x7a40cd1d332a84325fa6817493bdbbcb4f4e268b0bd90a9efad7057835a67178, out_idx: 3 }, OutPoint { txid: 0x7a40cd1d332a84325fa6817493bdbbcb4f4e268b0bd90a9efad7057835a67178, out_idx: 4 }, OutPoint { txid: 0x7a40cd1d332a84325fa6817493bdbbcb4f4e268b0bd90a9efad7057835a67178, out_idx: 5 }, OutPoint { txid: 0x7a40cd1d332a84325fa6817493bdbbcb4f4e268b0bd90a9efad7057835a67178, out_idx: 6 }, OutPoint { txid: 0x7a40cd1d332a84325fa6817493bdbbcb4f4e268b0bd90a9efad7057835a67178, out_idx: 7 }, OutPoint { txid: 0x7a40cd1d332a84325fa6817493bdbbcb4f4e268b0bd90a9efad7057835a67178, out_idx: 8 }, OutPoint { txid: 0x7a40cd1d332a84325fa6817493bdbbcb4f4e268b0bd90a9efad7057835a67178, out_idx: 9 }, OutPoint { txid: 0x7a40cd1d332a84325fa6817493bdbbcb4f4e268b0bd90a9efad7057835a67178, out_idx: 10 }, OutPoint { txid: 0x7a40cd1d332a84325fa6817493bdbbcb4f4e268b0bd90a9efad7057835a67178, out_idx: 11 }] }
+inside get_v0_migrated_state
+wallet_sm_variant: 0
+wallet_sm_len: 76
+operation_id: OperationId(a8c4206d_03b78f15)
+matched 0 wallet_sm_variant, Deposit
+created_sm_len: 42
+created_deposit_state: CreatedDepositState { tweak_key: KeyPair(#addf2292d6452b4a), timeout_at: SystemTime { tv_sec: 1718293781, tv_nsec: 700049086 } }
+inside get_v0_migrated_state
+wallet_sm_variant: 0
+wallet_sm_len: 272
+operation_id: OperationId(a8c4206d_03b78f15)
+matched 0 wallet_sm_variant, Deposit
+matched 1 wallet_sm_variant, WaitingForConfirmations
+waiting_for_confirmations_sm_len: 238
+waiting_for_confirmations_deposit_state: WaitingForConfirmationsDepositState { tweak_key: KeyPair(#addf2292d6452b4a), btc_transaction: Transaction { version: 2, lock_time: Blocks(Height(152)), input: [TxIn { previous_output: OutPoint { txid: 0xd65c59fd9e460c45945a49f68cdd56334d506968f6ba9031755d5822d676d252, vout: 1 }, script_sig: Script(), sequence: Sequence(4294967293), witness: Witness { content: [64, 228, 188, 173, 10, 127, 10, 204, 6, 59, 36, 149, 86, 143, 29, 79, 27, 128, 12, 87, 213, 116, 100, 111, 182, 63, 139, 105, 66, 193, 243, 222, 77, 61, 96, 127, 0, 93, 172, 246, 200, 178, 121, 202, 143, 197, 59, 96, 244, 73, 76, 154, 13, 250, 230, 252, 240, 159, 152, 129, 1, 150, 186, 175, 125, 0, 0, 0, 0], witness_elements: 1, indices_start: 65 } }], output: [TxOut { value: 4699979560, script_pubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 5d6ea46b429bab74ec02e76c01a6c0a3088bb4d599030f863ac27d9b4091574c) }, TxOut { value: 100001000, script_pubkey: Script(OP_0 OP_PUSHBYTES_32 d57091629dad30fca9791f5b90975343470964953a67775da88acfc39c834c55) }] }, out_idx: 1 }
+inside get_v0_migrated_state
+wallet_sm_variant: 0
+wallet_sm_len: 2874
+operation_id: OperationId(a8c4206d_03b78f15)
+matched 0 wallet_sm_variant, Deposit
+matched 2 wallet_sm_variant, Claiming
+created_sm_len: 2838
+claiming_deposit_state: ClaimingDepositStateV0 { transaction_id: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, change: [OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 0 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 1 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 2 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 3 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 4 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 5 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 6 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 7 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 8 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 9 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 10 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 11 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 12 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 13 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 14 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 15 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 16 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 17 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 18 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 19 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 20 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 21 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 22 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 23 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 24 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 25 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 26 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 27 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 28 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 29 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 30 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 31 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 32 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 33 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 34 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 35 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 36 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 37 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 38 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 39 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 40 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 41 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 42 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 43 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 44 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 45 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 46 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 47 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 48 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 49 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 50 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 51 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 52 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 53 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 54 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 55 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 56 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 57 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 58 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 59 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 60 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 61 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 62 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 63 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 64 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 65 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 66 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 67 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 68 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 69 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 70 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 71 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 72 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 73 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 74 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 75 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 76 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 77 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 78 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 79 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 80 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 81 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 82 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 83 }, OutPoint { txid: 0xcee37aff6f2d9aeaa719a80b30ed117d3734756fcbb64aca87eb9e52aeba2e33, out_idx: 84 }] }
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(0))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(0))
+target_version: DatabaseVersion(1)
+inside get_v0_migrated_state
+wallet_sm_variant: 0
+wallet_sm_len: 76
+operation_id: OperationId(48817a62_550c394d)
+matched 0 wallet_sm_variant, Deposit
+created_sm_len: 42
+created_deposit_state: CreatedDepositState { tweak_key: KeyPair(#ab39e2edc2f688c7), timeout_at: SystemTime { tv_sec: 1718293808, tv_nsec: 671600887 } }
+inside get_v0_migrated_state
+wallet_sm_variant: 0
+wallet_sm_len: 272
+operation_id: OperationId(48817a62_550c394d)
+matched 0 wallet_sm_variant, Deposit
+matched 1 wallet_sm_variant, WaitingForConfirmations
+waiting_for_confirmations_sm_len: 238
+waiting_for_confirmations_deposit_state: WaitingForConfirmationsDepositState { tweak_key: KeyPair(#ab39e2edc2f688c7), btc_transaction: Transaction { version: 2, lock_time: Blocks(Height(236)), input: [TxIn { previous_output: OutPoint { txid: 0x0c9973f8eb7812d152e43395c1780dd7704cab0982cc3e54442f5d65261a3741, vout: 0 }, script_sig: Script(), sequence: Sequence(4294967293), witness: Witness { content: [64, 113, 38, 137, 161, 122, 142, 232, 151, 50, 18, 219, 204, 136, 130, 175, 245, 45, 6, 188, 221, 64, 238, 83, 119, 19, 43, 235, 127, 159, 213, 207, 91, 253, 249, 72, 80, 29, 55, 81, 1, 71, 68, 199, 129, 103, 238, 40, 81, 45, 12, 13, 95, 2, 5, 147, 254, 32, 36, 125, 119, 193, 116, 220, 97, 0, 0, 0, 0], witness_elements: 1, indices_start: 65 } }], output: [TxOut { value: 101000, script_pubkey: Script(OP_0 OP_PUSHBYTES_32 8a13c4f95a1d3369e6e9c4fcfd9ab3a12eb167ccbf626c91548666d666ecfb58) }, TxOut { value: 4499750760, script_pubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 5d358a3b7d8403da7f1d0bf8e8b18a386ac4b189600a5ca8938139de818cf826) }] }, out_idx: 0 }
+inside get_v0_migrated_state
+wallet_sm_variant: 0
+wallet_sm_len: 465
+operation_id: OperationId(48817a62_550c394d)
+matched 0 wallet_sm_variant, Deposit
+matched 2 wallet_sm_variant, Claiming
+created_sm_len: 429
+claiming_deposit_state: ClaimingDepositStateV0 { transaction_id: 0x405df45b109238fafbd1e0519f4c1a7f4a4fcecf613e8a2c0078d3e5e32625b1, change: [OutPoint { txid: 0x405df45b109238fafbd1e0519f4c1a7f4a4fcecf613e8a2c0078d3e5e32625b1, out_idx: 0 }, OutPoint { txid: 0x405df45b109238fafbd1e0519f4c1a7f4a4fcecf613e8a2c0078d3e5e32625b1, out_idx: 1 }, OutPoint { txid: 0x405df45b109238fafbd1e0519f4c1a7f4a4fcecf613e8a2c0078d3e5e32625b1, out_idx: 2 }, OutPoint { txid: 0x405df45b109238fafbd1e0519f4c1a7f4a4fcecf613e8a2c0078d3e5e32625b1, out_idx: 3 }, OutPoint { txid: 0x405df45b109238fafbd1e0519f4c1a7f4a4fcecf613e8a2c0078d3e5e32625b1, out_idx: 4 }, OutPoint { txid: 0x405df45b109238fafbd1e0519f4c1a7f4a4fcecf613e8a2c0078d3e5e32625b1, out_idx: 5 }, OutPoint { txid: 0x405df45b109238fafbd1e0519f4c1a7f4a4fcecf613e8a2c0078d3e5e32625b1, out_idx: 6 }, OutPoint { txid: 0x405df45b109238fafbd1e0519f4c1a7f4a4fcecf613e8a2c0078d3e5e32625b1, out_idx: 7 }, OutPoint { txid: 0x405df45b109238fafbd1e0519f4c1a7f4a4fcecf613e8a2c0078d3e5e32625b1, out_idx: 8 }, OutPoint { txid: 0x405df45b109238fafbd1e0519f4c1a7f4a4fcecf613e8a2c0078d3e5e32625b1, out_idx: 9 }, OutPoint { txid: 0x405df45b109238fafbd1e0519f4c1a7f4a4fcecf613e8a2c0078d3e5e32625b1, out_idx: 10 }, OutPoint { txid: 0x405df45b109238fafbd1e0519f4c1a7f4a4fcecf613e8a2c0078d3e5e32625b1, out_idx: 11 }] }
+inside get_v0_migrated_state
+wallet_sm_variant: 1
+wallet_sm_len: 66
+operation_id: OperationId(49dadb70_6cc905c2)
+matched 1 wallet_sm_variant, Withdraw
+withdraw_sm_variant: 1
+inside get_v0_migrated_state
+wallet_sm_variant: 1
+wallet_sm_len: 67
+operation_id: OperationId(49dadb70_6cc905c2)
+matched 1 wallet_sm_variant, Withdraw
+withdraw_sm_variant: 0
+inside get_v0_migrated_state
+wallet_sm_variant: 0
+wallet_sm_len: 76
+operation_id: OperationId(b4bca10c_e9319280)
+matched 0 wallet_sm_variant, Deposit
+created_sm_len: 42
+created_deposit_state: CreatedDepositState { tweak_key: KeyPair(#552a55274bb06a53), timeout_at: SystemTime { tv_sec: 1718293781, tv_nsec: 750996972 } }
+inside get_v0_migrated_state
+wallet_sm_variant: 0
+wallet_sm_len: 272
+operation_id: OperationId(b4bca10c_e9319280)
+matched 0 wallet_sm_variant, Deposit
+matched 1 wallet_sm_variant, WaitingForConfirmations
+waiting_for_confirmations_sm_len: 238
+waiting_for_confirmations_deposit_state: WaitingForConfirmationsDepositState { tweak_key: KeyPair(#552a55274bb06a53), btc_transaction: Transaction { version: 2, lock_time: Blocks(Height(194)), input: [TxIn { previous_output: OutPoint { txid: 0x9b7f31a79aaed83351a4db0a4ebd982941ec65002533d2f9d428e796fdf20d11, vout: 1 }, script_sig: Script(), sequence: Sequence(4294967293), witness: Witness { content: [64, 129, 249, 205, 241, 241, 246, 218, 90, 113, 222, 3, 159, 84, 196, 122, 36, 70, 102, 131, 232, 2, 236, 12, 164, 201, 87, 237, 128, 174, 105, 23, 198, 236, 193, 218, 202, 161, 38, 229, 151, 185, 84, 140, 70, 47, 135, 129, 122, 59, 205, 18, 120, 191, 217, 137, 238, 50, 23, 168, 152, 99, 49, 205, 209, 0, 0, 0, 0], witness_elements: 1, indices_start: 65 } }], output: [TxOut { value: 4499965160, script_pubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 e60146d759e42d9daf7ace173a76b5d209ebb2dffba388b93fb4d3beb098aea2) }, TxOut { value: 100001000, script_pubkey: Script(OP_0 OP_PUSHBYTES_32 85478d1998d11cfb12abb51860c804dd101a99b347e141dd6632f37e371e14e9) }] }, out_idx: 1 }
+inside get_v0_migrated_state
+wallet_sm_variant: 0
+wallet_sm_len: 2874
+operation_id: OperationId(b4bca10c_e9319280)
+matched 0 wallet_sm_variant, Deposit
+matched 2 wallet_sm_variant, Claiming
+created_sm_len: 2838
+claiming_deposit_state: ClaimingDepositStateV0 { transaction_id: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, change: [OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 0 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 1 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 2 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 3 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 4 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 5 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 6 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 7 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 8 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 9 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 10 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 11 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 12 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 13 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 14 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 15 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 16 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 17 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 18 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 19 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 20 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 21 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 22 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 23 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 24 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 25 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 26 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 27 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 28 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 29 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 30 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 31 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 32 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 33 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 34 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 35 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 36 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 37 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 38 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 39 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 40 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 41 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 42 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 43 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 44 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 45 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 46 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 47 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 48 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 49 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 50 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 51 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 52 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 53 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 54 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 55 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 56 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 57 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 58 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 59 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 60 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 61 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 62 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 63 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 64 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 65 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 66 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 67 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 68 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 69 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 70 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 71 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 72 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 73 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 74 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 75 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 76 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 77 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 78 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 79 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 80 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 81 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 82 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 83 }, OutPoint { txid: 0x7aaa0e342d86d68f89a8affc798b15b637f18beb1132bb61048f0849e7df6223, out_idx: 84 }] }
+inside get_database_migrations for wallet client
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+inside apply_migrations_client
+is_new_db: false
+is_new_db: false
+current_version: Some(DatabaseVersion(0))
+target_version: DatabaseVersion(1)
+current_version: Some(DatabaseVersion(0))
+target_version: DatabaseVersion(1)
+inside get_v0_migrated_state
+wallet_sm_variant: 1
+wallet_sm_len: 66
+operation_id: OperationId(c2608ea4_25ba8f90)
+matched 1 wallet_sm_variant, Withdraw
+withdraw_sm_variant: 1
+inside get_v0_migrated_state
+wallet_sm_variant: 1
+wallet_sm_len: 67
+operation_id: OperationId(c2608ea4_25ba8f90)
+matched 1 wallet_sm_variant, Withdraw
+withdraw_sm_variant: 0
+inside get_v0_migrated_state
+wallet_sm_variant: 0
+wallet_sm_len: 76
+operation_id: OperationId(c7844fc5_77713d96)
+matched 0 wallet_sm_variant, Deposit
+created_sm_len: 42
+created_deposit_state: CreatedDepositState { tweak_key: KeyPair(#07bde17560572f88), timeout_at: SystemTime { tv_sec: 1718293781, tv_nsec: 701634168 } }
+inside get_v0_migrated_state
+wallet_sm_variant: 0
+wallet_sm_len: 315
+operation_id: OperationId(c7844fc5_77713d96)
+matched 0 wallet_sm_variant, Deposit
+matched 1 wallet_sm_variant, WaitingForConfirmations
+waiting_for_confirmations_sm_len: 279
+waiting_for_confirmations_deposit_state: WaitingForConfirmationsDepositState { tweak_key: KeyPair(#07bde17560572f88), btc_transaction: Transaction { version: 2, lock_time: Blocks(Height(66)), input: [TxIn { previous_output: OutPoint { txid: 0xbe98cc2d3d3001c522f1bbbcd4e38fbcd284926eb12a99f7b1e6708dd40b8809, vout: 1 }, script_sig: Script(), sequence: Sequence(4294967293), witness: Witness { content: [71, 48, 68, 2, 32, 16, 181, 211, 34, 91, 48, 96, 4, 44, 47, 252, 99, 96, 104, 208, 156, 199, 209, 146, 159, 118, 149, 26, 47, 216, 35, 38, 13, 120, 121, 146, 201, 2, 32, 94, 18, 141, 80, 193, 20, 245, 82, 243, 235, 252, 172, 91, 192, 190, 66, 173, 168, 194, 155, 203, 137, 4, 239, 60, 25, 86, 132, 56, 78, 38, 132, 1, 33, 2, 42, 243, 37, 96, 209, 209, 156, 80, 85, 216, 208, 72, 25, 233, 148, 37, 96, 55, 160, 153, 49, 213, 17, 210, 218, 38, 76, 111, 214, 124, 11, 220, 0, 0, 0, 0, 72, 0, 0, 0], witness_elements: 2, indices_start: 106 } }], output: [TxOut { value: 100001000, script_pubkey: Script(OP_0 OP_PUSHBYTES_32 2e5d074692cff84dbc6a96e5462e3a109ed5f4df1ac7b14b43a2770fcf469a6b) }, TxOut { value: 4799986760, script_pubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 b6d59d24892cc3046a770ad9dc539bc5fbbe5d6f4d45baec7fe30c693e56f512) }] }, out_idx: 0 }
+inside get_v0_migrated_state
+wallet_sm_variant: 0
+wallet_sm_len: 2874
+operation_id: OperationId(c7844fc5_77713d96)
+matched 0 wallet_sm_variant, Deposit
+matched 2 wallet_sm_variant, Claiming
+created_sm_len: 2838
+claiming_deposit_state: ClaimingDepositStateV0 { transaction_id: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, change: [OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 0 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 1 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 2 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 3 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 4 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 5 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 6 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 7 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 8 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 9 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 10 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 11 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 12 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 13 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 14 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 15 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 16 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 17 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 18 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 19 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 20 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 21 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 22 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 23 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 24 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 25 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 26 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 27 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 28 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 29 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 30 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 31 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 32 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 33 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 34 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 35 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 36 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 37 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 38 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 39 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 40 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 41 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 42 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 43 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 44 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 45 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 46 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 47 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 48 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 49 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 50 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 51 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 52 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 53 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 54 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 55 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 56 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 57 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 58 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 59 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 60 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 61 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 62 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 63 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 64 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 65 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 66 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 67 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 68 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 69 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 70 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 71 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 72 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 73 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 74 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 75 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 76 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 77 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 78 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 79 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 80 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 81 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 82 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 83 }, OutPoint { txid: 0x38dd4e8e4d0cb5ca2f26ae690db97f8956819729a8d850efe8f47104d6ff87f9, out_idx: 84 }] }
+inside get_v0_migrated_state
+wallet_sm_variant: 0
+wallet_sm_len: 76
+operation_id: OperationId(e5c0010d_8a03046f)
+matched 0 wallet_sm_variant, Deposit
+created_sm_len: 42
+created_deposit_state: CreatedDepositState { tweak_key: KeyPair(#35f72f21aec2bba0), timeout_at: SystemTime { tv_sec: 1718293808, tv_nsec: 703509564 } }
+inside get_v0_migrated_state
+wallet_sm_variant: 0
+wallet_sm_len: 272
+operation_id: OperationId(e5c0010d_8a03046f)
+matched 0 wallet_sm_variant, Deposit
+matched 1 wallet_sm_variant, WaitingForConfirmations
+waiting_for_confirmations_sm_len: 238
+waiting_for_confirmations_deposit_state: WaitingForConfirmationsDepositState { tweak_key: KeyPair(#35f72f21aec2bba0), btc_transaction: Transaction { version: 2, lock_time: Blocks(Height(257)), input: [TxIn { previous_output: OutPoint { txid: 0xf16718a69d61c39cdad8fff3ce9b452f5905772aa4f553998bc3625f6fa0aa16, vout: 1 }, script_sig: Script(), sequence: Sequence(4294967293), witness: Witness { content: [64, 247, 67, 55, 30, 84, 5, 226, 96, 236, 196, 160, 110, 149, 232, 38, 129, 55, 54, 196, 208, 100, 73, 192, 184, 192, 217, 226, 153, 166, 248, 146, 41, 58, 153, 183, 195, 79, 50, 122, 46, 60, 166, 55, 97, 229, 129, 177, 21, 125, 149, 96, 19, 164, 36, 248, 142, 244, 96, 40, 250, 211, 210, 61, 34, 0, 0, 0, 0], witness_elements: 1, indices_start: 65 } }], output: [TxOut { value: 4499643560, script_pubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 676524bc7014c405da8e6123fad7ab1451f6f187e96a2b0712a93e23aa780a2e) }, TxOut { value: 101000, script_pubkey: Script(OP_0 OP_PUSHBYTES_32 7880d151f9ab04906d7c12166715d8ff6832e26a741940a8ef5ce7db4c1bbd0d) }] }, out_idx: 1 }
+inside get_v0_migrated_state
+wallet_sm_variant: 0
+wallet_sm_len: 465
+operation_id: OperationId(e5c0010d_8a03046f)
+matched 0 wallet_sm_variant, Deposit
+matched 2 wallet_sm_variant, Claiming
+created_sm_len: 429
+claiming_deposit_state: ClaimingDepositStateV0 { transaction_id: 0xccf4934681285c2ec8c64f7c6ec22db83d473773076d1856b897238f0181c275, change: [OutPoint { txid: 0xccf4934681285c2ec8c64f7c6ec22db83d473773076d1856b897238f0181c275, out_idx: 0 }, OutPoint { txid: 0xccf4934681285c2ec8c64f7c6ec22db83d473773076d1856b897238f0181c275, out_idx: 1 }, OutPoint { txid: 0xccf4934681285c2ec8c64f7c6ec22db83d473773076d1856b897238f0181c275, out_idx: 2 }, OutPoint { txid: 0xccf4934681285c2ec8c64f7c6ec22db83d473773076d1856b897238f0181c275, out_idx: 3 }, OutPoint { txid: 0xccf4934681285c2ec8c64f7c6ec22db83d473773076d1856b897238f0181c275, out_idx: 4 }, OutPoint { txid: 0xccf4934681285c2ec8c64f7c6ec22db83d473773076d1856b897238f0181c275, out_idx: 5 }, OutPoint { txid: 0xccf4934681285c2ec8c64f7c6ec22db83d473773076d1856b897238f0181c275, out_idx: 6 }, OutPoint { txid: 0xccf4934681285c2ec8c64f7c6ec22db83d473773076d1856b897238f0181c275, out_idx: 7 }, OutPoint { txid: 0xccf4934681285c2ec8c64f7c6ec22db83d473773076d1856b897238f0181c275, out_idx: 8 }, OutPoint { txid: 0xccf4934681285c2ec8c64f7c6ec22db83d473773076d1856b897238f0181c275, out_idx: 9 }, OutPoint { txid: 0xccf4934681285c2ec8c64f7c6ec22db83d473773076d1856b897238f0181c275, out_idx: 10 }, OutPoint { txid: 0xccf4934681285c2ec8c64f7c6ec22db83d473773076d1856b897238f0181c275, out_idx: 11 }] }
+inside get_v0_migrated_state
+wallet_sm_variant: 0
+wallet_sm_len: 76
+operation_id: OperationId(38242c54_9bc830d6)
+matched 0 wallet_sm_variant, Deposit
+created_sm_len: 42
+created_deposit_state: CreatedDepositState { tweak_key: KeyPair(#80029088bc6f4266), timeout_at: SystemTime { tv_sec: 1718293807, tv_nsec: 857717300 } }
+inside get_v0_migrated_state
+wallet_sm_variant: 0
+wallet_sm_len: 272
+operation_id: OperationId(38242c54_9bc830d6)
+matched 0 wallet_sm_variant, Deposit
+matched 1 wallet_sm_variant, WaitingForConfirmations
+waiting_for_confirmations_sm_len: 238
+waiting_for_confirmations_deposit_state: WaitingForConfirmationsDepositState { tweak_key: KeyPair(#80029088bc6f4266), btc_transaction: Transaction { version: 2, lock_time: Blocks(Height(215)), input: [TxIn { previous_output: OutPoint { txid: 0xf70a2a38fc35598bc99439e1ca0bedffcabdf86c8ee312aa46091624eff4caca, vout: 0 }, script_sig: Script(), sequence: Sequence(4294967293), witness: Witness { content: [64, 80, 104, 203, 241, 102, 48, 47, 186, 105, 133, 99, 66, 54, 14, 175, 160, 136, 1, 192, 76, 52, 97, 110, 173, 194, 28, 84, 150, 151, 236, 69, 91, 99, 187, 131, 27, 82, 46, 210, 134, 76, 190, 216, 204, 170, 149, 134, 192, 53, 168, 172, 13, 211, 72, 125, 122, 219, 174, 178, 216, 199, 49, 226, 231, 0, 0, 0, 0], witness_elements: 1, indices_start: 65 } }], output: [TxOut { value: 4499857960, script_pubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 0870441244a0f46ac294260b6cabdc530d2fbedea640221215d93066a3ee2a6c) }, TxOut { value: 101000, script_pubkey: Script(OP_0 OP_PUSHBYTES_32 ec1046780b0892e2484b3431617097f591e6c0a910d62b13c042851156bba654) }] }, out_idx: 1 }
+inside get_v0_migrated_state
+wallet_sm_variant: 0
+wallet_sm_len: 465
+operation_id: OperationId(38242c54_9bc830d6)
+matched 0 wallet_sm_variant, Deposit
+matched 2 wallet_sm_variant, Claiming
+created_sm_len: 429
+claiming_deposit_state: ClaimingDepositStateV0 { transaction_id: 0xb4d65499a881b7e760f7abbda19224db0ff231e378e203ddafa451957fe7eae4, change: [OutPoint { txid: 0xb4d65499a881b7e760f7abbda19224db0ff231e378e203ddafa451957fe7eae4, out_idx: 0 }, OutPoint { txid: 0xb4d65499a881b7e760f7abbda19224db0ff231e378e203ddafa451957fe7eae4, out_idx: 1 }, OutPoint { txid: 0xb4d65499a881b7e760f7abbda19224db0ff231e378e203ddafa451957fe7eae4, out_idx: 2 }, OutPoint { txid: 0xb4d65499a881b7e760f7abbda19224db0ff231e378e203ddafa451957fe7eae4, out_idx: 3 }, OutPoint { txid: 0xb4d65499a881b7e760f7abbda19224db0ff231e378e203ddafa451957fe7eae4, out_idx: 4 }, OutPoint { txid: 0xb4d65499a881b7e760f7abbda19224db0ff231e378e203ddafa451957fe7eae4, out_idx: 5 }, OutPoint { txid: 0xb4d65499a881b7e760f7abbda19224db0ff231e378e203ddafa451957fe7eae4, out_idx: 6 }, OutPoint { txid: 0xb4d65499a881b7e760f7abbda19224db0ff231e378e203ddafa451957fe7eae4, out_idx: 7 }, OutPoint { txid: 0xb4d65499a881b7e760f7abbda19224db0ff231e378e203ddafa451957fe7eae4, out_idx: 8 }, OutPoint { txid: 0xb4d65499a881b7e760f7abbda19224db0ff231e378e203ddafa451957fe7eae4, out_idx: 9 }, OutPoint { txid: 0xb4d65499a881b7e760f7abbda19224db0ff231e378e203ddafa451957fe7eae4, out_idx: 10 }, OutPoint { txid: 0xb4d65499a881b7e760f7abbda19224db0ff231e378e203ddafa451957fe7eae4, out_idx: 11 }] }
+inside get_v0_migrated_state
+wallet_sm_variant: 0
+wallet_sm_len: 76
+operation_id: OperationId(58f50b93_b31238a6)
+matched 0 wallet_sm_variant, Deposit
+created_sm_len: 42
+created_deposit_state: CreatedDepositState { tweak_key: KeyPair(#0802ef9af6dfc483), timeout_at: SystemTime { tv_sec: 1718293781, tv_nsec: 743900187 } }
+inside get_v0_migrated_state
+wallet_sm_variant: 0
+wallet_sm_len: 272
+operation_id: OperationId(58f50b93_b31238a6)
+matched 0 wallet_sm_variant, Deposit
+matched 1 wallet_sm_variant, WaitingForConfirmations
+waiting_for_confirmations_sm_len: 238
+waiting_for_confirmations_deposit_state: WaitingForConfirmationsDepositState { tweak_key: KeyPair(#0802ef9af6dfc483), btc_transaction: Transaction { version: 2, lock_time: Blocks(Height(173)), input: [TxIn { previous_output: OutPoint { txid: 0xbaf25b2315cf0284489fdbb068e37017752c73a759f02c6b6d486ad1d16d7f2c, vout: 0 }, script_sig: Script(), sequence: Sequence(4294967293), witness: Witness { content: [64, 162, 70, 24, 41, 154, 199, 7, 89, 120, 10, 165, 232, 23, 115, 80, 116, 24, 158, 173, 24, 53, 44, 148, 220, 219, 51, 182, 242, 55, 49, 168, 143, 142, 30, 97, 168, 231, 200, 159, 29, 193, 69, 185, 57, 154, 130, 193, 201, 58, 40, 235, 86, 244, 133, 242, 244, 48, 228, 47, 172, 239, 80, 33, 114, 0, 0, 0, 0], witness_elements: 1, indices_start: 65 } }], output: [TxOut { value: 100001000, script_pubkey: Script(OP_0 OP_PUSHBYTES_32 23e5f24fed2fed55039c9e7f8f30e5352b1893594379e7166343564da782768f) }, TxOut { value: 4599972360, script_pubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 e4c70b0eae8ab290a723ca742e19bed24bf9e4ea051d46c20d0c0fa25c38ac22) }] }, out_idx: 0 }
+inside get_v0_migrated_state
+wallet_sm_variant: 0
+wallet_sm_len: 2874
+operation_id: OperationId(58f50b93_b31238a6)
+matched 0 wallet_sm_variant, Deposit
+matched 2 wallet_sm_variant, Claiming
+created_sm_len: 2838
+claiming_deposit_state: ClaimingDepositStateV0 { transaction_id: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, change: [OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 0 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 1 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 2 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 3 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 4 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 5 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 6 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 7 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 8 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 9 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 10 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 11 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 12 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 13 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 14 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 15 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 16 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 17 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 18 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 19 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 20 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 21 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 22 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 23 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 24 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 25 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 26 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 27 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 28 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 29 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 30 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 31 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 32 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 33 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 34 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 35 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 36 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 37 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 38 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 39 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 40 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 41 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 42 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 43 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 44 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 45 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 46 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 47 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 48 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 49 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 50 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 51 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 52 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 53 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 54 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 55 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 56 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 57 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 58 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 59 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 60 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 61 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 62 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 63 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 64 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 65 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 66 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 67 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 68 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 69 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 70 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 71 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 72 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 73 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 74 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 75 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 76 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 77 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 78 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 79 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 80 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 81 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 82 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 83 }, OutPoint { txid: 0xf52ece79c9e23d76eab9c8adac8ce97d1d2058907e20024f45283a117305682d, out_idx: 84 }] }
+inside get_v0_migrated_state
+wallet_sm_variant: 1
+wallet_sm_len: 66
+operation_id: OperationId(a36d6094_78f6ae3e)
+matched 1 wallet_sm_variant, Withdraw
+withdraw_sm_variant: 1
+inside get_v0_migrated_state
+wallet_sm_variant: 1
+wallet_sm_len: 67
+operation_id: OperationId(a36d6094_78f6ae3e)
+matched 1 wallet_sm_variant, Withdraw
+withdraw_sm_variant: 0
+esplora_tx_type: []
+num_transactions: 0
+found transactions: []
+num transactions: 0
+txids: []
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+esplora_tx_type: []
+num_transactions: 0
+found transactions: []
+num transactions: 0
+txids: []
+esplora_tx_type: []
+num_transactions: 0
+found transactions: []
+num transactions: 0
+txids: []
+esplora_tx_type: []
+num_transactions: 0
+found transactions: []
+num transactions: 0
+txids: []
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+esplora_tx_type: [Tx { txid: 0xbfef4bc693076d7379f3e4f5ab400daa1535aa37b8d3d791d60679008ac7e412, version: 2, locktime: 341, vin: [Vin { txid: 0xa5faba61a82a9afb0cbadc1db799f72399283606ef2373d6e136881cf1dcacab, vout: 0, prevout: Some(PrevOut { value: 4389521960, scriptpubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 e1dc1ccccf4025616483bc15f769dbe6333bba87bc2c5ae50ea83511b34f35f9) }), scriptsig: Script(), witness: [[137, 8, 228, 29, 188, 103, 150, 235, 81, 126, 120, 116, 133, 243, 216, 53, 53, 64, 1, 85, 185, 69, 171, 171, 248, 200, 89, 74, 114, 252, 248, 182, 26, 39, 187, 159, 32, 221, 40, 17, 147, 50, 136, 45, 52, 126, 183, 69, 250, 193, 143, 106, 21, 22, 38, 44, 72, 62, 243, 94, 111, 248, 114, 69]], sequence: 4294967293, is_coinbase: false }], vout: [Vout { value: 4289514760, scriptpubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 c469964ddb47e59728c253bc4959a4d66730361d918bfdfdfbb84469b42e4176) }, Vout { value: 100001000, scriptpubkey: Script(OP_0 OP_PUSHBYTES_32 4b8ac20b116c7349f03723f29f18340e950d04b62e22e785c89bf768be71e7c5) }], status: TxStatus { confirmed: true, block_height: Some(342), block_hash: Some(0x5c783ee14ff503a154c1a0f003b6cefe866afdb999d3fa1845febdbea493428a), block_time: Some(1717689078) }, fee: 6200 }]
+num_transactions: 1
+found transactions: [Transaction { version: 2, lock_time: Blocks(Height(341)), input: [TxIn { previous_output: OutPoint { txid: 0xa5faba61a82a9afb0cbadc1db799f72399283606ef2373d6e136881cf1dcacab, vout: 0 }, script_sig: Script(), sequence: Sequence(4294967293), witness: Witness { content: [64, 137, 8, 228, 29, 188, 103, 150, 235, 81, 126, 120, 116, 133, 243, 216, 53, 53, 64, 1, 85, 185, 69, 171, 171, 248, 200, 89, 74, 114, 252, 248, 182, 26, 39, 187, 159, 32, 221, 40, 17, 147, 50, 136, 45, 52, 126, 183, 69, 250, 193, 143, 106, 21, 22, 38, 44, 72, 62, 243, 94, 111, 248, 114, 69, 0, 0, 0, 0], witness_elements: 1, indices_start: 65 } }], output: [TxOut { value: 4289514760, script_pubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 c469964ddb47e59728c253bc4959a4d66730361d918bfdfdfbb84469b42e4176) }, TxOut { value: 100001000, script_pubkey: Script(OP_0 OP_PUSHBYTES_32 4b8ac20b116c7349f03723f29f18340e950d04b62e22e785c89bf768be71e7c5) }] }]
+num transactions: 1
+txids: [0xbfef4bc693076d7379f3e4f5ab400daa1535aa37b8d3d791d60679008ac7e412]
+inside get_tx_block_height
+tx: Some(Transaction { version: 2, lock_time: Blocks(Height(341)), input: [TxIn { previous_output: OutPoint { txid: 0xa5faba61a82a9afb0cbadc1db799f72399283606ef2373d6e136881cf1dcacab, vout: 0 }, script_sig: Script(), sequence: Sequence(4294967293), witness: Witness { content: [64, 137, 8, 228, 29, 188, 103, 150, 235, 81, 126, 120, 116, 133, 243, 216, 53, 53, 64, 1, 85, 185, 69, 171, 171, 248, 200, 89, 74, 114, 252, 248, 182, 26, 39, 187, 159, 32, 221, 40, 17, 147, 50, 136, 45, 52, 126, 183, 69, 250, 193, 143, 106, 21, 22, 38, 44, 72, 62, 243, 94, 111, 248, 114, 69, 0, 0, 0, 0], witness_elements: 1, indices_start: 65 } }], output: [TxOut { value: 4289514760, script_pubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 c469964ddb47e59728c253bc4959a4d66730361d918bfdfdfbb84469b42e4176) }, TxOut { value: 100001000, script_pubkey: Script(OP_0 OP_PUSHBYTES_32 4b8ac20b116c7349f03723f29f18340e950d04b62e22e785c89bf768be71e7c5) }] })
+tx_status: TxStatus { confirmed: true, block_height: Some(342), block_hash: Some(0x5c783ee14ff503a154c1a0f003b6cefe866afdb999d3fa1845febdbea493428a), block_time: Some(1717689078) }
+esplora_tx_type: [Tx { txid: 0xa5faba61a82a9afb0cbadc1db799f72399283606ef2373d6e136881cf1dcacab, version: 2, locktime: 320, vin: [Vin { txid: 0x0e7e42ac279dbd803f19613842477f34fbceb967dd23d9ce17f950713b57f0b3, vout: 1, prevout: Some(PrevOut { value: 4489529160, scriptpubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 3b21629b38360dc8f93adfc5b0a3a321fcc094052336f127af2114f2766c7f2e) }), scriptsig: Script(), witness: [[166, 236, 242, 29, 51, 233, 135, 217, 217, 81, 156, 77, 184, 141, 1, 6, 177, 95, 126, 130, 159, 66, 46, 169, 44, 238, 255, 37, 62, 135, 237, 31, 33, 82, 66, 57, 252, 116, 51, 18, 252, 232, 255, 71, 159, 100, 148, 203, 217, 234, 209, 140, 254, 147, 26, 60, 108, 239, 66, 4, 46, 237, 144, 22]], sequence: 4294967293, is_coinbase: false }], vout: [Vout { value: 4389521960, scriptpubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 e1dc1ccccf4025616483bc15f769dbe6333bba87bc2c5ae50ea83511b34f35f9) }, Vout { value: 100001000, scriptpubkey: Script(OP_0 OP_PUSHBYTES_32 0a7c9f4d915a717037c4a4f36c02fabc66f0009099728d3e3c5acb4f7d08680f) }], status: TxStatus { confirmed: true, block_height: Some(321), block_hash: Some(0x5a0dbda9a4be62831f11d494b7fbb3448a0399878cd21496d7de9b3c10481516), block_time: Some(1717689075) }, fee: 6200 }]
+num_transactions: 1
+found transactions: [Transaction { version: 2, lock_time: Blocks(Height(320)), input: [TxIn { previous_output: OutPoint { txid: 0x0e7e42ac279dbd803f19613842477f34fbceb967dd23d9ce17f950713b57f0b3, vout: 1 }, script_sig: Script(), sequence: Sequence(4294967293), witness: Witness { content: [64, 166, 236, 242, 29, 51, 233, 135, 217, 217, 81, 156, 77, 184, 141, 1, 6, 177, 95, 126, 130, 159, 66, 46, 169, 44, 238, 255, 37, 62, 135, 237, 31, 33, 82, 66, 57, 252, 116, 51, 18, 252, 232, 255, 71, 159, 100, 148, 203, 217, 234, 209, 140, 254, 147, 26, 60, 108, 239, 66, 4, 46, 237, 144, 22, 0, 0, 0, 0], witness_elements: 1, indices_start: 65 } }], output: [TxOut { value: 4389521960, script_pubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 e1dc1ccccf4025616483bc15f769dbe6333bba87bc2c5ae50ea83511b34f35f9) }, TxOut { value: 100001000, script_pubkey: Script(OP_0 OP_PUSHBYTES_32 0a7c9f4d915a717037c4a4f36c02fabc66f0009099728d3e3c5acb4f7d08680f) }] }]
+num transactions: 1
+txids: [0xa5faba61a82a9afb0cbadc1db799f72399283606ef2373d6e136881cf1dcacab]
+inside get_tx_block_height
+tx: Some(Transaction { version: 2, lock_time: Blocks(Height(320)), input: [TxIn { previous_output: OutPoint { txid: 0x0e7e42ac279dbd803f19613842477f34fbceb967dd23d9ce17f950713b57f0b3, vout: 1 }, script_sig: Script(), sequence: Sequence(4294967293), witness: Witness { content: [64, 166, 236, 242, 29, 51, 233, 135, 217, 217, 81, 156, 77, 184, 141, 1, 6, 177, 95, 126, 130, 159, 66, 46, 169, 44, 238, 255, 37, 62, 135, 237, 31, 33, 82, 66, 57, 252, 116, 51, 18, 252, 232, 255, 71, 159, 100, 148, 203, 217, 234, 209, 140, 254, 147, 26, 60, 108, 239, 66, 4, 46, 237, 144, 22, 0, 0, 0, 0], witness_elements: 1, indices_start: 65 } }], output: [TxOut { value: 4389521960, script_pubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 e1dc1ccccf4025616483bc15f769dbe6333bba87bc2c5ae50ea83511b34f35f9) }, TxOut { value: 100001000, script_pubkey: Script(OP_0 OP_PUSHBYTES_32 0a7c9f4d915a717037c4a4f36c02fabc66f0009099728d3e3c5acb4f7d08680f) }] })
+tx_status: TxStatus { confirmed: true, block_height: Some(321), block_hash: Some(0x5a0dbda9a4be62831f11d494b7fbb3448a0399878cd21496d7de9b3c10481516), block_time: Some(1717689075) }
+inside get_tx_block_height
+tx: Some(Transaction { version: 2, lock_time: Blocks(Height(341)), input: [TxIn { previous_output: OutPoint { txid: 0xa5faba61a82a9afb0cbadc1db799f72399283606ef2373d6e136881cf1dcacab, vout: 0 }, script_sig: Script(), sequence: Sequence(4294967293), witness: Witness { content: [64, 137, 8, 228, 29, 188, 103, 150, 235, 81, 126, 120, 116, 133, 243, 216, 53, 53, 64, 1, 85, 185, 69, 171, 171, 248, 200, 89, 74, 114, 252, 248, 182, 26, 39, 187, 159, 32, 221, 40, 17, 147, 50, 136, 45, 52, 126, 183, 69, 250, 193, 143, 106, 21, 22, 38, 44, 72, 62, 243, 94, 111, 248, 114, 69, 0, 0, 0, 0], witness_elements: 1, indices_start: 65 } }], output: [TxOut { value: 4289514760, script_pubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 c469964ddb47e59728c253bc4959a4d66730361d918bfdfdfbb84469b42e4176) }, TxOut { value: 100001000, script_pubkey: Script(OP_0 OP_PUSHBYTES_32 4b8ac20b116c7349f03723f29f18340e950d04b62e22e785c89bf768be71e7c5) }] })
+tx_status: TxStatus { confirmed: true, block_height: Some(342), block_hash: Some(0x5c783ee14ff503a154c1a0f003b6cefe866afdb999d3fa1845febdbea493428a), block_time: Some(1717689078) }
+inside get_tx_block_height
+tx: Some(Transaction { version: 2, lock_time: Blocks(Height(341)), input: [TxIn { previous_output: OutPoint { txid: 0xa5faba61a82a9afb0cbadc1db799f72399283606ef2373d6e136881cf1dcacab, vout: 0 }, script_sig: Script(), sequence: Sequence(4294967293), witness: Witness { content: [64, 137, 8, 228, 29, 188, 103, 150, 235, 81, 126, 120, 116, 133, 243, 216, 53, 53, 64, 1, 85, 185, 69, 171, 171, 248, 200, 89, 74, 114, 252, 248, 182, 26, 39, 187, 159, 32, 221, 40, 17, 147, 50, 136, 45, 52, 126, 183, 69, 250, 193, 143, 106, 21, 22, 38, 44, 72, 62, 243, 94, 111, 248, 114, 69, 0, 0, 0, 0], witness_elements: 1, indices_start: 65 } }], output: [TxOut { value: 4289514760, script_pubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 c469964ddb47e59728c253bc4959a4d66730361d918bfdfdfbb84469b42e4176) }, TxOut { value: 100001000, script_pubkey: Script(OP_0 OP_PUSHBYTES_32 4b8ac20b116c7349f03723f29f18340e950d04b62e22e785c89bf768be71e7c5) }] })
+tx_status: TxStatus { confirmed: true, block_height: Some(342), block_hash: Some(0x5c783ee14ff503a154c1a0f003b6cefe866afdb999d3fa1845febdbea493428a), block_time: Some(1717689078) }
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+esplora_tx_type: []
+num_transactions: 0
+found transactions: []
+num transactions: 0
+txids: []
+esplora_tx_type: [Tx { txid: 0x312413e87c239e955d38e18efba3609de56d1a9cdb148c34a56637505e976f5a, version: 2, locktime: 362, vin: [Vin { txid: 0xbfef4bc693076d7379f3e4f5ab400daa1535aa37b8d3d791d60679008ac7e412, vout: 0, prevout: Some(PrevOut { value: 4289514760, scriptpubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 c469964ddb47e59728c253bc4959a4d66730361d918bfdfdfbb84469b42e4176) }), scriptsig: Script(), witness: [[104, 249, 219, 11, 123, 143, 147, 235, 197, 156, 164, 58, 211, 127, 142, 93, 222, 48, 145, 107, 9, 106, 13, 52, 253, 227, 231, 236, 197, 186, 114, 97, 207, 131, 183, 211, 104, 118, 122, 83, 147, 143, 44, 130, 215, 95, 109, 113, 34, 233, 190, 94, 179, 8, 19, 186, 148, 100, 75, 32, 165, 154, 22, 96]], sequence: 4294967293, is_coinbase: false }], vout: [Vout { value: 100001000, scriptpubkey: Script(OP_0 OP_PUSHBYTES_32 11fd1fc9d42ed377bf4cb1536f70b86572806ad0223435345492d515e75b892a) }, Vout { value: 4189507560, scriptpubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 46c8bf59b0d9362e9d8e7d2fd55c80f641440a5869e03ef44533a517b99f9bd8) }], status: TxStatus { confirmed: true, block_height: Some(363), block_hash: Some(0x6121072391a22408aa84bdab719cc9d6f319724fa050657a12eb9c2c8efc75c3), block_time: Some(1717689082) }, fee: 6200 }]
+num_transactions: 1
+found transactions: [Transaction { version: 2, lock_time: Blocks(Height(362)), input: [TxIn { previous_output: OutPoint { txid: 0xbfef4bc693076d7379f3e4f5ab400daa1535aa37b8d3d791d60679008ac7e412, vout: 0 }, script_sig: Script(), sequence: Sequence(4294967293), witness: Witness { content: [64, 104, 249, 219, 11, 123, 143, 147, 235, 197, 156, 164, 58, 211, 127, 142, 93, 222, 48, 145, 107, 9, 106, 13, 52, 253, 227, 231, 236, 197, 186, 114, 97, 207, 131, 183, 211, 104, 118, 122, 83, 147, 143, 44, 130, 215, 95, 109, 113, 34, 233, 190, 94, 179, 8, 19, 186, 148, 100, 75, 32, 165, 154, 22, 96, 0, 0, 0, 0], witness_elements: 1, indices_start: 65 } }], output: [TxOut { value: 100001000, script_pubkey: Script(OP_0 OP_PUSHBYTES_32 11fd1fc9d42ed377bf4cb1536f70b86572806ad0223435345492d515e75b892a) }, TxOut { value: 4189507560, script_pubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 46c8bf59b0d9362e9d8e7d2fd55c80f641440a5869e03ef44533a517b99f9bd8) }] }]
+num transactions: 1
+txids: [0x312413e87c239e955d38e18efba3609de56d1a9cdb148c34a56637505e976f5a]
+inside get_tx_block_height
+tx: Some(Transaction { version: 2, lock_time: Blocks(Height(362)), input: [TxIn { previous_output: OutPoint { txid: 0xbfef4bc693076d7379f3e4f5ab400daa1535aa37b8d3d791d60679008ac7e412, vout: 0 }, script_sig: Script(), sequence: Sequence(4294967293), witness: Witness { content: [64, 104, 249, 219, 11, 123, 143, 147, 235, 197, 156, 164, 58, 211, 127, 142, 93, 222, 48, 145, 107, 9, 106, 13, 52, 253, 227, 231, 236, 197, 186, 114, 97, 207, 131, 183, 211, 104, 118, 122, 83, 147, 143, 44, 130, 215, 95, 109, 113, 34, 233, 190, 94, 179, 8, 19, 186, 148, 100, 75, 32, 165, 154, 22, 96, 0, 0, 0, 0], witness_elements: 1, indices_start: 65 } }], output: [TxOut { value: 100001000, script_pubkey: Script(OP_0 OP_PUSHBYTES_32 11fd1fc9d42ed377bf4cb1536f70b86572806ad0223435345492d515e75b892a) }, TxOut { value: 4189507560, script_pubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 46c8bf59b0d9362e9d8e7d2fd55c80f641440a5869e03ef44533a517b99f9bd8) }] })
+tx_status: TxStatus { confirmed: true, block_height: Some(363), block_hash: Some(0x6121072391a22408aa84bdab719cc9d6f319724fa050657a12eb9c2c8efc75c3), block_time: Some(1717689082) }
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+esplora_tx_type: []
+num_transactions: 0
+found transactions: []
+num transactions: 0
+txids: []
+esplora_tx_type: []
+num_transactions: 0
+found transactions: []
+num transactions: 0
+txids: []
+esplora_tx_type: []
+num_transactions: 0
+found transactions: []
+num transactions: 0
+txids: []
+esplora_tx_type: [Tx { txid: 0x18dd5bac6fa6eddbc5f7c8f63ffa39ad5117de50ad2538f960b996b4c523220f, version: 2, locktime: 383, vin: [Vin { txid: 0x312413e87c239e955d38e18efba3609de56d1a9cdb148c34a56637505e976f5a, vout: 1, prevout: Some(PrevOut { value: 4189507560, scriptpubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 46c8bf59b0d9362e9d8e7d2fd55c80f641440a5869e03ef44533a517b99f9bd8) }), scriptsig: Script(), witness: [[254, 114, 253, 210, 202, 237, 230, 112, 60, 156, 134, 147, 253, 106, 126, 59, 187, 98, 39, 156, 233, 48, 218, 50, 102, 231, 16, 200, 44, 212, 214, 222, 112, 101, 232, 208, 142, 252, 144, 67, 27, 104, 245, 200, 169, 116, 53, 77, 232, 109, 29, 211, 192, 147, 156, 244, 86, 5, 195, 226, 139, 141, 178, 253]], sequence: 4294967293, is_coinbase: false }], vout: [Vout { value: 4089500360, scriptpubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 210c6cab19c906b20621bed7faaf49ed113b4497f0a228f22e157f56d336ef4a) }, Vout { value: 100001000, scriptpubkey: Script(OP_0 OP_PUSHBYTES_32 099351b5c7422ab1e274d920513d6b64601664c484f9a8eb84a8c5bf6b90eabf) }], status: TxStatus { confirmed: true, block_height: Some(384), block_hash: Some(0x24b3e34275b3e7f14ee0e1f538bcd065521fb3d5f742842c1f492141f10db9ce), block_time: Some(1717689090) }, fee: 6200 }]
+num_transactions: 1
+found transactions: [Transaction { version: 2, lock_time: Blocks(Height(383)), input: [TxIn { previous_output: OutPoint { txid: 0x312413e87c239e955d38e18efba3609de56d1a9cdb148c34a56637505e976f5a, vout: 1 }, script_sig: Script(), sequence: Sequence(4294967293), witness: Witness { content: [64, 254, 114, 253, 210, 202, 237, 230, 112, 60, 156, 134, 147, 253, 106, 126, 59, 187, 98, 39, 156, 233, 48, 218, 50, 102, 231, 16, 200, 44, 212, 214, 222, 112, 101, 232, 208, 142, 252, 144, 67, 27, 104, 245, 200, 169, 116, 53, 77, 232, 109, 29, 211, 192, 147, 156, 244, 86, 5, 195, 226, 139, 141, 178, 253, 0, 0, 0, 0], witness_elements: 1, indices_start: 65 } }], output: [TxOut { value: 4089500360, script_pubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 210c6cab19c906b20621bed7faaf49ed113b4497f0a228f22e157f56d336ef4a) }, TxOut { value: 100001000, script_pubkey: Script(OP_0 OP_PUSHBYTES_32 099351b5c7422ab1e274d920513d6b64601664c484f9a8eb84a8c5bf6b90eabf) }] }]
+num transactions: 1
+txids: [0x18dd5bac6fa6eddbc5f7c8f63ffa39ad5117de50ad2538f960b996b4c523220f]
+inside get_tx_block_height
+tx: Some(Transaction { version: 2, lock_time: Blocks(Height(383)), input: [TxIn { previous_output: OutPoint { txid: 0x312413e87c239e955d38e18efba3609de56d1a9cdb148c34a56637505e976f5a, vout: 1 }, script_sig: Script(), sequence: Sequence(4294967293), witness: Witness { content: [64, 254, 114, 253, 210, 202, 237, 230, 112, 60, 156, 134, 147, 253, 106, 126, 59, 187, 98, 39, 156, 233, 48, 218, 50, 102, 231, 16, 200, 44, 212, 214, 222, 112, 101, 232, 208, 142, 252, 144, 67, 27, 104, 245, 200, 169, 116, 53, 77, 232, 109, 29, 211, 192, 147, 156, 244, 86, 5, 195, 226, 139, 141, 178, 253, 0, 0, 0, 0], witness_elements: 1, indices_start: 65 } }], output: [TxOut { value: 4089500360, script_pubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 210c6cab19c906b20621bed7faaf49ed113b4497f0a228f22e157f56d336ef4a) }, TxOut { value: 100001000, script_pubkey: Script(OP_0 OP_PUSHBYTES_32 099351b5c7422ab1e274d920513d6b64601664c484f9a8eb84a8c5bf6b90eabf) }] })
+tx_status: TxStatus { confirmed: true, block_height: Some(384), block_hash: Some(0x24b3e34275b3e7f14ee0e1f538bcd065521fb3d5f742842c1f492141f10db9ce), block_time: Some(1717689090) }
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+esplora_tx_type: []
+num_transactions: 0
+found transactions: []
+num transactions: 0
+txids: []
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+esplora_tx_type: []
+num_transactions: 0
+found transactions: []
+num transactions: 0
+txids: []
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+esplora_tx_type: []
+num_transactions: 0
+found transactions: []
+num transactions: 0
+txids: []
+esplora_tx_type: []
+num_transactions: 0
+found transactions: []
+num transactions: 0
+txids: []
+esplora_tx_type: []
+num_transactions: 0
+found transactions: []
+num transactions: 0
+txids: []
+esplora_tx_type: []
+num_transactions: 0
+found transactions: []
+num transactions: 0
+txids: []
+esplora_tx_type: []
+num_transactions: 0
+found transactions: []
+num transactions: 0
+txids: []
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+esplora_tx_type: [Tx { txid: 0x563246043c6eaac228e8401bbfcf5e916980a085a759b406f096c4df2ce37bb6, version: 2, locktime: 404, vin: [Vin { txid: 0x18dd5bac6fa6eddbc5f7c8f63ffa39ad5117de50ad2538f960b996b4c523220f, vout: 0, prevout: Some(PrevOut { value: 4089500360, scriptpubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 210c6cab19c906b20621bed7faaf49ed113b4497f0a228f22e157f56d336ef4a) }), scriptsig: Script(), witness: [[86, 149, 25, 152, 154, 144, 140, 140, 178, 178, 28, 167, 121, 93, 50, 85, 32, 169, 192, 99, 12, 126, 3, 51, 238, 60, 182, 67, 231, 150, 122, 182, 43, 206, 1, 29, 210, 94, 84, 241, 21, 233, 10, 219, 224, 168, 115, 63, 86, 252, 54, 254, 205, 210, 28, 251, 171, 219, 206, 198, 178, 197, 218, 30]], sequence: 4294967293, is_coinbase: false }], vout: [Vout { value: 101000, scriptpubkey: Script(OP_0 OP_PUSHBYTES_32 3ff8312bfd65abd4104e935520262550cdf31c077a27d9a4825a5eb692d67fd0) }, Vout { value: 4089393160, scriptpubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 900f9c656aa0529be8a827020584a0f054269e8e0400c877aac2ce4c6425c7ea) }], status: TxStatus { confirmed: true, block_height: Some(405), block_hash: Some(0x0f47fc1f6a915780b28748052e9de1b4220468abf4d6b387037ddca5808b4278), block_time: Some(1717689106) }, fee: 6200 }]
+num_transactions: 1
+found transactions: [Transaction { version: 2, lock_time: Blocks(Height(404)), input: [TxIn { previous_output: OutPoint { txid: 0x18dd5bac6fa6eddbc5f7c8f63ffa39ad5117de50ad2538f960b996b4c523220f, vout: 0 }, script_sig: Script(), sequence: Sequence(4294967293), witness: Witness { content: [64, 86, 149, 25, 152, 154, 144, 140, 140, 178, 178, 28, 167, 121, 93, 50, 85, 32, 169, 192, 99, 12, 126, 3, 51, 238, 60, 182, 67, 231, 150, 122, 182, 43, 206, 1, 29, 210, 94, 84, 241, 21, 233, 10, 219, 224, 168, 115, 63, 86, 252, 54, 254, 205, 210, 28, 251, 171, 219, 206, 198, 178, 197, 218, 30, 0, 0, 0, 0], witness_elements: 1, indices_start: 65 } }], output: [TxOut { value: 101000, script_pubkey: Script(OP_0 OP_PUSHBYTES_32 3ff8312bfd65abd4104e935520262550cdf31c077a27d9a4825a5eb692d67fd0) }, TxOut { value: 4089393160, script_pubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 900f9c656aa0529be8a827020584a0f054269e8e0400c877aac2ce4c6425c7ea) }] }]
+num transactions: 1
+txids: [0x563246043c6eaac228e8401bbfcf5e916980a085a759b406f096c4df2ce37bb6]
+inside get_tx_block_height
+tx: Some(Transaction { version: 2, lock_time: Blocks(Height(404)), input: [TxIn { previous_output: OutPoint { txid: 0x18dd5bac6fa6eddbc5f7c8f63ffa39ad5117de50ad2538f960b996b4c523220f, vout: 0 }, script_sig: Script(), sequence: Sequence(4294967293), witness: Witness { content: [64, 86, 149, 25, 152, 154, 144, 140, 140, 178, 178, 28, 167, 121, 93, 50, 85, 32, 169, 192, 99, 12, 126, 3, 51, 238, 60, 182, 67, 231, 150, 122, 182, 43, 206, 1, 29, 210, 94, 84, 241, 21, 233, 10, 219, 224, 168, 115, 63, 86, 252, 54, 254, 205, 210, 28, 251, 171, 219, 206, 198, 178, 197, 218, 30, 0, 0, 0, 0], witness_elements: 1, indices_start: 65 } }], output: [TxOut { value: 101000, script_pubkey: Script(OP_0 OP_PUSHBYTES_32 3ff8312bfd65abd4104e935520262550cdf31c077a27d9a4825a5eb692d67fd0) }, TxOut { value: 4089393160, script_pubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 900f9c656aa0529be8a827020584a0f054269e8e0400c877aac2ce4c6425c7ea) }] })
+tx_status: TxStatus { confirmed: true, block_height: Some(405), block_hash: Some(0x0f47fc1f6a915780b28748052e9de1b4220468abf4d6b387037ddca5808b4278), block_time: Some(1717689106) }
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+esplora_tx_type: []
+num_transactions: 0
+found transactions: []
+num transactions: 0
+txids: []
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+esplora_tx_type: [Tx { txid: 0x33274cf42bef4767f9b61b7d5cb94487ecb8955e933af413fe7b711f1e936bf2, version: 2, locktime: 425, vin: [Vin { txid: 0x563246043c6eaac228e8401bbfcf5e916980a085a759b406f096c4df2ce37bb6, vout: 1, prevout: Some(PrevOut { value: 4089393160, scriptpubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 900f9c656aa0529be8a827020584a0f054269e8e0400c877aac2ce4c6425c7ea) }), scriptsig: Script(), witness: [[2, 51, 34, 234, 118, 82, 46, 183, 60, 90, 197, 172, 42, 121, 255, 62, 147, 107, 197, 28, 105, 90, 130, 186, 27, 57, 59, 135, 21, 107, 23, 91, 57, 63, 115, 197, 125, 242, 84, 14, 178, 26, 202, 152, 20, 11, 51, 161, 1, 235, 5, 77, 21, 98, 86, 53, 216, 209, 168, 37, 198, 200, 98, 88]], sequence: 4294967293, is_coinbase: false }], vout: [Vout { value: 101000, scriptpubkey: Script(OP_0 OP_PUSHBYTES_32 431248046389769be69e002115cf3f37c6d2944d75fd624da788c79e26dec1dc) }, Vout { value: 4089285960, scriptpubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 fe296dbda33c19a4200010504c0fde5d4ad7e03a5c4530c9a67f139edbc06eca) }], status: TxStatus { confirmed: true, block_height: Some(426), block_hash: Some(0x37e6d9b9d4393f62b0eafbce639e1f6aacb889bba3f936bb23fe7a66ec5196eb), block_time: Some(1717689109) }, fee: 6200 }]
+num_transactions: 1
+found transactions: [Transaction { version: 2, lock_time: Blocks(Height(425)), input: [TxIn { previous_output: OutPoint { txid: 0x563246043c6eaac228e8401bbfcf5e916980a085a759b406f096c4df2ce37bb6, vout: 1 }, script_sig: Script(), sequence: Sequence(4294967293), witness: Witness { content: [64, 2, 51, 34, 234, 118, 82, 46, 183, 60, 90, 197, 172, 42, 121, 255, 62, 147, 107, 197, 28, 105, 90, 130, 186, 27, 57, 59, 135, 21, 107, 23, 91, 57, 63, 115, 197, 125, 242, 84, 14, 178, 26, 202, 152, 20, 11, 51, 161, 1, 235, 5, 77, 21, 98, 86, 53, 216, 209, 168, 37, 198, 200, 98, 88, 0, 0, 0, 0], witness_elements: 1, indices_start: 65 } }], output: [TxOut { value: 101000, script_pubkey: Script(OP_0 OP_PUSHBYTES_32 431248046389769be69e002115cf3f37c6d2944d75fd624da788c79e26dec1dc) }, TxOut { value: 4089285960, script_pubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 fe296dbda33c19a4200010504c0fde5d4ad7e03a5c4530c9a67f139edbc06eca) }] }]
+num transactions: 1
+txids: [0x33274cf42bef4767f9b61b7d5cb94487ecb8955e933af413fe7b711f1e936bf2]
+inside get_tx_block_height
+tx: Some(Transaction { version: 2, lock_time: Blocks(Height(425)), input: [TxIn { previous_output: OutPoint { txid: 0x563246043c6eaac228e8401bbfcf5e916980a085a759b406f096c4df2ce37bb6, vout: 1 }, script_sig: Script(), sequence: Sequence(4294967293), witness: Witness { content: [64, 2, 51, 34, 234, 118, 82, 46, 183, 60, 90, 197, 172, 42, 121, 255, 62, 147, 107, 197, 28, 105, 90, 130, 186, 27, 57, 59, 135, 21, 107, 23, 91, 57, 63, 115, 197, 125, 242, 84, 14, 178, 26, 202, 152, 20, 11, 51, 161, 1, 235, 5, 77, 21, 98, 86, 53, 216, 209, 168, 37, 198, 200, 98, 88, 0, 0, 0, 0], witness_elements: 1, indices_start: 65 } }], output: [TxOut { value: 101000, script_pubkey: Script(OP_0 OP_PUSHBYTES_32 431248046389769be69e002115cf3f37c6d2944d75fd624da788c79e26dec1dc) }, TxOut { value: 4089285960, script_pubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 fe296dbda33c19a4200010504c0fde5d4ad7e03a5c4530c9a67f139edbc06eca) }] })
+tx_status: TxStatus { confirmed: true, block_height: Some(426), block_hash: Some(0x37e6d9b9d4393f62b0eafbce639e1f6aacb889bba3f936bb23fe7a66ec5196eb), block_time: Some(1717689109) }
+esplora_tx_type: []
+num_transactions: 0
+found transactions: []
+num transactions: 0
+txids: []
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+esplora_tx_type: []
+num_transactions: 0
+found transactions: []
+num transactions: 0
+txids: []
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: true
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+esplora_tx_type: []
+num_transactions: 0
+found transactions: []
+num transactions: 0
+txids: []
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+esplora_tx_type: []
+num_transactions: 0
+found transactions: []
+num transactions: 0
+txids: []
+esplora_tx_type: []
+num_transactions: 0
+found transactions: []
+num transactions: 0
+txids: []
+esplora_tx_type: [Tx { txid: 0x5f0f285d1ed190b1af265d524a354daaf71068a1d4c35ba81475bfc4e3f738cf, version: 2, locktime: 467, vin: [Vin { txid: 0x6a6f4264d2e72178e9f3e8bf9fce63ec7c01bd48e416cad3f66d3323894c2f17, vout: 1, prevout: Some(PrevOut { value: 4089178760, scriptpubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 42e9e97d2cab0c201bfeba7d4c929b9456a0879c20b5bebf03750e326a75e6d2) }), scriptsig: Script(), witness: [[58, 3, 68, 74, 161, 77, 252, 41, 100, 250, 126, 59, 141, 196, 178, 94, 149, 34, 72, 118, 61, 231, 255, 228, 44, 98, 99, 191, 188, 14, 212, 254, 151, 68, 32, 226, 133, 91, 161, 126, 133, 246, 38, 113, 136, 180, 51, 248, 122, 66, 181, 113, 204, 176, 124, 234, 219, 88, 129, 106, 86, 26, 247, 134]], sequence: 4294967293, is_coinbase: false }], vout: [Vout { value: 10001000, scriptpubkey: Script(OP_0 OP_PUSHBYTES_32 994b867c3428a2c5e8d27d0a6e5faf8ce28a04f790c6b4494482d14b9ee774a5) }, Vout { value: 4079171560, scriptpubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 62cbd51863facc4c5acf5d81c4cfe2fcd97297edb5e34998f5033b868f373412) }], status: TxStatus { confirmed: true, block_height: Some(468), block_hash: Some(0x5a28dfa9e0a8ffa1164f82a2b8d7336a6cc46881f560f259fffe8a3914af0d7a), block_time: Some(1717689116) }, fee: 6200 }]
+num_transactions: 1
+found transactions: [Transaction { version: 2, lock_time: Blocks(Height(467)), input: [TxIn { previous_output: OutPoint { txid: 0x6a6f4264d2e72178e9f3e8bf9fce63ec7c01bd48e416cad3f66d3323894c2f17, vout: 1 }, script_sig: Script(), sequence: Sequence(4294967293), witness: Witness { content: [64, 58, 3, 68, 74, 161, 77, 252, 41, 100, 250, 126, 59, 141, 196, 178, 94, 149, 34, 72, 118, 61, 231, 255, 228, 44, 98, 99, 191, 188, 14, 212, 254, 151, 68, 32, 226, 133, 91, 161, 126, 133, 246, 38, 113, 136, 180, 51, 248, 122, 66, 181, 113, 204, 176, 124, 234, 219, 88, 129, 106, 86, 26, 247, 134, 0, 0, 0, 0], witness_elements: 1, indices_start: 65 } }], output: [TxOut { value: 10001000, script_pubkey: Script(OP_0 OP_PUSHBYTES_32 994b867c3428a2c5e8d27d0a6e5faf8ce28a04f790c6b4494482d14b9ee774a5) }, TxOut { value: 4079171560, script_pubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 62cbd51863facc4c5acf5d81c4cfe2fcd97297edb5e34998f5033b868f373412) }] }]
+num transactions: 1
+txids: [0x5f0f285d1ed190b1af265d524a354daaf71068a1d4c35ba81475bfc4e3f738cf]
+inside get_tx_block_height
+tx: Some(Transaction { version: 2, lock_time: Blocks(Height(467)), input: [TxIn { previous_output: OutPoint { txid: 0x6a6f4264d2e72178e9f3e8bf9fce63ec7c01bd48e416cad3f66d3323894c2f17, vout: 1 }, script_sig: Script(), sequence: Sequence(4294967293), witness: Witness { content: [64, 58, 3, 68, 74, 161, 77, 252, 41, 100, 250, 126, 59, 141, 196, 178, 94, 149, 34, 72, 118, 61, 231, 255, 228, 44, 98, 99, 191, 188, 14, 212, 254, 151, 68, 32, 226, 133, 91, 161, 126, 133, 246, 38, 113, 136, 180, 51, 248, 122, 66, 181, 113, 204, 176, 124, 234, 219, 88, 129, 106, 86, 26, 247, 134, 0, 0, 0, 0], witness_elements: 1, indices_start: 65 } }], output: [TxOut { value: 10001000, script_pubkey: Script(OP_0 OP_PUSHBYTES_32 994b867c3428a2c5e8d27d0a6e5faf8ce28a04f790c6b4494482d14b9ee774a5) }, TxOut { value: 4079171560, script_pubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 62cbd51863facc4c5acf5d81c4cfe2fcd97297edb5e34998f5033b868f373412) }] })
+tx_status: TxStatus { confirmed: true, block_height: Some(468), block_hash: Some(0x5a28dfa9e0a8ffa1164f82a2b8d7336a6cc46881f560f259fffe8a3914af0d7a), block_time: Some(1717689116) }
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+esplora_tx_type: []
+num_transactions: 0
+found transactions: []
+num transactions: 0
+txids: []
+esplora_tx_type: [Tx { txid: 0x6a6f4264d2e72178e9f3e8bf9fce63ec7c01bd48e416cad3f66d3323894c2f17, version: 2, locktime: 446, vin: [Vin { txid: 0x33274cf42bef4767f9b61b7d5cb94487ecb8955e933af413fe7b711f1e936bf2, vout: 1, prevout: Some(PrevOut { value: 4089285960, scriptpubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 fe296dbda33c19a4200010504c0fde5d4ad7e03a5c4530c9a67f139edbc06eca) }), scriptsig: Script(), witness: [[255, 203, 147, 183, 201, 68, 13, 81, 116, 162, 225, 80, 4, 229, 132, 165, 127, 252, 179, 179, 14, 119, 17, 234, 110, 42, 94, 187, 23, 104, 211, 194, 100, 183, 172, 161, 152, 93, 203, 191, 114, 104, 118, 56, 63, 38, 249, 228, 132, 92, 166, 45, 210, 209, 6, 166, 152, 195, 175, 24, 178, 199, 215, 200]], sequence: 4294967293, is_coinbase: false }], vout: [Vout { value: 101000, scriptpubkey: Script(OP_0 OP_PUSHBYTES_32 dc177992909cadba04a6da7c3a0d99b410f3b0bcec70451751a5bcbb6b884ce6) }, Vout { value: 4089178760, scriptpubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 42e9e97d2cab0c201bfeba7d4c929b9456a0879c20b5bebf03750e326a75e6d2) }], status: TxStatus { confirmed: true, block_height: Some(447), block_hash: Some(0x63811fead8e1e8ab84e08798c65b31c85022dc4000d6c5fedadfe37b12fab99b), block_time: Some(1717689113) }, fee: 6200 }]
+num_transactions: 1
+found transactions: [Transaction { version: 2, lock_time: Blocks(Height(446)), input: [TxIn { previous_output: OutPoint { txid: 0x33274cf42bef4767f9b61b7d5cb94487ecb8955e933af413fe7b711f1e936bf2, vout: 1 }, script_sig: Script(), sequence: Sequence(4294967293), witness: Witness { content: [64, 255, 203, 147, 183, 201, 68, 13, 81, 116, 162, 225, 80, 4, 229, 132, 165, 127, 252, 179, 179, 14, 119, 17, 234, 110, 42, 94, 187, 23, 104, 211, 194, 100, 183, 172, 161, 152, 93, 203, 191, 114, 104, 118, 56, 63, 38, 249, 228, 132, 92, 166, 45, 210, 209, 6, 166, 152, 195, 175, 24, 178, 199, 215, 200, 0, 0, 0, 0], witness_elements: 1, indices_start: 65 } }], output: [TxOut { value: 101000, script_pubkey: Script(OP_0 OP_PUSHBYTES_32 dc177992909cadba04a6da7c3a0d99b410f3b0bcec70451751a5bcbb6b884ce6) }, TxOut { value: 4089178760, script_pubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 42e9e97d2cab0c201bfeba7d4c929b9456a0879c20b5bebf03750e326a75e6d2) }] }]
+num transactions: 1
+txids: [0x6a6f4264d2e72178e9f3e8bf9fce63ec7c01bd48e416cad3f66d3323894c2f17]
+inside get_tx_block_height
+tx: Some(Transaction { version: 2, lock_time: Blocks(Height(446)), input: [TxIn { previous_output: OutPoint { txid: 0x33274cf42bef4767f9b61b7d5cb94487ecb8955e933af413fe7b711f1e936bf2, vout: 1 }, script_sig: Script(), sequence: Sequence(4294967293), witness: Witness { content: [64, 255, 203, 147, 183, 201, 68, 13, 81, 116, 162, 225, 80, 4, 229, 132, 165, 127, 252, 179, 179, 14, 119, 17, 234, 110, 42, 94, 187, 23, 104, 211, 194, 100, 183, 172, 161, 152, 93, 203, 191, 114, 104, 118, 56, 63, 38, 249, 228, 132, 92, 166, 45, 210, 209, 6, 166, 152, 195, 175, 24, 178, 199, 215, 200, 0, 0, 0, 0], witness_elements: 1, indices_start: 65 } }], output: [TxOut { value: 101000, script_pubkey: Script(OP_0 OP_PUSHBYTES_32 dc177992909cadba04a6da7c3a0d99b410f3b0bcec70451751a5bcbb6b884ce6) }, TxOut { value: 4089178760, script_pubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 42e9e97d2cab0c201bfeba7d4c929b9456a0879c20b5bebf03750e326a75e6d2) }] })
+tx_status: TxStatus { confirmed: true, block_height: Some(447), block_hash: Some(0x63811fead8e1e8ab84e08798c65b31c85022dc4000d6c5fedadfe37b12fab99b), block_time: Some(1717689113) }
+esplora_tx_type: []
+num_transactions: 0
+found transactions: []
+num transactions: 0
+txids: []
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+esplora_tx_type: []
+num_transactions: 0
+found transactions: []
+num transactions: 0
+txids: []
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+esplora_tx_type: [Tx { txid: 0x210b70d8c38bfa657bbb9edc7c5a7871e97b812a4d625cbf83f6cce782585537, version: 2, locktime: 488, vin: [Vin { txid: 0x5f0f285d1ed190b1af265d524a354daaf71068a1d4c35ba81475bfc4e3f738cf, vout: 1, prevout: Some(PrevOut { value: 4079171560, scriptpubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 62cbd51863facc4c5acf5d81c4cfe2fcd97297edb5e34998f5033b868f373412) }), scriptsig: Script(), witness: [[40, 100, 100, 100, 114, 34, 4, 158, 30, 153, 207, 15, 112, 243, 91, 209, 175, 141, 160, 167, 202, 158, 101, 1, 98, 202, 129, 244, 155, 151, 130, 245, 11, 254, 62, 19, 32, 27, 129, 99, 246, 31, 199, 88, 33, 137, 186, 51, 182, 57, 177, 107, 103, 145, 218, 84, 169, 40, 168, 70, 125, 201, 239, 209]], sequence: 4294967293, is_coinbase: false }], vout: [Vout { value: 4079064360, scriptpubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 59183bc80c1bd975aaec96780c352c70974c6149ea4d938c18698710b631d204) }, Vout { value: 101000, scriptpubkey: Script(OP_0 OP_PUSHBYTES_32 de9f26f9a3a1568cfbf20d7b4949b9030781eba44a82b683787bb8a5947703cf) }], status: TxStatus { confirmed: true, block_height: Some(489), block_hash: Some(0x338cf8d6c4df149e305fbc6ff5209d0aaa2f4a17922c43b56760e9a2284ecc28), block_time: Some(1717689120) }, fee: 6200 }]
+num_transactions: 1
+found transactions: [Transaction { version: 2, lock_time: Blocks(Height(488)), input: [TxIn { previous_output: OutPoint { txid: 0x5f0f285d1ed190b1af265d524a354daaf71068a1d4c35ba81475bfc4e3f738cf, vout: 1 }, script_sig: Script(), sequence: Sequence(4294967293), witness: Witness { content: [64, 40, 100, 100, 100, 114, 34, 4, 158, 30, 153, 207, 15, 112, 243, 91, 209, 175, 141, 160, 167, 202, 158, 101, 1, 98, 202, 129, 244, 155, 151, 130, 245, 11, 254, 62, 19, 32, 27, 129, 99, 246, 31, 199, 88, 33, 137, 186, 51, 182, 57, 177, 107, 103, 145, 218, 84, 169, 40, 168, 70, 125, 201, 239, 209, 0, 0, 0, 0], witness_elements: 1, indices_start: 65 } }], output: [TxOut { value: 4079064360, script_pubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 59183bc80c1bd975aaec96780c352c70974c6149ea4d938c18698710b631d204) }, TxOut { value: 101000, script_pubkey: Script(OP_0 OP_PUSHBYTES_32 de9f26f9a3a1568cfbf20d7b4949b9030781eba44a82b683787bb8a5947703cf) }] }]
+num transactions: 1
+txids: [0x210b70d8c38bfa657bbb9edc7c5a7871e97b812a4d625cbf83f6cce782585537]
+inside get_tx_block_height
+tx: Some(Transaction { version: 2, lock_time: Blocks(Height(488)), input: [TxIn { previous_output: OutPoint { txid: 0x5f0f285d1ed190b1af265d524a354daaf71068a1d4c35ba81475bfc4e3f738cf, vout: 1 }, script_sig: Script(), sequence: Sequence(4294967293), witness: Witness { content: [64, 40, 100, 100, 100, 114, 34, 4, 158, 30, 153, 207, 15, 112, 243, 91, 209, 175, 141, 160, 167, 202, 158, 101, 1, 98, 202, 129, 244, 155, 151, 130, 245, 11, 254, 62, 19, 32, 27, 129, 99, 246, 31, 199, 88, 33, 137, 186, 51, 182, 57, 177, 107, 103, 145, 218, 84, 169, 40, 168, 70, 125, 201, 239, 209, 0, 0, 0, 0], witness_elements: 1, indices_start: 65 } }], output: [TxOut { value: 4079064360, script_pubkey: Script(OP_PUSHNUM_1 OP_PUSHBYTES_32 59183bc80c1bd975aaec96780c352c70974c6149ea4d938c18698710b631d204) }, TxOut { value: 101000, script_pubkey: Script(OP_0 OP_PUSHBYTES_32 de9f26f9a3a1568cfbf20d7b4949b9030781eba44a82b683787bb8a5947703cf) }] })
+tx_status: TxStatus { confirmed: true, block_height: Some(489), block_hash: Some(0x338cf8d6c4df149e305fbc6ff5209d0aaa2f4a17922c43b56760e9a2284ecc28), block_time: Some(1717689120) }
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
+inside get_database_migrations for wallet client
+inside apply_migrations_client
+is_new_db: false
+current_version: Some(DatabaseVersion(1))
+target_version: DatabaseVersion(1)
