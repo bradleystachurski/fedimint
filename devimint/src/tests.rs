@@ -138,6 +138,66 @@ pub async fn latency_tests(
     client.use_gateway(&gw_cln).await?;
     let initial_balance_sats = 100_000_000;
     fed.pegin_client(initial_balance_sats, &client).await?;
+    fedimint_core::task::sleep_in_test(
+        "perhaps this will allow the 0.3.1 state machines to wrap up",
+        Duration::from_secs(20),
+    )
+    .await;
+
+    info!("Testing client deposit");
+    let initial_walletng_balance = client.balance().await?;
+
+    fed.pegin_client(100_000, &client).await?; // deposit in sats
+
+    let post_deposit_walletng_balance = client.balance().await?;
+
+    assert_eq!(
+        post_deposit_walletng_balance,
+        initial_walletng_balance + 100_000_000 // deposit in msats
+    );
+
+    // ## Withdraw
+    info!("Testing client withdraw");
+
+    let initial_walletng_balance = client.balance().await?;
+
+    let address = bitcoind.get_new_address().await?;
+    let withdraw_res = cmd!(
+        client,
+        "withdraw",
+        "--address",
+        &address,
+        "--amount",
+        "50000 sat"
+    )
+    .out_json()
+    .await?;
+
+    // let txid: Txid = withdraw_res["txid"].as_str().unwrap().parse().unwrap();
+    let fees_sat = withdraw_res["fees_sat"].as_u64().unwrap();
+
+    // let tx_hex = poll("Waiting for transaction in mempool", || async {
+    //     // TODO: distinguish errors from not found
+    //     bitcoind
+    //         .get_raw_transaction(&txid)
+    //         .await
+    //         .context("getrawtransaction")
+    //         .map_err(ControlFlow::Continue)
+    // })
+    // .await
+    // .expect("cannot fail, gets stuck");
+
+    // let tx = bitcoin::Transaction::consensus_decode_hex(&tx_hex,
+    // &Default::default()).unwrap(); assert!(tx
+    //     .output
+    //     .iter()
+    //     .any(|o| o.script_pubkey == address.script_pubkey() && o.value ==
+    // 50000));
+
+    let post_withdraw_walletng_balance = client.balance().await?;
+    let expected_wallet_balance = initial_walletng_balance - 50_000_000 - (fees_sat * 1000);
+
+    assert_eq!(post_withdraw_walletng_balance, expected_wallet_balance);
 
     let cln_gw_id = gw_cln.gateway_id().await?;
 
@@ -1131,6 +1191,7 @@ pub async fn cli_tests(dev_fed: DevFed) -> Result<()> {
 
     // # Wallet tests
     // ## Deposit
+    // mark
     info!("Testing client deposit");
     let initial_walletng_balance = client.balance().await?;
 

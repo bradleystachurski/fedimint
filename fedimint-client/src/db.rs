@@ -390,7 +390,7 @@ pub async fn apply_migrations_client(
     migrations: BTreeMap<DatabaseVersion, ClientMigrationFn>,
     module_instance_id: ModuleInstanceId,
 ) -> Result<(), anyhow::Error> {
-    let id_to_check = 0;
+    let id_to_check = 2;
 
     if module_instance_id == id_to_check {
         fedimint_core::util::write_log(&format!("inside apply_migrations_client")).await?;

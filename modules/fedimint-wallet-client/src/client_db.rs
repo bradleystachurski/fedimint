@@ -35,14 +35,102 @@ pub(crate) fn get_v0_migrated_state(
     cursor: &mut Cursor<&[u8]>,
     _dbtx: &mut DatabaseTransaction<'_>,
 ) -> anyhow::Result<Option<(Vec<u8>, OperationId)>> {
-    fedimint_core::util::write_log_sync(&format!("inside get_v1_migrated_state"))?;
+    fedimint_core::util::write_log_sync(&format!("inside get_v0_migrated_state"))?;
     // fedimint_core::runtime::block_on(fedimint_core::util::write_log(&format!(
     // "inside get_v1_migrated_state" )))?;
 
     // fedimint_core::util::write_log(&format!("inside
     // get_v1_migrated_state")).await?;
     let decoders = ModuleDecoderRegistry::default();
-    let ln_sm_variant = u16::consensus_decode(cursor, &decoders)?;
+    let wallet_sm_variant = u16::consensus_decode(cursor, &decoders)?;
+
+    fedimint_core::util::write_log_sync(&format!("wallet_sm_variant: {wallet_sm_variant:?}"))?;
+
+    let wallet_sm_len = u16::consensus_decode(cursor, &decoders)?;
+    let operation_id = OperationId::consensus_decode(cursor, &decoders)?;
+
+    fedimint_core::util::write_log_sync(&format!("wallet_sm_len: {wallet_sm_len:?}"))?;
+    fedimint_core::util::write_log_sync(&format!("operation_id: {operation_id:?}"))?;
+
+    // think I found the issue! need to consider Deposit/Withdraw, was skipping
+    // assuming Deposit
+    match wallet_sm_variant {
+        0 => {
+            fedimint_core::util::write_log_sync(&format!("matched 0 wallet_sm_variant, Deposit"))?;
+
+            let deposit_sm_variant = u16::consensus_decode(cursor, &decoders)?;
+
+            match deposit_sm_variant {
+                0 => {
+                    let created_sm_len = u16::consensus_decode(cursor, &decoders)?;
+                    fedimint_core::util::write_log_sync(&format!(
+                        "created_sm_len: {created_sm_len:?}"
+                    ))?;
+
+                    let created_deposit_state =
+                        crate::deposit::CreatedDepositState::consensus_decode(cursor, &decoders)?;
+                    fedimint_core::util::write_log_sync(&format!(
+                        "created_deposit_state: {created_deposit_state:?}"
+                    ))?;
+                }
+                1 => {
+                    fedimint_core::util::write_log_sync(&format!(
+                        "matched 1 wallet_sm_variant, WaitingForConfirmations"
+                    ))?;
+                    let waiting_for_confirmations_sm_len =
+                        u16::consensus_decode(cursor, &decoders)?;
+                    fedimint_core::util::write_log_sync(&format!(
+                        "waiting_for_confirmations_sm_len: {waiting_for_confirmations_sm_len:?}"
+                    ))?;
+
+                    let waiting_for_confirmations_deposit_state =
+                        crate::deposit::WaitingForConfirmationsDepositState::consensus_decode(
+                            cursor, &decoders,
+                        )?;
+                    fedimint_core::util::write_log_sync(&format!(
+                        "waiting_for_confirmations_deposit_state: {waiting_for_confirmations_deposit_state:?}"
+                    ))?;
+                }
+                2 => {
+                    fedimint_core::util::write_log_sync(&format!(
+                        "matched 2 wallet_sm_variant, Claiming"
+                    ))?;
+                    let created_sm_len = u16::consensus_decode(cursor, &decoders)?;
+                    fedimint_core::util::write_log_sync(&format!(
+                        "created_sm_len: {created_sm_len:?}"
+                    ))?;
+
+                    #[derive(Debug, Clone, Eq, PartialEq, Hash, Decodable, Encodable)]
+                    pub struct ClaimingDepositStateV0 {
+                        /// Fedimint transaction id in which the deposit is
+                        /// being claimed.
+                        pub(crate) transaction_id: fedimint_core::TransactionId,
+                        pub(crate) change: Vec<fedimint_core::OutPoint>,
+                    }
+
+                    let claiming_deposit_state =
+                        ClaimingDepositStateV0::consensus_decode(cursor, &decoders)?;
+                    fedimint_core::util::write_log_sync(&format!(
+                        "claiming_deposit_state: {claiming_deposit_state:?}"
+                    ))?;
+
+                    // TODO: query dbtx to get btc tx details using operation_id
+                }
+                other => panic!("unknown variant: {other:?}"),
+            }
+        }
+        1 => {
+            fedimint_core::util::write_log_sync(&format!("matched 1 wallet_sm_variant, Withdraw"))?;
+
+            let withdraw_sm_variant = u16::consensus_decode(cursor, &decoders)?;
+            fedimint_core::util::write_log_sync(&format!(
+                "withdraw_sm_variant: {withdraw_sm_variant:?}"
+            ))?;
+        }
+        other => {
+            panic!("recived other wallet state variant: {other}");
+        }
+    }
 
     Ok(None)
     // #[derive(Debug, Clone, Decodable)]

@@ -705,6 +705,7 @@ async fn get_next_peg_in_tweak_child_id(dbtx: &mut DatabaseTransaction<'_>) -> C
     ChildId(index)
 }
 
+// mark
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Decodable, Encodable)]
 pub enum WalletClientStates {
     Deposit(DepositStateMachine),
