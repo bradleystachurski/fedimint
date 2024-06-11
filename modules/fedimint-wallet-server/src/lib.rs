@@ -28,9 +28,9 @@ use bitcoin::sighash::{EcdsaSighashType, SighashCache};
 use bitcoin::{Address, BlockHash, Network, ScriptBuf, Sequence, Transaction, TxIn, TxOut, Txid};
 use common::config::WalletConfigConsensus;
 use common::{
-    proprietary_tweak_key, PegOutFees, PegOutSignatureItem, ProcessPegOutSigError, SpendableUTXO,
-    WalletCommonInit, WalletConsensusItem, WalletCreationError, WalletInput, WalletModuleTypes,
-    WalletOutput, WalletOutputOutcome, CONFIRMATION_TARGET,
+    proprietary_tweak_key, AvailableUtxo, PegOutFees, PegOutSignatureItem, ProcessPegOutSigError,
+    SpendableUTXO, WalletCommonInit, WalletConsensusItem, WalletCreationError, WalletInput,
+    WalletModuleTypes, WalletOutput, WalletOutputOutcome, CONFIRMATION_TARGET,
 };
 use fedimint_bitcoind::{create_bitcoind, DynBitcoindRpc};
 use fedimint_core::config::{
@@ -64,7 +64,8 @@ use fedimint_server::config::distributedgen::PeerHandleOps;
 pub use fedimint_wallet_common as common;
 use fedimint_wallet_common::config::{WalletClientConfig, WalletConfig, WalletGenParams};
 use fedimint_wallet_common::endpoint_constants::{
-    BLOCK_COUNT_ENDPOINT, BLOCK_COUNT_LOCAL_ENDPOINT, PEG_OUT_FEES_ENDPOINT,
+    AVAILABLE_UTXOS_ENDPOINT, BLOCK_COUNT_ENDPOINT, BLOCK_COUNT_LOCAL_ENDPOINT,
+    PEG_OUT_FEES_ENDPOINT,
 };
 use fedimint_wallet_common::keys::CompressedPublicKey;
 use fedimint_wallet_common::tweakable::Tweakable;
@@ -704,6 +705,14 @@ impl ServerModule for Wallet {
                     }
                 }
             },
+            api_endpoint! {
+                AVAILABLE_UTXOS_ENDPOINT,
+                // TODO: investigate version
+                ApiVersion::new(0, 0),
+                async |module: &Wallet, context, _params: ()| -> Vec<AvailableUtxo> {
+                    Ok(module.get_available_utxo_outpoints(&mut context.dbtx().into_nc()).await)
+                }
+            },
         ]
     }
 }
@@ -1173,6 +1182,20 @@ impl Wallet {
             .map(|(_, utxo)| utxo.amount.to_sat())
             .sum();
         bitcoin::Amount::from_sat(sat_sum)
+    }
+
+    async fn get_available_utxo_outpoints(
+        &self,
+        dbtx: &mut DatabaseTransaction<'_>,
+    ) -> Vec<AvailableUtxo> {
+        self.available_utxos(dbtx)
+            .await
+            .iter()
+            .map(|(utxo_key, spendable_utxo)| AvailableUtxo {
+                outpoint: utxo_key.0,
+                amount: spendable_utxo.amount,
+            })
+            .collect()
     }
 
     fn offline_wallet(&self) -> StatelessWallet {

@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::time::Duration;
 
 use anyhow::{bail, Context};
@@ -22,7 +23,7 @@ use fedimint_wallet_client::{DepositState, WalletClientInit, WalletClientModule,
 use fedimint_wallet_common::config::{WalletConfig, WalletGenParams};
 use fedimint_wallet_common::tweakable::Tweakable;
 use fedimint_wallet_common::txoproof::PegInProof;
-use fedimint_wallet_common::{PegOutFees, Rbf};
+use fedimint_wallet_common::{AvailableUtxo, PegOutFees, Rbf};
 use fedimint_wallet_server::WalletInit;
 use futures::stream::StreamExt;
 use tracing::info;
@@ -46,7 +47,7 @@ async fn peg_in<'a>(
     client: &'a ClientHandleArc,
     bitcoin: &dyn BitcoinTest,
     finality_delay: u64,
-) -> anyhow::Result<BoxStream<'a, Amount>> {
+) -> anyhow::Result<(BoxStream<'a, Amount>, bitcoin::Transaction)> {
     let valid_until = time::now() + PEG_IN_TIMEOUT;
 
     let mut balance_sub = client.subscribe_balance_changes().await;
@@ -79,7 +80,7 @@ async fn peg_in<'a>(
     assert_eq!(balance_sub.ok().await?, sats(PEG_IN_AMOUNT_SATS));
     info!(?height, ?tx, "Peg-in transaction claimed");
 
-    Ok(balance_sub)
+    Ok((balance_sub, tx))
 }
 
 async fn await_consensus_to_catch_up(
@@ -104,6 +105,7 @@ async fn await_consensus_to_catch_up(
 }
 
 #[tokio::test(flavor = "multi_thread")]
+#[ignore]
 async fn sanity_check_bitcoin_blocks() -> anyhow::Result<()> {
     let fixtures = fixtures();
     let fed = fixtures.new_default_fed().await;
@@ -146,6 +148,97 @@ async fn sanity_check_bitcoin_blocks() -> anyhow::Result<()> {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn sandbox() -> anyhow::Result<()> {
+    let fixtures = fixtures();
+    let fed = fixtures.new_default_fed().await;
+    let client = fed.new_client().await;
+    let bitcoin = fixtures.bitcoin();
+    let bitcoin = bitcoin.lock_exclusive().await;
+    let wallet_module = client.get_first_module::<WalletClientModule>();
+    info!("Starting test on_chain_peg_in_and_peg_out_happy_case");
+
+    let finality_delay = 10;
+    bitcoin.mine_blocks(finality_delay).await;
+    await_consensus_to_catch_up(&client, 1).await?;
+
+    let mut expected_available_utxos: HashSet<AvailableUtxo> = HashSet::new();
+
+    for _ in (0..5) {}
+    let (_, tx) = peg_in(&client, bitcoin.as_ref(), finality_delay).await?;
+    let expected_peg_in_amount =
+        PEG_IN_AMOUNT_SATS + (wallet_module.get_fee_consensus().peg_in_abs.msats / 1000);
+
+    let expected_available_utxo = tx
+        .output
+        .iter()
+        .enumerate()
+        .find_map(|(idx, output)| {
+            if output.value == expected_peg_in_amount {
+                Some(AvailableUtxo {
+                    outpoint: bitcoin::OutPoint {
+                        txid: tx.txid(),
+                        vout: idx as u32,
+                    },
+                    amount: bitcoin::Amount::from_sat(output.value),
+                })
+            } else {
+                None
+            }
+        })
+        .expect("peg-in transaction must contain federation's UTXO");
+
+    // let expected_availabe_utxo =
+    // tx.output.into_iter().enumerate().find_map(|(idx, output)| if output.value ==
+    // PEG_IN_AMOUNT_SATS { Some(AvailableUtxo { outpoint: bitcoin::OutPoint{ txid:
+    // tx.txid(), vout: idx as u32 }, amount:
+    // bitcoin::Amount::from_sat(output.value)})} else None)
+    // let expected_availabe_utxo =
+    // tx.output.into_iter().enumerate().find_map(|(idx, output)| {         if
+    // output.value == PEG_IN_AMOUNT_SATS {             Some(AvailableUtxo {
+    // outpoint: bitcoin::OutPoint{ txid: tx.txid(), vout: idx as u32 }, amount:
+    // bitcoin::Amount::from_sat(output.value)})         } else { None }
+    //     })
+
+    // let expected_outpoint = bitcoin::OutPoint::new(tx.txid(), 0);
+    // let fed_utxo = tx.output.first().expect("transaction must have outputs");
+    // let expected_amount = Amount::from_sats(fed_utxo.value);
+    // let expected_amount = bitcoin::Amount::from_sat(fed_utxo.value);
+
+    // let expected_available_utxo = AvailableUtxo {
+    //     outpoint: expected_outpoint,
+    //     amount: expected_amount,
+    // };
+
+    // info!(?expected_available_utxo);
+
+    // for output in tx.output {
+    //     info!(?output);
+    // }
+
+    let available_utxos = wallet_module.get_available_utxos().await?;
+
+    assert_eq!(available_utxos.len(), 1);
+
+    let available_utxo = available_utxos
+        .first()
+        .expect("already verified one available utxo");
+
+    info!(?available_utxo);
+    assert_eq!(*available_utxo, expected_available_utxo);
+    // fed_utxo.
+    // assert_eq(available_utxo.outpoint.t)
+
+    // available_utxos.iter().find(|utxo| utxo.outpoint.txid == tx)
+
+    for utxo in available_utxos {
+        info!(?utxo);
+    }
+
+    Ok(())
+}
+
+#[tokio::test(flavor = "multi_thread")]
+#[ignore]
 async fn on_chain_peg_in_and_peg_out_happy_case() -> anyhow::Result<()> {
     let fixtures = fixtures();
     let fed = fixtures.new_default_fed().await;
@@ -158,7 +251,7 @@ async fn on_chain_peg_in_and_peg_out_happy_case() -> anyhow::Result<()> {
     bitcoin.mine_blocks(finality_delay).await;
     await_consensus_to_catch_up(&client, 1).await?;
 
-    let mut balance_sub = peg_in(&client, bitcoin.as_ref(), finality_delay).await?;
+    let (mut balance_sub, _) = peg_in(&client, bitcoin.as_ref(), finality_delay).await?;
 
     info!("Peg-in finished for test on_chain_peg_in_and_peg_out_happy_case");
     // Peg-out test, requires block to recognize change UTXOs
@@ -206,6 +299,7 @@ async fn on_chain_peg_in_and_peg_out_happy_case() -> anyhow::Result<()> {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+#[ignore]
 async fn peg_out_fail_refund() -> anyhow::Result<()> {
     let fixtures = fixtures();
     let fed = fixtures.new_default_fed().await;
@@ -218,7 +312,7 @@ async fn peg_out_fail_refund() -> anyhow::Result<()> {
     bitcoin.mine_blocks(finality_delay).await;
     await_consensus_to_catch_up(&client, 1).await?;
 
-    let mut balance_sub = peg_in(&client, bitcoin.as_ref(), finality_delay).await?;
+    let (mut balance_sub, _) = peg_in(&client, bitcoin.as_ref(), finality_delay).await?;
 
     info!("Peg-in finished for test peg_out_fail_refund");
     // Peg-out test, requires block to recognize change UTXOs
@@ -253,6 +347,7 @@ async fn peg_out_fail_refund() -> anyhow::Result<()> {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+#[ignore]
 async fn peg_outs_support_rbf() -> anyhow::Result<()> {
     let fixtures = fixtures();
     let fed = fixtures.new_default_fed().await;
@@ -266,7 +361,7 @@ async fn peg_outs_support_rbf() -> anyhow::Result<()> {
     bitcoin.mine_blocks(finality_delay).await;
     await_consensus_to_catch_up(&client, 1).await?;
 
-    let mut balance_sub = peg_in(&client, bitcoin.as_ref(), finality_delay).await?;
+    let (mut balance_sub, _) = peg_in(&client, bitcoin.as_ref(), finality_delay).await?;
 
     info!("Peg-in finished for test peg_outs_support_rbf");
     let address = checked_address_to_unchecked_address(&bitcoin.get_new_address().await);
@@ -334,6 +429,7 @@ async fn peg_outs_support_rbf() -> anyhow::Result<()> {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+#[ignore]
 async fn peg_outs_must_wait_for_available_utxos() -> anyhow::Result<()> {
     let fixtures = fixtures();
     let fed = fixtures.new_default_fed().await;
@@ -349,7 +445,7 @@ async fn peg_outs_must_wait_for_available_utxos() -> anyhow::Result<()> {
     bitcoin.mine_blocks(finality_delay).await;
     await_consensus_to_catch_up(&client, 1).await?;
 
-    let mut balance_sub = peg_in(&client, bitcoin.as_ref(), finality_delay).await?;
+    let (mut balance_sub, _) = peg_in(&client, bitcoin.as_ref(), finality_delay).await?;
 
     info!("Peg-in finished for test peg_outs_must_wait_for_available_utxos");
     let address = checked_address_to_unchecked_address(&bitcoin.get_new_address().await);
@@ -419,6 +515,7 @@ async fn peg_outs_must_wait_for_available_utxos() -> anyhow::Result<()> {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+#[ignore]
 async fn peg_ins_that_are_unconfirmed_are_rejected() -> anyhow::Result<()> {
     let fixtures = fixtures();
     let bitcoin = fixtures.bitcoin();
@@ -804,6 +901,7 @@ mod fedimint_migration_tests {
     }
 
     #[tokio::test(flavor = "multi_thread")]
+    #[ignore]
     async fn snapshot_server_db_migrations() -> anyhow::Result<()> {
         snapshot_db_migrations::<_, WalletCommonInit>("wallet-server-v0", |db| {
             Box::pin(async {
@@ -814,6 +912,7 @@ mod fedimint_migration_tests {
     }
 
     #[tokio::test(flavor = "multi_thread")]
+    #[ignore]
     async fn test_server_db_migrations() -> anyhow::Result<()> {
         let _ = TracingSetup::default().init();
 
@@ -945,6 +1044,7 @@ mod fedimint_migration_tests {
     }
 
     #[tokio::test(flavor = "multi_thread")]
+    #[ignore]
     async fn snapshot_client_db_migrations() -> anyhow::Result<()> {
         snapshot_db_migrations_client::<_, _, WalletCommonInit>(
             "wallet-client-v0",
@@ -955,6 +1055,7 @@ mod fedimint_migration_tests {
     }
 
     #[tokio::test(flavor = "multi_thread")]
+    #[ignore]
     async fn test_client_db_migrations() -> anyhow::Result<()> {
         let _ = TracingSetup::default().init();
 

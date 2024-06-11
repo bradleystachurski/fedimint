@@ -92,6 +92,13 @@ pub struct SpendableUTXO {
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash, Deserialize, Serialize, Encodable, Decodable)]
+pub struct AvailableUtxo {
+    pub outpoint: bitcoin::OutPoint,
+    #[serde(with = "bitcoin::amount::serde::as_sat")]
+    pub amount: bitcoin::Amount,
+}
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash, Deserialize, Serialize, Encodable, Decodable)]
 pub struct PegOutFees {
     pub fee_rate: Feerate,
     pub total_weight: u64,
