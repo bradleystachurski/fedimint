@@ -51,7 +51,8 @@ async fn peg_in<'a>(
     let valid_until = time::now() + PEG_IN_TIMEOUT;
 
     let mut balance_sub = client.subscribe_balance_changes().await;
-    assert_eq!(balance_sub.ok().await?, sats(0));
+    let initial_balance = balance_sub.ok().await?;
+    // assert_eq!(balance_sub.ok().await?, sats(0));
 
     let wallet_module = &client.get_first_module::<WalletClientModule>();
     let (op, address) = wallet_module.get_deposit_address(valid_until, ()).await?;
@@ -76,8 +77,14 @@ async fn peg_in<'a>(
     bitcoin.mine_blocks(finality_delay).await;
     assert!(matches!(sub.ok().await?, DepositState::Confirmed(_)));
     assert!(matches!(sub.ok().await?, DepositState::Claimed(_)));
-    assert_eq!(client.get_balance().await, sats(PEG_IN_AMOUNT_SATS));
-    assert_eq!(balance_sub.ok().await?, sats(PEG_IN_AMOUNT_SATS));
+    assert_eq!(
+        client.get_balance().await,
+        initial_balance + sats(PEG_IN_AMOUNT_SATS)
+    );
+    assert_eq!(
+        balance_sub.ok().await?,
+        initial_balance + sats(PEG_IN_AMOUNT_SATS)
+    );
     info!(?height, ?tx, "Peg-in transaction claimed");
 
     Ok((balance_sub, tx))
@@ -163,75 +170,40 @@ async fn sandbox() -> anyhow::Result<()> {
 
     let mut expected_available_utxos: HashSet<AvailableUtxo> = HashSet::new();
 
-    for _ in (0..5) {}
-    let (_, tx) = peg_in(&client, bitcoin.as_ref(), finality_delay).await?;
-    let expected_peg_in_amount =
-        PEG_IN_AMOUNT_SATS + (wallet_module.get_fee_consensus().peg_in_abs.msats / 1000);
+    for _ in 0..3 {
+        let (_, tx) = peg_in(&client, bitcoin.as_ref(), finality_delay).await?;
+        let expected_peg_in_amount =
+            PEG_IN_AMOUNT_SATS + (wallet_module.get_fee_consensus().peg_in_abs.msats / 1000);
 
-    let expected_available_utxo = tx
-        .output
-        .iter()
-        .enumerate()
-        .find_map(|(idx, output)| {
-            if output.value == expected_peg_in_amount {
-                Some(AvailableUtxo {
-                    outpoint: bitcoin::OutPoint {
-                        txid: tx.txid(),
-                        vout: idx as u32,
-                    },
-                    amount: bitcoin::Amount::from_sat(output.value),
-                })
-            } else {
-                None
-            }
-        })
-        .expect("peg-in transaction must contain federation's UTXO");
+        let expected_available_utxo = tx
+            .output
+            .iter()
+            .enumerate()
+            .find_map(|(idx, output)| {
+                // bitcoin core randomizes the change output index so we can't assume the fed's
+                // utxo is always index 0
+                if output.value == expected_peg_in_amount {
+                    Some(AvailableUtxo {
+                        outpoint: bitcoin::OutPoint {
+                            txid: tx.txid(),
+                            vout: idx as u32,
+                        },
+                        amount: bitcoin::Amount::from_sat(output.value),
+                    })
+                } else {
+                    None
+                }
+            })
+            .expect("peg-in transaction must contain federation's UTXO");
 
-    // let expected_availabe_utxo =
-    // tx.output.into_iter().enumerate().find_map(|(idx, output)| if output.value ==
-    // PEG_IN_AMOUNT_SATS { Some(AvailableUtxo { outpoint: bitcoin::OutPoint{ txid:
-    // tx.txid(), vout: idx as u32 }, amount:
-    // bitcoin::Amount::from_sat(output.value)})} else None)
-    // let expected_availabe_utxo =
-    // tx.output.into_iter().enumerate().find_map(|(idx, output)| {         if
-    // output.value == PEG_IN_AMOUNT_SATS {             Some(AvailableUtxo {
-    // outpoint: bitcoin::OutPoint{ txid: tx.txid(), vout: idx as u32 }, amount:
-    // bitcoin::Amount::from_sat(output.value)})         } else { None }
-    //     })
+        assert!(expected_available_utxos.insert(expected_available_utxo));
 
-    // let expected_outpoint = bitcoin::OutPoint::new(tx.txid(), 0);
-    // let fed_utxo = tx.output.first().expect("transaction must have outputs");
-    // let expected_amount = Amount::from_sats(fed_utxo.value);
-    // let expected_amount = bitcoin::Amount::from_sat(fed_utxo.value);
-
-    // let expected_available_utxo = AvailableUtxo {
-    //     outpoint: expected_outpoint,
-    //     amount: expected_amount,
-    // };
-
-    // info!(?expected_available_utxo);
-
-    // for output in tx.output {
-    //     info!(?output);
-    // }
-
-    let available_utxos = wallet_module.get_available_utxos().await?;
-
-    assert_eq!(available_utxos.len(), 1);
-
-    let available_utxo = available_utxos
-        .first()
-        .expect("already verified one available utxo");
-
-    info!(?available_utxo);
-    assert_eq!(*available_utxo, expected_available_utxo);
-    // fed_utxo.
-    // assert_eq(available_utxo.outpoint.t)
-
-    // available_utxos.iter().find(|utxo| utxo.outpoint.txid == tx)
-
-    for utxo in available_utxos {
-        info!(?utxo);
+        let available_utxos = wallet_module
+            .get_available_utxos()
+            .await?
+            .into_iter()
+            .collect::<HashSet<_>>();
+        assert_eq!(expected_available_utxos, available_utxos);
     }
 
     Ok(())
