@@ -292,6 +292,10 @@ impl BitcoinTest for FakeBitcoinTest {
             .get(txid)
             .map(|height| height.to_owned() as u64)
     }
+
+    async fn get_tip(&self) -> u64 {
+        unimplemented!()
+    }
 }
 
 #[async_trait]

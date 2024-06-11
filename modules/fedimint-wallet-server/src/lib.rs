@@ -718,7 +718,7 @@ impl ServerModule for Wallet {
                 // TODO: investigate version
                 ApiVersion::new(0, 0),
                 async |module: &Wallet, context, _params: ()| -> WalletSummary {
-                    Ok(module.get_available_utxo_outpoints(&mut context.dbtx().into_nc()).await)
+                    Ok(module.get_wallet_summary(&mut context.dbtx().into_nc()).await)
                 }
             },
         ]
@@ -1218,44 +1218,43 @@ impl Wallet {
             })
             .collect::<Vec<_>>();
 
-        let unsigned_transactions = dbtx
+        let mut unsigned_transactions = dbtx
             .find_by_prefix(&UnsignedTransactionPrefixKey)
             .await
-            .map(|(_, tx)| tx)
-            .collect::<Vec<_>>()
+            .map(|(tx_key, tx)| (tx_key.0, tx))
+            .collect::<HashMap<_, _>>()
             .await;
 
-        let unsigned_txids_to_remove: HashSet<bitcoin::Txid> = unsigned_transactions
-            .iter()
-            .filter_map(|tx| tx.rbf.as_ref().map(|rbf_tx| rbf_tx.txid))
-            .collect();
-
-        let pending_transactions = dbtx
+        let mut pending_transactions = dbtx
             .find_by_prefix(&PendingTransactionPrefixKey)
             .await
-            .map(|(_, tx)| tx)
-            .collect::<Vec<_>>()
+            .map(|(tx_key, tx)| (tx_key.0, tx))
+            .collect::<HashMap<_, _>>()
             .await;
 
-        let pending_txids_to_remove: HashSet<bitcoin::Txid> = pending_transactions
-            .iter()
-            .filter_map(|tx| tx.rbf.as_ref().map(|rbf_tx| rbf_tx.txid))
-            .collect();
+        let mut rbf_txids_to_remove: HashSet<bitcoin::Txid> = HashSet::new();
 
-        let txids_to_remove: HashSet<bitcoin::Txid> = pending_txids_to_remove
-            .union(&unsigned_txids_to_remove)
-            .cloned()
-            .collect();
+        for (_, tx) in unsigned_transactions.iter() {
+            if let Some(rbf_tx) = tx.rbf.as_ref() {
+                rbf_txids_to_remove.insert(rbf_tx.txid);
+            }
+        }
 
-        let filtered_unsigned_transactions = unsigned_transactions
-            .iter()
-            .filter(|tx| !txids_to_remove.contains(&tx.psbt.unsigned_tx.txid()))
-            .collect::<Vec<_>>();
+        for (_, tx) in pending_transactions.iter() {
+            if let Some(rbf_tx) = tx.rbf.as_ref() {
+                rbf_txids_to_remove.insert(rbf_tx.txid);
+            }
+        }
 
-        let filtered_pending_transactions = pending_transactions
-            .iter()
-            .filter(|tx| !txids_to_remove.contains(&tx.tx.txid()))
-            .collect::<Vec<_>>();
+        for txid in rbf_txids_to_remove {
+            unsigned_transactions.remove(&txid);
+            pending_transactions.remove(&txid);
+        }
+
+        let combined_unconfirmed_transactions = unsigned_transactions
+            .into_values()
+            .map(|tx| tx.psbt.unsigned_tx)
+            .chain(pending_transactions.into_values().map(|tx| tx.tx));
 
         // for UnsignedTransactions, we need to use the construction of the tx to
         // identify withdrawal (idx = 0) and change (idx = 1) since there are always two
@@ -1264,48 +1263,15 @@ impl Wallet {
         // tweak so we generically identify change outputs vs withdrawal
         let mut pending_peg_out_utxos: Vec<UTXOSummary> = Vec::new();
         let mut pending_change_utxos: Vec<UTXOSummary> = Vec::new();
-        for tx in filtered_unsigned_transactions {
-            let txid = tx.psbt.unsigned_tx.txid();
+        for tx in combined_unconfirmed_transactions {
+            let txid = tx.txid();
 
             let withdrawal_output = tx
-                .psbt
-                .unsigned_tx
                 .output
                 .first()
                 .expect("tx must contain withdrawal output");
 
-            let change_output = tx
-                .psbt
-                .unsigned_tx
-                .output
-                .last()
-                .expect("tx must contain withdrawal output");
-
-            pending_peg_out_utxos.push(UTXOSummary {
-                outpoint: bitcoin::OutPoint { txid, vout: 0 },
-                amount: bitcoin::Amount::from_sat(withdrawal_output.value),
-            });
-
-            pending_change_utxos.push(UTXOSummary {
-                outpoint: bitcoin::OutPoint { txid, vout: 1 },
-                amount: bitcoin::Amount::from_sat(change_output.value),
-            });
-        }
-
-        for tx in filtered_pending_transactions {
-            let txid = tx.tx.txid();
-
-            let withdrawal_output = tx
-                .tx
-                .output
-                .first()
-                .expect("tx must contain withdrawal output");
-
-            let change_output = tx
-                .tx
-                .output
-                .last()
-                .expect("tx must contain withdrawal output");
+            let change_output = tx.output.last().expect("tx must contain withdrawal output");
 
             pending_peg_out_utxos.push(UTXOSummary {
                 outpoint: bitcoin::OutPoint { txid, vout: 0 },

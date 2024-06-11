@@ -351,6 +351,10 @@ impl WalletClientModule {
         Ok(self.module_api.fetch_available_utxos().await?)
     }
 
+    pub async fn get_wallet_summary(&self) -> anyhow::Result<WalletSummary> {
+        Ok(self.module_api.fetch_wallet_summary().await?)
+    }
+
     pub fn create_withdraw_output(
         &self,
         operation_id: OperationId,

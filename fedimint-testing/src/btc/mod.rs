@@ -48,4 +48,7 @@ pub trait BitcoinTest {
     /// for finding a tx block height.
     /// see: `<https://github.com/fedimint/fedimint/issues/5329>`
     async fn get_tx_block_height(&self, txid: &Txid) -> Option<u64>;
+
+    // TODO: better name?
+    async fn get_tip(&self) -> u64;
 }

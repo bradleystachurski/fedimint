@@ -162,7 +162,7 @@ async fn sandbox() -> anyhow::Result<()> {
     let bitcoin = fixtures.bitcoin();
     let bitcoin = bitcoin.lock_exclusive().await;
     let wallet_module = client.get_first_module::<WalletClientModule>();
-    info!("Starting test on_chain_peg_in_and_peg_out_happy_case");
+    info!("Starting test TODO");
 
     let finality_delay = 10;
     bitcoin.mine_blocks(finality_delay).await;
@@ -205,6 +205,54 @@ async fn sandbox() -> anyhow::Result<()> {
             .collect::<HashSet<_>>();
         assert_eq!(expected_available_utxos, available_utxos);
     }
+
+    let address = checked_address_to_unchecked_address(&bitcoin.get_new_address().await);
+    let peg_out = bsats(PEG_OUT_AMOUNT_SATS);
+    let wallet_module = client.get_first_module::<WalletClientModule>();
+    let fees = wallet_module
+        .get_withdraw_fees(address.clone(), peg_out)
+        .await?;
+    assert_eq!(
+        fees.total_weight, 871,
+        "stateless wallet should have constructed a tx with a total weight=871"
+    );
+    let op = wallet_module
+        .withdraw(address.clone(), peg_out, fees, ())
+        .await?;
+
+    let sub = wallet_module.subscribe_withdraw_updates(op).await?;
+    let mut sub = sub.into_stream();
+    assert_eq!(sub.ok().await?, WithdrawState::Created);
+
+    let txid = match sub.ok().await? {
+        WithdrawState::Succeeded(txid) => txid,
+        other => panic!("Unexpected state: {other:?}"),
+    };
+
+    let wallet_summary_before_mining = wallet_module.get_wallet_summary().await?;
+    info!(?wallet_summary_before_mining);
+
+    let expected_tx_fee = {
+        let witness_scale_factor = 4;
+        let sats_per_vbyte = fees.fee_rate.sats_per_kvb / 1000;
+        let tx_vbytes = (fees.total_weight + witness_scale_factor - 1) / witness_scale_factor;
+        Amount::from_sats(sats_per_vbyte * tx_vbytes)
+    };
+    let tx_fee = bitcoin.get_mempool_tx_fee(&txid).await;
+    assert_eq!(tx_fee, expected_tx_fee);
+
+    let received = bitcoin
+        .mine_block_and_get_received(&address.clone().assume_checked())
+        .await;
+    assert_eq!(received, peg_out.into());
+
+    bitcoin.mine_blocks(finality_delay).await;
+    let tip = bitcoin.get_tip().await;
+    await_consensus_to_catch_up(&client, tip - finality_delay).await?;
+    // sleep_in_test("waiting", Duration::from_secs(10)).await;
+
+    let wallet_summary_after_mining = wallet_module.get_wallet_summary().await?;
+    info!(?wallet_summary_after_mining);
 
     Ok(())
 }

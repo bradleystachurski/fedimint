@@ -178,6 +178,12 @@ impl BitcoinTest for RealBitcoinTestNoLock {
             })
             .map(|height| height as u64)
     }
+
+    async fn get_tip(&self) -> u64 {
+        self.client
+            .get_block_count()
+            .expect("failed to fetch chain tip")
+    }
 }
 
 /// Fixture implementing bitcoin node under test by talking to a `bitcoind` -
@@ -271,6 +277,11 @@ impl BitcoinTest for RealBitcoinTest {
         let _lock = self.lock_exclusive().await;
         self.inner.get_tx_block_height(txid).await
     }
+
+    async fn get_tip(&self) -> u64 {
+        let _lock = self.lock_exclusive().await;
+        self.inner.get_tip().await
+    }
 }
 
 #[async_trait]
@@ -313,5 +324,9 @@ impl BitcoinTest for RealBitcoinTestLocked {
 
     async fn get_tx_block_height(&self, txid: &Txid) -> Option<u64> {
         self.inner.get_tx_block_height(txid).await
+    }
+
+    async fn get_tip(&self) -> u64 {
+        self.inner.get_tip().await
     }
 }
