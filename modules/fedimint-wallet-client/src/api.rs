@@ -6,7 +6,7 @@ use fedimint_core::{apply, async_trait_maybe_send};
 use fedimint_wallet_common::endpoint_constants::{
     AVAILABLE_UTXOS_ENDPOINT, BLOCK_COUNT_ENDPOINT, PEG_OUT_FEES_ENDPOINT,
 };
-use fedimint_wallet_common::{AvailableUtxo, PegOutFees};
+use fedimint_wallet_common::{PegOutFees, UTXOSummary};
 
 #[apply(async_trait_maybe_send!)]
 pub trait WalletFederationApi {
@@ -18,7 +18,7 @@ pub trait WalletFederationApi {
         amount: bitcoin::Amount,
     ) -> FederationResult<Option<PegOutFees>>;
 
-    async fn fetch_available_utxos(&self) -> FederationResult<Vec<AvailableUtxo>>;
+    async fn fetch_available_utxos(&self) -> FederationResult<Vec<UTXOSummary>>;
 }
 
 #[apply(async_trait_maybe_send!)]
@@ -46,7 +46,7 @@ where
         .await
     }
 
-    async fn fetch_available_utxos(&self) -> FederationResult<Vec<AvailableUtxo>> {
+    async fn fetch_available_utxos(&self) -> FederationResult<Vec<UTXOSummary>> {
         self.request_current_consensus(
             AVAILABLE_UTXOS_ENDPOINT.to_string(),
             ApiRequestErased::default(),

@@ -92,10 +92,17 @@ pub struct SpendableUTXO {
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash, Deserialize, Serialize, Encodable, Decodable)]
-pub struct AvailableUtxo {
+pub struct UTXOSummary {
     pub outpoint: bitcoin::OutPoint,
     #[serde(with = "bitcoin::amount::serde::as_sat")]
     pub amount: bitcoin::Amount,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Deserialize, Serialize, Encodable, Decodable)]
+pub struct WalletSummary {
+    pub spendable_utxos: Vec<UTXOSummary>,
+    pub pending_peg_out_utxos: Vec<UTXOSummary>,
+    pub pending_change_utxos: Vec<UTXOSummary>,
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash, Deserialize, Serialize, Encodable, Decodable)]

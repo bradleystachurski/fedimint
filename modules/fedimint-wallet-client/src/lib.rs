@@ -347,7 +347,7 @@ impl WalletClientModule {
             .context("Federation didn't return peg-out fees")
     }
 
-    pub async fn get_available_utxos(&self) -> anyhow::Result<Vec<AvailableUtxo>> {
+    pub async fn get_available_utxos(&self) -> anyhow::Result<Vec<UTXOSummary>> {
         Ok(self.module_api.fetch_available_utxos().await?)
     }
 

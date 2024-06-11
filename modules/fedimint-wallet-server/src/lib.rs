@@ -11,7 +11,7 @@
 
 pub mod db;
 
-use std::collections::{BTreeMap, BTreeSet, HashMap};
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::convert::Infallible;
 #[cfg(not(target_family = "wasm"))]
 use std::time::Duration;
@@ -28,9 +28,9 @@ use bitcoin::sighash::{EcdsaSighashType, SighashCache};
 use bitcoin::{Address, BlockHash, Network, ScriptBuf, Sequence, Transaction, TxIn, TxOut, Txid};
 use common::config::WalletConfigConsensus;
 use common::{
-    proprietary_tweak_key, AvailableUtxo, PegOutFees, PegOutSignatureItem, ProcessPegOutSigError,
-    SpendableUTXO, WalletCommonInit, WalletConsensusItem, WalletCreationError, WalletInput,
-    WalletModuleTypes, WalletOutput, WalletOutputOutcome, CONFIRMATION_TARGET,
+    proprietary_tweak_key, PegOutFees, PegOutSignatureItem, ProcessPegOutSigError, SpendableUTXO,
+    UTXOSummary, WalletCommonInit, WalletConsensusItem, WalletCreationError, WalletInput,
+    WalletModuleTypes, WalletOutput, WalletOutputOutcome, WalletSummary, CONFIRMATION_TARGET,
 };
 use fedimint_bitcoind::{create_bitcoind, DynBitcoindRpc};
 use fedimint_core::config::{
@@ -65,7 +65,7 @@ pub use fedimint_wallet_common as common;
 use fedimint_wallet_common::config::{WalletClientConfig, WalletConfig, WalletGenParams};
 use fedimint_wallet_common::endpoint_constants::{
     AVAILABLE_UTXOS_ENDPOINT, BLOCK_COUNT_ENDPOINT, BLOCK_COUNT_LOCAL_ENDPOINT,
-    PEG_OUT_FEES_ENDPOINT,
+    PEG_OUT_FEES_ENDPOINT, WALLET_SUMMARY_ENDPOINT,
 };
 use fedimint_wallet_common::keys::CompressedPublicKey;
 use fedimint_wallet_common::tweakable::Tweakable;
@@ -709,7 +709,15 @@ impl ServerModule for Wallet {
                 AVAILABLE_UTXOS_ENDPOINT,
                 // TODO: investigate version
                 ApiVersion::new(0, 0),
-                async |module: &Wallet, context, _params: ()| -> Vec<AvailableUtxo> {
+                async |module: &Wallet, context, _params: ()| -> Vec<UTXOSummary> {
+                    Ok(module.get_available_utxo_outpoints(&mut context.dbtx().into_nc()).await)
+                }
+            },
+            api_endpoint! {
+                WALLET_SUMMARY_ENDPOINT,
+                // TODO: investigate version
+                ApiVersion::new(0, 0),
+                async |module: &Wallet, context, _params: ()| -> WalletSummary {
                     Ok(module.get_available_utxo_outpoints(&mut context.dbtx().into_nc()).await)
                 }
             },
@@ -1184,18 +1192,137 @@ impl Wallet {
         bitcoin::Amount::from_sat(sat_sum)
     }
 
+    // TODO: wrong name now
     async fn get_available_utxo_outpoints(
         &self,
         dbtx: &mut DatabaseTransaction<'_>,
-    ) -> Vec<AvailableUtxo> {
+    ) -> Vec<UTXOSummary> {
         self.available_utxos(dbtx)
             .await
             .iter()
-            .map(|(utxo_key, spendable_utxo)| AvailableUtxo {
+            .map(|(utxo_key, spendable_utxo)| UTXOSummary {
                 outpoint: utxo_key.0,
                 amount: spendable_utxo.amount,
             })
             .collect()
+    }
+
+    async fn get_wallet_summary(&self, dbtx: &mut DatabaseTransaction<'_>) -> WalletSummary {
+        let available_utxos = self
+            .available_utxos(dbtx)
+            .await
+            .iter()
+            .map(|(utxo_key, spendable_utxo)| UTXOSummary {
+                outpoint: utxo_key.0,
+                amount: spendable_utxo.amount,
+            })
+            .collect::<Vec<_>>();
+
+        let unsigned_transactions = dbtx
+            .find_by_prefix(&UnsignedTransactionPrefixKey)
+            .await
+            .map(|(_, tx)| tx)
+            .collect::<Vec<_>>()
+            .await;
+
+        let unsigned_txids_to_remove: HashSet<bitcoin::Txid> = unsigned_transactions
+            .iter()
+            .filter_map(|tx| tx.rbf.as_ref().map(|rbf_tx| rbf_tx.txid))
+            .collect();
+
+        let pending_transactions = dbtx
+            .find_by_prefix(&PendingTransactionPrefixKey)
+            .await
+            .map(|(_, tx)| tx)
+            .collect::<Vec<_>>()
+            .await;
+
+        let pending_txids_to_remove: HashSet<bitcoin::Txid> = pending_transactions
+            .iter()
+            .filter_map(|tx| tx.rbf.as_ref().map(|rbf_tx| rbf_tx.txid))
+            .collect();
+
+        let txids_to_remove: HashSet<bitcoin::Txid> = pending_txids_to_remove
+            .union(&unsigned_txids_to_remove)
+            .cloned()
+            .collect();
+
+        let filtered_unsigned_transactions = unsigned_transactions
+            .iter()
+            .filter(|tx| !txids_to_remove.contains(&tx.psbt.unsigned_tx.txid()))
+            .collect::<Vec<_>>();
+
+        let filtered_pending_transactions = pending_transactions
+            .iter()
+            .filter(|tx| !txids_to_remove.contains(&tx.tx.txid()))
+            .collect::<Vec<_>>();
+
+        // for UnsignedTransactions, we need to use the construction of the tx to
+        // identify withdrawal (idx = 0) and change (idx = 1) since there are always two
+        // outputs in that order. would prefer a more elegant solution, since this will
+        // blow up if we refactor create_tx. for PendingTransaction, we have the change
+        // tweak so we generically identify change outputs vs withdrawal
+        let mut pending_peg_out_utxos: Vec<UTXOSummary> = Vec::new();
+        let mut pending_change_utxos: Vec<UTXOSummary> = Vec::new();
+        for tx in filtered_unsigned_transactions {
+            let txid = tx.psbt.unsigned_tx.txid();
+
+            let withdrawal_output = tx
+                .psbt
+                .unsigned_tx
+                .output
+                .first()
+                .expect("tx must contain withdrawal output");
+
+            let change_output = tx
+                .psbt
+                .unsigned_tx
+                .output
+                .last()
+                .expect("tx must contain withdrawal output");
+
+            pending_peg_out_utxos.push(UTXOSummary {
+                outpoint: bitcoin::OutPoint { txid, vout: 0 },
+                amount: bitcoin::Amount::from_sat(withdrawal_output.value),
+            });
+
+            pending_change_utxos.push(UTXOSummary {
+                outpoint: bitcoin::OutPoint { txid, vout: 1 },
+                amount: bitcoin::Amount::from_sat(change_output.value),
+            });
+        }
+
+        for tx in filtered_pending_transactions {
+            let txid = tx.tx.txid();
+
+            let withdrawal_output = tx
+                .tx
+                .output
+                .first()
+                .expect("tx must contain withdrawal output");
+
+            let change_output = tx
+                .tx
+                .output
+                .last()
+                .expect("tx must contain withdrawal output");
+
+            pending_peg_out_utxos.push(UTXOSummary {
+                outpoint: bitcoin::OutPoint { txid, vout: 0 },
+                amount: bitcoin::Amount::from_sat(withdrawal_output.value),
+            });
+
+            pending_change_utxos.push(UTXOSummary {
+                outpoint: bitcoin::OutPoint { txid, vout: 1 },
+                amount: bitcoin::Amount::from_sat(change_output.value),
+            });
+        }
+
+        WalletSummary {
+            spendable_utxos: available_utxos.clone(),
+            pending_peg_out_utxos,
+            pending_change_utxos,
+        }
     }
 
     fn offline_wallet(&self) -> StatelessWallet {

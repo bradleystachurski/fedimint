@@ -23,7 +23,7 @@ use fedimint_wallet_client::{DepositState, WalletClientInit, WalletClientModule,
 use fedimint_wallet_common::config::{WalletConfig, WalletGenParams};
 use fedimint_wallet_common::tweakable::Tweakable;
 use fedimint_wallet_common::txoproof::PegInProof;
-use fedimint_wallet_common::{AvailableUtxo, PegOutFees, Rbf};
+use fedimint_wallet_common::{PegOutFees, Rbf, UTXOSummary};
 use fedimint_wallet_server::WalletInit;
 use futures::stream::StreamExt;
 use tracing::info;
@@ -168,7 +168,7 @@ async fn sandbox() -> anyhow::Result<()> {
     bitcoin.mine_blocks(finality_delay).await;
     await_consensus_to_catch_up(&client, 1).await?;
 
-    let mut expected_available_utxos: HashSet<AvailableUtxo> = HashSet::new();
+    let mut expected_available_utxos: HashSet<UTXOSummary> = HashSet::new();
 
     for _ in 0..3 {
         let (_, tx) = peg_in(&client, bitcoin.as_ref(), finality_delay).await?;
@@ -183,7 +183,7 @@ async fn sandbox() -> anyhow::Result<()> {
                 // bitcoin core randomizes the change output index so we can't assume the fed's
                 // utxo is always index 0
                 if output.value == expected_peg_in_amount {
-                    Some(AvailableUtxo {
+                    Some(UTXOSummary {
                         outpoint: bitcoin::OutPoint {
                             txid: tx.txid(),
                             vout: idx as u32,
