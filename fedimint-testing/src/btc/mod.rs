@@ -51,4 +51,6 @@ pub trait BitcoinTest {
 
     // TODO: better name?
     async fn get_tip(&self) -> u64;
+
+    async fn get_mempool_tx(&self, txid: &Txid) -> Option<bitcoin::Transaction>;
 }

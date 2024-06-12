@@ -1,3 +1,4 @@
+use std::any::Any;
 use std::collections::HashSet;
 use std::time::Duration;
 
@@ -23,7 +24,7 @@ use fedimint_wallet_client::{DepositState, WalletClientInit, WalletClientModule,
 use fedimint_wallet_common::config::{WalletConfig, WalletGenParams};
 use fedimint_wallet_common::tweakable::Tweakable;
 use fedimint_wallet_common::txoproof::PegInProof;
-use fedimint_wallet_common::{PegOutFees, Rbf, UTXOSummary};
+use fedimint_wallet_common::{PegOutFees, Rbf, UTXOSummary, WalletSummary};
 use fedimint_wallet_server::WalletInit;
 use futures::stream::StreamExt;
 use tracing::info;
@@ -161,6 +162,7 @@ async fn sandbox() -> anyhow::Result<()> {
     let client = fed.new_client().await;
     let bitcoin = fixtures.bitcoin();
     let bitcoin = bitcoin.lock_exclusive().await;
+    let dyn_bitcoin_rpc = fixtures.dyn_bitcoin_rpc();
     let wallet_module = client.get_first_module::<WalletClientModule>();
     info!("Starting test TODO");
 
@@ -170,6 +172,7 @@ async fn sandbox() -> anyhow::Result<()> {
 
     let mut expected_available_utxos: HashSet<UTXOSummary> = HashSet::new();
 
+    // Verify peg-ins update the wallet summary
     for _ in 0..3 {
         let (_, tx) = peg_in(&client, bitcoin.as_ref(), finality_delay).await?;
         let expected_peg_in_amount =
@@ -204,6 +207,19 @@ async fn sandbox() -> anyhow::Result<()> {
             .into_iter()
             .collect::<HashSet<_>>();
         assert_eq!(expected_available_utxos, available_utxos);
+
+        // bleh, comparisons are gross using vecs
+        // might be worth considering a different data structure
+        let wallet_summary = wallet_module.get_wallet_summary().await?;
+        assert_eq!(
+            wallet_summary
+                .spendable_utxos
+                .into_iter()
+                .collect::<HashSet<_>>(),
+            available_utxos
+        );
+        assert_eq!(wallet_summary.pending_peg_out_utxos, vec![]);
+        assert_eq!(wallet_summary.pending_change_utxos, vec![]);
     }
 
     let address = checked_address_to_unchecked_address(&bitcoin.get_new_address().await);
@@ -232,27 +248,99 @@ async fn sandbox() -> anyhow::Result<()> {
     let wallet_summary_before_mining = wallet_module.get_wallet_summary().await?;
     info!(?wallet_summary_before_mining);
 
-    let expected_tx_fee = {
-        let witness_scale_factor = 4;
-        let sats_per_vbyte = fees.fee_rate.sats_per_kvb / 1000;
-        let tx_vbytes = (fees.total_weight + witness_scale_factor - 1) / witness_scale_factor;
-        Amount::from_sats(sats_per_vbyte * tx_vbytes)
+    info!(?txid);
+    // sleep_in_test("waiting", Duration::from_secs(5)).await;
+    let mempool_tx = fedimint_core::util::retry(
+        "get peg-out mempool tx",
+        fedimint_core::util::ConstantBackoff::default()
+            .with_delay(Duration::from_millis(100))
+            .with_max_times(100),
+        || async {
+            bitcoin
+                .get_mempool_tx(&txid)
+                .await
+                .ok_or(anyhow::anyhow!("No mempool tx found"))
+        },
+    )
+    .await
+    .expect("couldn't fetch mempool tx within 10s");
+    info!(?mempool_tx);
+
+    for input in mempool_tx.input {
+        // `getrawtransaction` does not return the amount associated with a tx input, so
+        // we need to use the outpoint to find the spent UTXO instead of constructing a
+        // UTXOSummary
+        let consumed_utxo = expected_available_utxos
+            .iter()
+            .find(|utxo| utxo.outpoint == input.previous_output)
+            .expect("wallet should have consumed spendable UTXO")
+            .to_owned();
+
+        assert!(expected_available_utxos.remove(&consumed_utxo))
+    }
+
+    let expected_pending_peg_out_utxo = UTXOSummary {
+        outpoint: bitcoin::OutPoint { txid, vout: 0 },
+        amount: bitcoin::Amount::from_sat(
+            mempool_tx
+                .output
+                .first()
+                .expect("peg-out tx includes withdrawal output")
+                .value,
+        ),
     };
-    let tx_fee = bitcoin.get_mempool_tx_fee(&txid).await;
-    assert_eq!(tx_fee, expected_tx_fee);
 
-    let received = bitcoin
-        .mine_block_and_get_received(&address.clone().assume_checked())
-        .await;
-    assert_eq!(received, peg_out.into());
+    let expected_pending_change_utxo = UTXOSummary {
+        outpoint: bitcoin::OutPoint { txid, vout: 1 },
+        amount: bitcoin::Amount::from_sat(
+            mempool_tx
+                .output
+                .last()
+                .expect("peg-out tx includes change output")
+                .value,
+        ),
+    };
 
-    bitcoin.mine_blocks(finality_delay).await;
+    assert_eq!(
+        wallet_summary_before_mining
+            .spendable_utxos
+            .into_iter()
+            .collect::<HashSet<_>>(),
+        expected_available_utxos
+    );
+
+    assert_eq!(
+        wallet_summary_before_mining.pending_peg_out_utxos,
+        vec![expected_pending_peg_out_utxo]
+    );
+
+    assert_eq!(
+        wallet_summary_before_mining.pending_change_utxos,
+        vec![expected_pending_change_utxo]
+    );
+
+    // dang, we need this + 1 so something is funky
+    // need to investigate later
+    bitcoin.mine_blocks(finality_delay + 1).await;
     let tip = bitcoin.get_tip().await;
-    await_consensus_to_catch_up(&client, tip - finality_delay).await?;
-    // sleep_in_test("waiting", Duration::from_secs(10)).await;
+    await_consensus_to_catch_up(&client, tip - finality_delay + 1).await?;
 
     let wallet_summary_after_mining = wallet_module.get_wallet_summary().await?;
     info!(?wallet_summary_after_mining);
+
+    assert!(expected_available_utxos.insert(expected_pending_change_utxo));
+
+    assert_eq!(
+        wallet_summary_after_mining
+            .spendable_utxos
+            .into_iter()
+            .collect::<HashSet<_>>(),
+        expected_available_utxos
+    );
+
+    assert_eq!(wallet_summary_after_mining.pending_peg_out_utxos, vec![]);
+
+    assert_eq!(wallet_summary_after_mining.pending_change_utxos, vec![]);
 
     Ok(())
 }

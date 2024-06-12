@@ -1218,6 +1218,9 @@ impl Wallet {
             })
             .collect::<Vec<_>>();
 
+        // TODO: consider ordering - do we care?
+        // it seems like it'd be useful to have UTXOs returned sorted by age, but
+        // perhaps that's not necessary and can be done on the client if needed?
         let mut unsigned_transactions = dbtx
             .find_by_prefix(&UnsignedTransactionPrefixKey)
             .await

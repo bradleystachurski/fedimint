@@ -296,6 +296,10 @@ impl BitcoinTest for FakeBitcoinTest {
     async fn get_tip(&self) -> u64 {
         unimplemented!()
     }
+
+    async fn get_mempool_tx(&self, txid: &Txid) -> Option<bitcoin::Transaction> {
+        unimplemented!()
+    }
 }
 
 #[async_trait]

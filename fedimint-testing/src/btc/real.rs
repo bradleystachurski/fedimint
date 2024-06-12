@@ -184,6 +184,10 @@ impl BitcoinTest for RealBitcoinTestNoLock {
             .get_block_count()
             .expect("failed to fetch chain tip")
     }
+
+    async fn get_mempool_tx(&self, txid: &Txid) -> Option<bitcoin::Transaction> {
+        self.client.get_raw_transaction(txid, None).ok()
+    }
 }
 
 /// Fixture implementing bitcoin node under test by talking to a `bitcoind` -
@@ -282,6 +286,11 @@ impl BitcoinTest for RealBitcoinTest {
         let _lock = self.lock_exclusive().await;
         self.inner.get_tip().await
     }
+
+    async fn get_mempool_tx(&self, txid: &Txid) -> Option<bitcoin::Transaction> {
+        let _lock = self.lock_exclusive().await;
+        self.inner.get_mempool_tx(txid).await
+    }
 }
 
 #[async_trait]
@@ -328,5 +337,9 @@ impl BitcoinTest for RealBitcoinTestLocked {
 
     async fn get_tip(&self) -> u64 {
         self.inner.get_tip().await
+    }
+
+    async fn get_mempool_tx(&self, txid: &Txid) -> Option<bitcoin::Transaction> {
+        self.inner.get_mempool_tx(txid).await
     }
 }
