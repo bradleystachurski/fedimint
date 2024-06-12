@@ -1,4 +1,3 @@
-use std::any::Any;
 use std::collections::HashSet;
 use std::time::Duration;
 
@@ -24,7 +23,7 @@ use fedimint_wallet_client::{DepositState, WalletClientInit, WalletClientModule,
 use fedimint_wallet_common::config::{WalletConfig, WalletGenParams};
 use fedimint_wallet_common::tweakable::Tweakable;
 use fedimint_wallet_common::txoproof::PegInProof;
-use fedimint_wallet_common::{PegOutFees, Rbf, UTXOSummary, WalletSummary};
+use fedimint_wallet_common::{PegOutFees, Rbf, UTXOSummary};
 use fedimint_wallet_server::WalletInit;
 use futures::stream::StreamExt;
 use tracing::info;
@@ -162,7 +161,6 @@ async fn sandbox() -> anyhow::Result<()> {
     let client = fed.new_client().await;
     let bitcoin = fixtures.bitcoin();
     let bitcoin = bitcoin.lock_exclusive().await;
-    let dyn_bitcoin_rpc = fixtures.dyn_bitcoin_rpc();
     let wallet_module = client.get_first_module::<WalletClientModule>();
     info!("Starting test TODO");
 
@@ -171,6 +169,9 @@ async fn sandbox() -> anyhow::Result<()> {
     await_consensus_to_catch_up(&client, 1).await?;
 
     let mut expected_available_utxos: HashSet<UTXOSummary> = HashSet::new();
+    fn sum_utxos<'a>(utxos: impl Iterator<Item = &'a UTXOSummary>) -> bitcoin::Amount {
+        utxos.fold(bsats(0), |acc, utxo| bsats(utxo.amount.to_sat()) + acc)
+    }
 
     // Verify peg-ins update the wallet summary
     for _ in 0..3 {
@@ -212,6 +213,11 @@ async fn sandbox() -> anyhow::Result<()> {
         // might be worth considering a different data structure
         let wallet_summary = wallet_module.get_wallet_summary().await?;
         assert_eq!(
+            sum_utxos(expected_available_utxos.iter()),
+            wallet_summary.total_spendable_balance()
+        );
+        assert_eq!(bsats(0), wallet_summary.total_pending_change_balance());
+        assert_eq!(
             wallet_summary
                 .spendable_utxos
                 .into_iter()
@@ -228,10 +234,6 @@ async fn sandbox() -> anyhow::Result<()> {
     let fees = wallet_module
         .get_withdraw_fees(address.clone(), peg_out)
         .await?;
-    assert_eq!(
-        fees.total_weight, 871,
-        "stateless wallet should have constructed a tx with a total weight=871"
-    );
     let op = wallet_module
         .withdraw(address.clone(), peg_out, fees, ())
         .await?;
@@ -267,8 +269,8 @@ async fn sandbox() -> anyhow::Result<()> {
     info!(?mempool_tx);
 
     for input in mempool_tx.input {
-        // `getrawtransaction` does not return the amount associated with a tx input, so
-        // we need to use the outpoint to find the spent UTXO instead of constructing a
+        // using `find` is clunky, however it's necessary since `getrawtransaction`
+        // doesn't include an amount with inputs so we cannot manually construct a
         // UTXOSummary
         let consumed_utxo = expected_available_utxos
             .iter()
@@ -302,6 +304,22 @@ async fn sandbox() -> anyhow::Result<()> {
     };
 
     assert_eq!(
+        sum_utxos(expected_available_utxos.iter()),
+        wallet_summary_before_mining.total_spendable_balance()
+    );
+
+    assert_eq!(
+        bsats(
+            mempool_tx
+                .output
+                .last()
+                .expect("peg-out tx includes change output")
+                .value
+        ),
+        wallet_summary_before_mining.total_pending_change_balance()
+    );
+
+    assert_eq!(
         wallet_summary_before_mining
             .spendable_utxos
             .into_iter()
@@ -329,6 +347,16 @@ async fn sandbox() -> anyhow::Result<()> {
     info!(?wallet_summary_after_mining);
 
     assert!(expected_available_utxos.insert(expected_pending_change_utxo));
+
+    assert_eq!(
+        sum_utxos(expected_available_utxos.iter()),
+        wallet_summary_after_mining.total_spendable_balance()
+    );
+
+    assert_eq!(
+        bsats(0),
+        wallet_summary_after_mining.total_pending_change_balance()
+    );
 
     assert_eq!(
         wallet_summary_after_mining

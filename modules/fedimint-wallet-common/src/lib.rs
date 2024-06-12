@@ -105,6 +105,29 @@ pub struct WalletSummary {
     pub pending_change_utxos: Vec<UTXOSummary>,
 }
 
+impl WalletSummary {
+    // TODO: consider using fedimint Amount instead of bitcoin::Amount
+    fn sum<'a>(utxos: impl Iterator<Item = &'a UTXOSummary>) -> Amount {
+        utxos.fold(Amount::ZERO, |acc, utxo| utxo.amount + acc)
+    }
+
+    pub fn total_spendable_balance(&self) -> Amount {
+        WalletSummary::sum(self.spendable_utxos.iter())
+    }
+
+    pub fn total_pending_change_balance(&self) -> Amount {
+        WalletSummary::sum(self.pending_change_utxos.iter())
+    }
+
+    pub fn total_balance(&self) -> Amount {
+        WalletSummary::sum(
+            self.spendable_utxos
+                .iter()
+                .chain(self.pending_change_utxos.iter()),
+        )
+    }
+}
+
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash, Deserialize, Serialize, Encodable, Decodable)]
 pub struct PegOutFees {
     pub fee_rate: Feerate,
