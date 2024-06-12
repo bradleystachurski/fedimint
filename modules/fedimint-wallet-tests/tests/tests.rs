@@ -174,6 +174,8 @@ async fn sandbox() -> anyhow::Result<()> {
     }
 
     // Verify peg-ins update the wallet summary
+    // oof, doing only 1 peg-in allows rbf to work, but multiple fail
+    // might be a proper bug
     for _ in 0..3 {
         let (_, tx) = peg_in(&client, bitcoin.as_ref(), finality_delay).await?;
         let expected_peg_in_amount =
@@ -250,8 +252,6 @@ async fn sandbox() -> anyhow::Result<()> {
     let wallet_summary_before_mining = wallet_module.get_wallet_summary().await?;
     info!(?wallet_summary_before_mining);
 
-    info!(?txid);
-    // sleep_in_test("waiting", Duration::from_secs(5)).await;
     let mempool_tx = fedimint_core::util::retry(
         "get peg-out mempool tx",
         fedimint_core::util::ConstantBackoff::default()
@@ -334,6 +334,100 @@ async fn sandbox() -> anyhow::Result<()> {
 
     assert_eq!(
         wallet_summary_before_mining.pending_change_utxos,
+        vec![expected_pending_change_utxo]
+    );
+
+    // sleep_in_test("wait before trying rbf...?", Duration::from_secs(5)).await;
+    // RBF by increasing sats per kvb by 1000
+    let rbf = Rbf {
+        fees: PegOutFees::new(1000, fees.total_weight),
+        txid,
+    };
+    let op = wallet_module.rbf_withdraw(rbf.clone(), ()).await?;
+    let sub = wallet_module.subscribe_withdraw_updates(op).await?;
+    let mut sub = sub.into_stream();
+    assert_eq!(sub.ok().await?, WithdrawState::Created);
+    let rbf_txid = match sub.ok().await? {
+        WithdrawState::Succeeded(rbf_txid) => rbf_txid,
+        other => panic!("Unexpected state: {other:?}"),
+    };
+
+    let wallet_summary_after_rbf = wallet_module.get_wallet_summary().await?;
+
+    let mempool_rbf_tx = fedimint_core::util::retry(
+        "get peg-out mempool rbf tx",
+        fedimint_core::util::ConstantBackoff::default()
+            .with_delay(Duration::from_millis(100))
+            .with_max_times(100),
+        || async {
+            bitcoin
+                .get_mempool_tx(&rbf_txid)
+                .await
+                .ok_or(anyhow::anyhow!("No mempool tx found"))
+        },
+    )
+    .await
+    .expect("couldn't fetch mempool tx within 10s");
+
+    let expected_pending_peg_out_utxo = UTXOSummary {
+        outpoint: bitcoin::OutPoint {
+            txid: rbf_txid,
+            vout: 0,
+        },
+        amount: bitcoin::Amount::from_sat(
+            mempool_rbf_tx
+                .output
+                .first()
+                .expect("peg-out tx includes withdrawal output")
+                .value,
+        ),
+    };
+
+    let expected_pending_change_utxo = UTXOSummary {
+        outpoint: bitcoin::OutPoint {
+            txid: rbf_txid,
+            vout: 1,
+        },
+        amount: bitcoin::Amount::from_sat(
+            mempool_rbf_tx
+                .output
+                .last()
+                .expect("peg-out tx includes change output")
+                .value,
+        ),
+    };
+
+    assert_eq!(
+        sum_utxos(expected_available_utxos.iter()),
+        wallet_summary_after_rbf.total_spendable_balance()
+    );
+
+    assert_eq!(
+        bsats(
+            mempool_rbf_tx
+                .output
+                .last()
+                .expect("peg-out tx includes change output")
+                .value
+        ),
+        wallet_summary_after_rbf.total_pending_change_balance()
+    );
+
+    assert_eq!(
+        wallet_summary_after_rbf
+            .spendable_utxos
+            .into_iter()
+            .collect::<HashSet<_>>(),
+        expected_available_utxos
+    );
+
+    assert_eq!(
+        wallet_summary_after_rbf.pending_peg_out_utxos,
+        vec![expected_pending_peg_out_utxo]
+    );
+
+    assert_eq!(
+        wallet_summary_after_rbf.pending_change_utxos,
         vec![expected_pending_change_utxo]
     );
 
