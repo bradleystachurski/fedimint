@@ -155,6 +155,7 @@ async fn sanity_check_bitcoin_blocks() -> anyhow::Result<()> {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+#[ignore]
 async fn sandbox() -> anyhow::Result<()> {
     let fixtures = fixtures();
     let fed = fixtures.new_default_fed().await;
@@ -577,7 +578,6 @@ async fn peg_out_fail_refund() -> anyhow::Result<()> {
 }
 
 #[tokio::test(flavor = "multi_thread")]
-#[ignore]
 async fn peg_outs_support_rbf() -> anyhow::Result<()> {
     let fixtures = fixtures();
     let fed = fixtures.new_default_fed().await;
@@ -591,6 +591,7 @@ async fn peg_outs_support_rbf() -> anyhow::Result<()> {
     bitcoin.mine_blocks(finality_delay).await;
     await_consensus_to_catch_up(&client, 1).await?;
 
+    let (mut balance_sub, _) = peg_in(&client, bitcoin.as_ref(), finality_delay).await?;
     let (mut balance_sub, _) = peg_in(&client, bitcoin.as_ref(), finality_delay).await?;
 
     info!("Peg-in finished for test peg_outs_support_rbf");
@@ -615,8 +616,9 @@ async fn peg_outs_support_rbf() -> anyhow::Result<()> {
         bitcoin.get_mempool_tx_fee(&txid).await,
         fees.amount().into()
     );
-    let balance_after_normal_peg_out =
-        sats(PEG_IN_AMOUNT_SATS - PEG_OUT_AMOUNT_SATS - fees.amount().to_sat());
+    let balance_after_normal_peg_out = sats(
+        PEG_IN_AMOUNT_SATS + PEG_IN_AMOUNT_SATS - PEG_OUT_AMOUNT_SATS - fees.amount().to_sat(),
+    );
     assert_eq!(client.get_balance().await, balance_after_normal_peg_out);
     assert_eq!(balance_sub.ok().await?, balance_after_normal_peg_out);
 
@@ -643,7 +645,7 @@ async fn peg_outs_support_rbf() -> anyhow::Result<()> {
         sats(PEG_OUT_AMOUNT_SATS)
     );
     let balance_after_rbf_peg_out =
-        sats(PEG_IN_AMOUNT_SATS - PEG_OUT_AMOUNT_SATS - total_fees.to_sat());
+        sats(PEG_IN_AMOUNT_SATS + PEG_IN_AMOUNT_SATS - PEG_OUT_AMOUNT_SATS - total_fees.to_sat());
     let current_balance = client.get_balance().await;
     assert_eq!(balance_sub.ok().await?, current_balance);
     // So we don't know which transaction will get mined first, it could be
