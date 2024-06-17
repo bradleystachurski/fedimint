@@ -40,7 +40,7 @@ function run_tests() {
     if [ -z "${FM_BITCOIND_TEST_ONLY:-}" ] || [ "${FM_BITCOIND_TEST_ONLY:-}" = "wallet" ]; then
       cargo nextest run --locked --workspace --all-targets \
         ${CARGO_PROFILE:+--cargo-profile ${CARGO_PROFILE}} ${CARGO_PROFILE:+--profile ${CARGO_PROFILE}} \
-        ${TEST_ARGS_THREADED} \
+        --no-capture \
         -E 'package(fedimint-wallet-tests)'
     fi
     if [ -z "${FM_BITCOIND_TEST_ONLY:-}" ] || [ "${FM_BITCOIND_TEST_ONLY:-}" = "ln" ]; then

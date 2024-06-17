@@ -1,4 +1,5 @@
 use std::collections::BTreeMap;
+use std::str::FromStr;
 
 use bitcoin::Network;
 use fedimint_core::core::ModuleKind;
@@ -7,8 +8,9 @@ use fedimint_core::envs::BitcoinRpcConfig;
 use fedimint_core::module::__reexports::serde_json;
 use fedimint_core::util::SafeUrl;
 use fedimint_core::{plugin_types_trait_impl_config, Feerate, PeerId};
-use miniscript::descriptor::{Wpkh, Wsh};
-use secp256k1::SecretKey;
+use miniscript::descriptor::{Tr, Wpkh, Wsh};
+use miniscript::ToPublicKey;
+use secp256k1::{Secp256k1, SecretKey};
 use serde::{Deserialize, Serialize};
 
 use crate::envs::FM_PORT_ESPLORA_ENV;
@@ -173,9 +175,36 @@ impl WalletConfig {
                 .expect("Our key type is always compressed"),
             )
         } else {
-            PegInDescriptor::Wsh(
-                Wsh::new_sortedmulti(threshold, pubkeys.values().copied().collect()).unwrap(),
+            let unspendable_internal_public_key = secp256k1::XOnlyPublicKey::from_str(
+                "50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0",
             )
+            .unwrap()
+            .to_public_key();
+            let threshold_descriptor_pubkeys = pubkeys
+                .values()
+                .copied()
+                .map(|key| key.key.to_string())
+                .collect::<Vec<_>>()
+                .join(",");
+            let desc = format!(
+                "tr({}, multi_a({}, {}))",
+                unspendable_internal_public_key, threshold, threshold_descriptor_pubkeys
+            );
+            let desc = desc.replace(&[' ', '\n'][..], "");
+            println!("desc: {}", desc);
+            PegInDescriptor::Tr(Tr::from_str(&desc).unwrap())
+
+            // let wsh_descriptor = format!(
+            //     "wsh(multi({}, {}))",
+            //     threshold, threshold_descriptor_pubkeys
+            // );
+            // let wsh_descriptor = wsh_descriptor.replace(&[' ', '\n'][..],
+            // ""); println!("wsh_descriptor: {}", wsh_descriptor);
+            // PegInDescriptor::Wsh(Wsh::from_str(&wsh_descriptor).unwrap())
+
+            // PegInDescriptor::Wsh(
+            //     Wsh::new_sortedmulti(threshold,
+            // pubkeys.values().copied().collect()).unwrap(), )
         };
 
         Self {
