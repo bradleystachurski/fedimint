@@ -548,6 +548,8 @@ impl ServerModule for Wallet {
         output: &'a WalletOutput,
         out_point: OutPoint,
     ) -> Result<TransactionItemAmount, WalletOutputError> {
+        // branch on rbf and throw error
+        // only works if we know there's no previous rbfs
         let output = output.ensure_v0_ref()?;
 
         let change_tweak = self.consensus_nonce(dbtx).await;
@@ -1130,7 +1132,6 @@ impl Wallet {
             WalletOutputV0::PegOut(peg_out) => self.offline_wallet().create_tx(
                 peg_out.amount,
                 peg_out.recipient.clone().assume_checked().script_pubkey(),
-                vec![],
                 self.available_utxos(dbtx).await,
                 peg_out.fees.fee_rate,
                 change_tweak,
@@ -1145,7 +1146,6 @@ impl Wallet {
                 self.offline_wallet().create_tx(
                     tx.peg_out_amount,
                     tx.destination,
-                    tx.selected_utxos,
                     self.available_utxos(dbtx).await,
                     tx.fees.fee_rate,
                     change_tweak,
@@ -1381,7 +1381,6 @@ impl<'a> StatelessWallet<'a> {
         &self,
         peg_out_amount: bitcoin::Amount,
         destination: ScriptBuf,
-        mut included_utxos: Vec<(UTXOKey, SpendableUTXO)>,
         mut remaining_utxos: Vec<(UTXOKey, SpendableUTXO)>,
         mut fee_rate: Feerate,
         change_tweak: &[u8; 33],
@@ -1421,7 +1420,6 @@ impl<'a> StatelessWallet<'a> {
             16) as u64; // sequence
 
         // Ensure deterministic ordering of UTXOs for all peers
-        included_utxos.sort_by_key(|(_, utxo)| utxo.amount);
         remaining_utxos.sort_by_key(|(_, utxo)| utxo.amount);
         remaining_utxos.extend(included_utxos);
 

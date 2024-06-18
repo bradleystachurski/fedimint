@@ -839,6 +839,11 @@ pub trait ServerModule: Debug + Sized {
         dbtx: &mut DatabaseTransaction<'_>,
     ) -> Vec<<Self::Common as ModuleCommon>::ConsensusItem>;
 
+    // dpc's idea
+    // new method that wraps existing `process_`
+    // hack for wallet module here
+    // check if rbf, then reject if so
+
     /// This function is called once for every consensus item. The function
     /// should return Ok if and only if the consensus item changes
     /// the system state. *Therefore this method should return an error in case
