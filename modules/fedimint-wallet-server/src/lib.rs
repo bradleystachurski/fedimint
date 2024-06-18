@@ -551,6 +551,9 @@ impl ServerModule for Wallet {
         // branch on rbf and throw error
         // only works if we know there's no previous rbfs
         let output = output.ensure_v0_ref()?;
+        if let WalletOutputV0::Rbf(_) = output {
+            return Err(WalletOutputError::RbfWithdrawalsDeprecated);
+        }
 
         let change_tweak = self.consensus_nonce(dbtx).await;
 
@@ -689,7 +692,6 @@ impl ServerModule for Wallet {
                     let tx = module.offline_wallet().create_tx(
                         bitcoin::Amount::from_sat(sats),
                         address.assume_checked().script_pubkey(),
-                        vec![],
                         module.available_utxos(&mut context.dbtx().into_nc()).await,
                         feerate,
                         &dummy_tweak,
@@ -1137,21 +1139,7 @@ impl Wallet {
                 change_tweak,
                 None,
             ),
-            WalletOutputV0::Rbf(rbf) => {
-                let tx = dbtx
-                    .get_value(&PendingTransactionKey(rbf.txid))
-                    .await
-                    .ok_or(WalletOutputError::RbfTransactionIdNotFound)?;
-
-                self.offline_wallet().create_tx(
-                    tx.peg_out_amount,
-                    tx.destination,
-                    self.available_utxos(dbtx).await,
-                    tx.fees.fee_rate,
-                    change_tweak,
-                    Some(rbf.clone()),
-                )
-            }
+            WalletOutputV0::Rbf(_) => Err(WalletOutputError::RbfWithdrawalsDeprecated),
         }
     }
 
@@ -1421,7 +1409,6 @@ impl<'a> StatelessWallet<'a> {
 
         // Ensure deterministic ordering of UTXOs for all peers
         remaining_utxos.sort_by_key(|(_, utxo)| utxo.amount);
-        remaining_utxos.extend(included_utxos);
 
         // Finally we initialize our accumulator for selected input amounts
         let mut total_selected_value = bitcoin::Amount::from_sat(0);
@@ -1767,7 +1754,6 @@ mod tests {
         let tx = wallet.create_tx(
             Amount::from_sat(2452),
             recipient.clone().assume_checked().script_pubkey(),
-            vec![],
             vec![(UTXOKey(OutPoint::null()), spendable.clone())],
             fee,
             &[0; 33],
@@ -1780,7 +1766,6 @@ mod tests {
             .create_tx(
                 Amount::from_sat(1000),
                 recipient.clone().assume_checked().script_pubkey(),
-                vec![],
                 vec![(UTXOKey(OutPoint::null()), spendable)],
                 fee,
                 &[0; 33],

@@ -314,6 +314,8 @@ pub enum WalletOutputError {
     TxWeightIncorrect(u64, u64),
     #[error("Peg-out fee rate is below min relay fee")]
     BelowMinRelayFee,
+    #[error("RBF transactions are deprecated")]
+    RbfWithdrawalsDeprecated,
     #[error("The wallet output version is not supported by this federation")]
     UnknownOutputVariant(#[from] UnknownWalletOutputVariantError),
 }
