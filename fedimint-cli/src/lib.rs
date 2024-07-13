@@ -716,14 +716,11 @@ impl FedimintCli {
     async fn handle_command(&mut self, cli: Opts) -> CliOutputResult {
         match cli.command.clone() {
             Command::InviteCode { peer } => {
-                let db = cli.load_rocks_db().await?;
-                let client_config = Client::get_config_from_db(&db)
-                    .await
-                    .ok_or_cli_msg("client config code not found")?;
-                let api_secret = Client::get_api_secret_from_db(&db).await;
+                let client = self.client_open(&cli).await?;
 
-                let invite_code = client_config
-                    .invite_code(&peer, &api_secret)
+                let invite_code = client
+                    .invite_code(peer)
+                    .await
                     .ok_or_cli_msg("peer not found")?;
 
                 Ok(CliOutput::InviteCode { invite_code })
@@ -1092,12 +1089,22 @@ impl FedimintCli {
                 meta_json,
                 modules_json,
             } => {
+                fedimint_core::util::write_log("inside DkgAdminCmd::SetConfigGenParams");
                 let meta: BTreeMap<String, String> =
                     serde_json::from_str(meta_json).map_err_cli_msg("Invalid JSON")?;
                 let modules: ServerModuleConfigGenParamsRegistry =
                     serde_json::from_str(modules_json).map_err_cli_msg("Invalid JSON")?;
                 let params = ConfigGenParamsRequest { meta, modules };
-                client.set_config_gen_params(params, cli.auth()?).await?;
+                fedimint_core::util::write_log(
+                    "calling client.set_config_gen_params(params, cli.auth()?).await?;",
+                );
+                let res = client.set_config_gen_params(params, cli.auth()?).await;
+                fedimint_core::util::write_log(&format!("res: {:?}", res));
+                res?;
+                // client.set_config_gen_params(params, cli.auth()?).await?;
+                fedimint_core::util::write_log(
+                    "past calling client.set_config_gen_params(params, cli.auth()?).await?;",
+                );
                 Ok(CliOutput::Raw(Value::Null))
             }
             DkgAdminCmd::SetConfigGenConnections {

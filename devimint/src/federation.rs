@@ -137,7 +137,9 @@ impl Client {
     /// Client to join a federation
     pub async fn join_federation(&self, invite_code: String) -> Result<()> {
         debug!(target: LOG_DEVIMINT, "Joining federation with the main client");
+        info!("Joining federation with the main client");
         cmd!(self, "join-federation", invite_code).run().await?;
+        info!("past Joining federation with the main client");
 
         Ok(())
     }
@@ -235,6 +237,15 @@ impl Client {
         cmd!(self, "await-deposit", operation_id).run().await
     }
 
+    pub async fn invite_code(&self) -> Result<String> {
+        Ok(
+            cmd!(self, "invite-code", "0").out_json().await?["invite_code"]
+                .as_str()
+                .unwrap()
+                .to_string(),
+        )
+    }
+
     pub fn cmd(&self) -> Command {
         cmd!(
             crate::util::get_fedimint_cli_path(),
@@ -267,6 +278,7 @@ impl Federation {
         skip_setup: bool,
         federation_name: String,
     ) -> Result<Self> {
+        fedimint_core::util::write_log("inside Federation::new");
         let mut members = BTreeMap::new();
         let mut peer_to_env_vars_map = BTreeMap::new();
 
@@ -277,6 +289,7 @@ impl Federation {
             base_port,
             &ServerModuleConfigGenParamsRegistry::default(),
         )?;
+        fedimint_core::util::write_log(&format!("params with default: {:?}", params));
 
         let mut admin_clients: BTreeMap<PeerId, DynGlobalApi> = BTreeMap::new();
         let mut endpoints: BTreeMap<PeerId, _> = BTreeMap::new();
@@ -307,15 +320,38 @@ impl Federation {
             admin_clients.insert(*peer, admin_client);
             peer_to_env_vars_map.insert(peer.to_usize(), peer_env_vars);
         }
+        fedimint_core::util::write_log(&format!("params after loop: {:?}", params));
 
         if !skip_setup {
+            fedimint_core::util::write_log("setting up dkg");
             let fedimint_cli_version = crate::util::FedimintCli::version_or_default().await;
+            fedimint_core::util::write_log(&format!(
+                "fedimint_cli_version: {fedimint_cli_version}"
+            ));
+
+            let peer_data_dir = &peer_to_env_vars_map[&0].FM_DATA_DIR;
+            fedimint_core::util::write_log(&format!(
+                "reading entries of peer dir before moving invite code"
+            ));
+            let mut peer_entries_stream = tokio::fs::read_dir(peer_data_dir).await?;
+            while let Some(entry) = peer_entries_stream.next_entry().await? {
+                fedimint_core::util::write_log(&format!("entry: {:?}", entry));
+            }
+
             if fedimint_cli_version >= *VERSION_0_3_0_ALPHA {
-                run_cli_dkg(params, endpoints).await?;
+                run_cli_dkg(params, endpoints, peer_data_dir).await?;
             } else {
                 // TODO(support:v0.2): old fedimint-cli can't do DKG commands. keep this old DKG
                 // setup while fedimint-cli <= v0.2.x is supported
                 run_client_dkg(admin_clients, params).await?;
+            }
+            fedimint_core::util::write_log("past setting up dkg");
+            fedimint_core::util::write_log(&format!(
+                "reading entries of peer dir after moving invite code"
+            ));
+            let mut peer_entries_stream = tokio::fs::read_dir(peer_data_dir).await?;
+            while let Some(entry) = peer_entries_stream.next_entry().await? {
+                fedimint_core::util::write_log(&format!("entry: {:?}", entry));
             }
 
             // move configs to config directory
@@ -419,6 +455,7 @@ impl Federation {
         Ok(invite_code)
     }
 
+    // TODO: remove this, it's a dupe of the above function
     pub fn invite_code_static() -> Result<String> {
         let data_dir: PathBuf = env::var(FM_CLIENT_DIR_ENV)?.parse()?;
         let invite_code = fs::read_to_string(data_dir.join("invite-code"))?;
@@ -448,6 +485,11 @@ impl Federation {
 
     /// New [`Client`] that already joined `self`
     pub async fn new_joined_client(&self, name: &str) -> Result<Client> {
+        // TODO: likely need to check version, but worth a shot this way
+        let new_invite_code = self.internal_client().await?.invite_code().await?;
+        let old_invite_code = self.invite_code()?;
+        fedimint_core::util::write_log(&format!("old_invite_code: {:?}", old_invite_code));
+        fedimint_core::util::write_log(&format!("new_invite_code: {:?}", new_invite_code));
         let client = Client::create(name)?;
         client.join_federation(self.invite_code()?).await?;
         Ok(client)
@@ -787,10 +829,13 @@ impl Fedimintd {
 pub async fn run_cli_dkg(
     params: HashMap<PeerId, ConfigGenParams>,
     endpoints: BTreeMap<PeerId, String>,
+    peer_data_dir: &PathBuf,
 ) -> Result<()> {
+    fedimint_core::util::write_log("inside run_cli_dkg");
     let auth_for = |peer: &PeerId| -> &ApiAuth { &params[peer].local.api_auth };
 
     debug!(target: LOG_DEVIMINT, "Running DKG");
+    fedimint_core::util::write_log("looping through all peers and connecting");
     for endpoint in endpoints.values() {
         poll("trying-to-connect-to-peers", || async {
             crate::util::FedimintCli
@@ -803,6 +848,13 @@ pub async fn run_cli_dkg(
     }
 
     debug!(target: LOG_DEVIMINT, "Connected to all peers");
+    fedimint_core::util::write_log(&format!(
+        "reading entries of peer dir after trying-to-connect-to-peers"
+    ));
+    let mut peer_entries_stream = tokio::fs::read_dir(peer_data_dir).await?;
+    while let Some(entry) = peer_entries_stream.next_entry().await? {
+        fedimint_core::util::write_log(&format!("entry: {:?}", entry));
+    }
 
     for (peer_id, endpoint) in &endpoints {
         let status = crate::util::FedimintCli.ws_status(endpoint).await?;
@@ -826,24 +878,31 @@ pub async fn run_cli_dkg(
         .collect::<BTreeMap<_, _>>();
 
     debug!(target: LOG_DEVIMINT, "calling set_config_gen_connections for leader");
+    fedimint_core::util::write_log("calling set_config_gen_connections for leader");
     let leader_name = "leader".to_string();
     crate::util::FedimintCli
         .set_config_gen_connections(auth_for(leader_id), leader_endpoint, &leader_name, None)
         .await?;
+    fedimint_core::util::write_log("past calling set_config_gen_connections for leader");
 
     crate::util::FedimintCli
         .get_default_config_gen_params(auth_for(leader_id), leader_endpoint)
         .await?; // sanity check
 
+    fedimint_core::util::write_log("past calling get_default_config_gen_params");
+
     let server_gen_params = &params[leader_id].consensus.modules;
 
     debug!(target: LOG_DEVIMINT, "calling set_config_gen_params for leader");
+    fedimint_core::util::write_log("calling set_config_gen_params for leader");
+    fedimint_core::util::write_log(&format!("server_gen_params: {:?}", server_gen_params));
     cli_set_config_gen_params(
         leader_endpoint,
         auth_for(leader_id),
         server_gen_params.clone(),
     )
     .await?;
+    fedimint_core::util::write_log("past calling set_config_gen_params for leader");
 
     let followers_names = followers
         .keys()
@@ -859,6 +918,8 @@ pub async fn run_cli_dkg(
             })
         })
         .collect::<BTreeMap<_, _>>();
+
+    fedimint_core::util::write_log("looping through and calling cli_set_config_gen_params");
     for (peer_id, endpoint) in &followers {
         let name = followers_names
             .get(peer_id)
@@ -871,6 +932,7 @@ pub async fn run_cli_dkg(
 
         cli_set_config_gen_params(endpoint, auth_for(peer_id), server_gen_params.clone()).await?;
     }
+    fedimint_core::util::write_log("past looping through and calling cli_set_config_gen_params");
 
     debug!(target: LOG_DEVIMINT, "calling get_config_gen_peers for leader");
     let peers = crate::util::FedimintCli
@@ -909,6 +971,13 @@ pub async fn run_cli_dkg(
         .map(|p| p.our_current_id)
         .collect::<HashSet<_>>();
     assert_eq!(ids.len(), endpoints.len());
+    fedimint_core::util::write_log(&format!(
+        "reading entries of peer dir before FedimintCli.run_dkg"
+    ));
+    let mut peer_entries_stream = tokio::fs::read_dir(peer_data_dir).await?;
+    while let Some(entry) = peer_entries_stream.next_entry().await? {
+        fedimint_core::util::write_log(&format!("entry: {:?}", entry));
+    }
     let dkg_results = endpoints
         .iter()
         .map(|(peer_id, endpoint)| crate::util::FedimintCli.run_dkg(auth_for(peer_id), endpoint));
@@ -921,6 +990,13 @@ pub async fn run_cli_dkg(
         result?;
     }
     leader_wait_result?;
+    fedimint_core::util::write_log(&format!(
+        "reading entries of peer dir after FedimintCli.run_dkg"
+    ));
+    let mut peer_entries_stream = tokio::fs::read_dir(peer_data_dir).await?;
+    while let Some(entry) = peer_entries_stream.next_entry().await? {
+        fedimint_core::util::write_log(&format!("entry: {:?}", entry));
+    }
 
     // verify config hashes equal for all peers
     debug!(target: LOG_DEVIMINT, "Verifying config hashes");
@@ -935,6 +1011,13 @@ pub async fn run_cli_dkg(
     assert_eq!(hashes.len(), 1);
     info!(target: LOG_DEVIMINT, "DKG completed");
     debug!(target: LOG_DEVIMINT, "Starting consensus");
+    fedimint_core::util::write_log(&format!(
+        "reading entries of peer dir before starting consensus"
+    ));
+    let mut peer_entries_stream = tokio::fs::read_dir(peer_data_dir).await?;
+    while let Some(entry) = peer_entries_stream.next_entry().await? {
+        fedimint_core::util::write_log(&format!("entry: {:?}", entry));
+    }
     for (peer_id, endpoint) in &endpoints {
         let result = crate::util::FedimintCli
             .start_consensus(auth_for(peer_id), endpoint)
@@ -943,6 +1026,13 @@ pub async fn run_cli_dkg(
             tracing::debug!(target: LOG_DEVIMINT, "Error calling start_consensus: {e:?}, trying to continue...");
         }
         cli_wait_server_status(endpoint, ServerStatus::ConsensusRunning).await?;
+    }
+    fedimint_core::util::write_log(&format!(
+        "reading entries of peer dir after starting consensus"
+    ));
+    let mut peer_entries_stream = tokio::fs::read_dir(peer_data_dir).await?;
+    while let Some(entry) = peer_entries_stream.next_entry().await? {
+        fedimint_core::util::write_log(&format!("entry: {:?}", entry));
     }
     info!(target: LOG_DEVIMINT, "Consensus running");
     Ok(())
@@ -1106,11 +1196,14 @@ async fn set_config_gen_params(
     auth: ApiAuth,
     mut server_gen_params: ServerModuleConfigGenParamsRegistry,
 ) -> Result<()> {
+    fedimint_core::util::write_log("inside cli_set_config_gen_params");
+    let fedimintd_version = crate::util::FedimintdCmd::version_or_default().await;
     self::config::attach_default_module_init_params(
         &BitcoinRpcConfig::get_defaults_from_env_vars()?,
         &mut server_gen_params,
         Network::Regtest,
         10,
+        fedimintd_version,
     );
     // Since we are not actually calling `fedimintd` binary, parse and handle
     // `FM_EXTRA_META_DATA` like it would do.
@@ -1137,11 +1230,14 @@ async fn cli_set_config_gen_params(
     auth: &ApiAuth,
     mut server_gen_params: ServerModuleConfigGenParamsRegistry,
 ) -> Result<()> {
+    fedimint_core::util::write_log("inside cli_set_config_gen_params");
+    let fedimintd_version = crate::util::FedimintdCmd::version_or_default().await;
     self::config::attach_default_module_init_params(
         &BitcoinRpcConfig::get_defaults_from_env_vars()?,
         &mut server_gen_params,
         Network::Regtest,
         10,
+        fedimintd_version,
     );
     // Since we are not actually calling `fedimintd` binary, parse and handle
     // `FM_EXTRA_META_DATA` like it would do.

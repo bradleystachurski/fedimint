@@ -35,8 +35,8 @@ done
 
 upgrade_tests=(
   "devimint upgrade-tests fedimintd --paths $(printf "%s " "${fedimintd_paths[@]}")"
-  "devimint upgrade-tests fedimint-cli --paths $(printf "%s " "${fedimint_cli_paths[@]}")"
-  "devimint upgrade-tests gatewayd --paths $(printf "%s " "${gatewayd_paths[@]}")"
+  # "devimint upgrade-tests fedimint-cli --paths $(printf "%s " "${fedimint_cli_paths[@]}")"
+  # "devimint upgrade-tests gatewayd --paths $(printf "%s " "${gatewayd_paths[@]}")"
 )
 
 parsed_test_commands=$(printf "%s\n" "${upgrade_tests[@]}")

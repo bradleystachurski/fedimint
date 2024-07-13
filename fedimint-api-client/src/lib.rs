@@ -26,6 +26,7 @@ pub mod query;
 /// attempts to retry teb times before giving up.
 pub async fn download_from_invite_code(invite_code: &InviteCode) -> anyhow::Result<ClientConfig> {
     debug!("Downloading client config from {:?}", invite_code);
+    fedimint_core::util::write_log("inside download_from_invite_code");
 
     let federation_id = invite_code.federation_id();
     let api = DynGlobalApi::from_invite_code(invite_code);
@@ -38,7 +39,7 @@ pub async fn download_from_invite_code(invite_code: &InviteCode) -> anyhow::Resu
         backon::FibonacciBuilder::default()
             .with_min_delay(Duration::from_millis(200))
             .with_max_delay(Duration::from_secs(5))
-            .with_max_times(10),
+            .with_max_times(100),
         || try_download_client_config(&api, federation_id, api_secret.clone()),
     )
     .await
@@ -51,6 +52,7 @@ pub async fn try_download_client_config(
     federation_id: FederationId,
     api_secret: Option<String>,
 ) -> anyhow::Result<ClientConfig> {
+    fedimint_core::util::write_log("inside try_download_client_config");
     // TODO: use new download approach based on guardian PKs
     let query_strategy = FilterMap::new(
         move |cfg: ClientConfig| {
@@ -63,6 +65,7 @@ pub async fn try_download_client_config(
         NumPeers::from(1),
     );
 
+    fedimint_core::util::write_log("requesting CLIENT_CONFIG_ENDPOINT");
     let api_endpoints = api
         .request_with_strategy(
             query_strategy,
@@ -70,10 +73,12 @@ pub async fn try_download_client_config(
             ApiRequestErased::default(),
         )
         .await?;
+    fedimint_core::util::write_log("past requesting CLIENT_CONFIG_ENDPOINT");
 
     // now we can build an api for all guardians and download the client config
     let api_endpoints = api_endpoints.into_iter().map(|(peer, url)| (peer, url.url));
 
+    fedimint_core::util::write_log("requesting CLIENT_CONFIG_ENDPOINT with current consensus");
     let client_config = WsFederationApi::new(api_endpoints, &api_secret)
         .request_current_consensus::<ClientConfig>(
             CLIENT_CONFIG_ENDPOINT.to_owned(),
@@ -81,6 +86,7 @@ pub async fn try_download_client_config(
         )
         .await?;
 
+    fedimint_core::util::write_log("past requesting CLIENT_CONFIG_ENDPOINT with current consensus");
     if client_config.calculate_federation_id() != federation_id {
         bail!("Obtained client config has different federation id");
     }

@@ -163,10 +163,17 @@ impl ConfigGenApi {
     ///
     /// The leader passes consensus params, everyone passes local params
     pub async fn set_config_gen_params(&self, request: ConfigGenParamsRequest) -> ApiResult<()> {
+        fedimint_core::util::write_log("inside set_config_gen_params in server");
         self.consensus_config_gen_params(&request).await?;
+        fedimint_core::util::write_log(
+            "past calling self.consensus_config_gen_params(&request).await?;",
+        );
         let mut state = self
             .require_status(ServerStatus::SharingConfigGenParams)
             .await?;
+        fedimint_core::util::write_log(
+            "past calling .require_status(ServerStatus::SharingConfigGenParams)",
+        );
         state.requested_params = Some(request);
         info!(
             target: fedimint_logging::LOG_NET_PEER_DKG,
@@ -651,6 +658,9 @@ impl ConfigGenState {
             let combined = ConfigGenModuleParams::new(local.clone(), consensus.clone());
             // Check that the params are parseable
             let module = self.settings.registry.get(kind).expect("Module exists");
+            fedimint_core::util::write_log("inside loop in get_config_gen_params");
+            fedimint_core::util::write_log(&format!("id: {:?}", id));
+            fedimint_core::util::write_log(&format!("kind: {:?}", kind));
             module.validate_params(&combined).map_err(|e| {
                 ApiError::bad_request(format!(
                     "Module {} params invalid: {}",
@@ -764,6 +774,7 @@ pub fn server_endpoints() -> Vec<ApiEndpoint<ConfigGenApi>> {
             SET_CONFIG_GEN_PARAMS_ENDPOINT,
             ApiVersion::new(0, 0),
             async |config: &ConfigGenApi, context, params: ConfigGenParamsRequest| -> () {
+                fedimint_core::util::write_log("inside SET_CONFIG_GEN_PARAMS_ENDPOINT on server");
                 check_auth(context)?;
                 config.set_config_gen_params(params).await
             }

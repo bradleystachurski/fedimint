@@ -313,12 +313,13 @@ where
         requested: ConfigGenParamsRequest,
         auth: ApiAuth,
     ) -> FederationResult<()> {
-        self.request_admin(
-            SET_CONFIG_GEN_PARAMS_ENDPOINT,
-            ApiRequestErased::new(requested),
-            auth,
-        )
-        .await
+        fedimint_core::util::write_log(
+            "inside set_config_gen_params in fedimint-api-client/src/api/global_federation_api_with_cache.rs",
+        );
+        let erased = ApiRequestErased::new(requested);
+        fedimint_core::util::write_log(&format!("erased: {:?}", erased));
+        self.request_admin(SET_CONFIG_GEN_PARAMS_ENDPOINT, erased, auth)
+            .await
     }
 
     async fn consensus_config_gen_params(&self) -> FederationResult<ConfigGenParamsResponse> {

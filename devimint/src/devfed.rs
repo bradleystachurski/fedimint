@@ -6,7 +6,7 @@ use fedimint_core::runtime;
 use fedimint_core::task::jit::{JitTry, JitTryAnyhow};
 use fedimint_logging::LOG_DEVIMINT;
 use tokio::join;
-use tracing::debug;
+use tracing::{debug, info};
 
 use crate::envs::{FM_GWID_CLN_ENV, FM_GWID_LND_ENV};
 use crate::external::{open_channel_between_gateways, Bitcoind, Electrs, Esplora, Lightningd, Lnd};
@@ -64,6 +64,7 @@ impl DevFed {
     }
 }
 pub async fn dev_fed(process_mgr: &ProcessManager) -> Result<DevFed> {
+    info!("inside dev_fed");
     DevJitFed::new(process_mgr, false)?
         .to_dev_fed(process_mgr)
         .await
@@ -90,6 +91,7 @@ pub struct DevJitFed {
 
 impl DevJitFed {
     pub fn new(process_mgr: &ProcessManager, skip_setup: bool) -> Result<DevJitFed> {
+        info!("inside DevJitFed::new");
         let fed_size = process_mgr.globals.FM_FED_SIZE;
         let offline_nodes = process_mgr.globals.FM_OFFLINE_NODES;
         anyhow::ensure!(
@@ -141,10 +143,15 @@ impl DevJitFed {
         });
 
         let fed = JitTryAnyhow::new_try({
+            fedimint_core::util::write_log("inside fed JitTryAnyhow::new_try");
             let process_mgr = process_mgr.to_owned();
             let bitcoind = bitcoind.clone();
             move || async move {
+                fedimint_core::util::write_log(
+                    "calling bitcoind.get_try().await?.deref().clone();",
+                );
                 let bitcoind = bitcoind.get_try().await?.deref().clone();
+                fedimint_core::util::write_log("calling Federation::new");
                 let mut fed = Federation::new(
                     &process_mgr,
                     bitcoind,
@@ -153,6 +160,7 @@ impl DevJitFed {
                     "default".to_string(),
                 )
                 .await?;
+                fedimint_core::util::write_log("past call to Federation::new");
 
                 // Create a degraded federation if there are offline nodes
                 fed.degrade_federation(&process_mgr).await?;
@@ -244,6 +252,7 @@ impl DevJitFed {
                 Ok(Arc::new(()))
             }
         });
+        info!("at the end of DevJitFed::new");
 
         Ok(DevJitFed {
             bitcoind,
@@ -302,11 +311,17 @@ impl DevJitFed {
     /// Like [`Self::internal_client`] but will check and wait for a LN gateway
     /// to be registered
     pub async fn internal_client_gw_registered(&self) -> anyhow::Result<Client> {
-        self.fed().await?.await_gateways_registered().await?;
+        info!("inside internal_client_gw_registered");
+        info!("calling self.fed().await?;");
+        let fed = self.fed().await?;
+        info!("calling fed.await_gateways_registered().await?;");
+        fed.await_gateways_registered().await?;
+        info!("past self.fed().await?.await_gateways_registered().await?;");
         Ok(self.fed().await?.internal_client().await?.clone())
     }
 
     pub async fn finalize(&self, process_mgr: &ProcessManager) -> anyhow::Result<()> {
+        info!("inside finalize");
         let fed_size = process_mgr.globals.FM_FED_SIZE;
         let offline_nodes = process_mgr.globals.FM_OFFLINE_NODES;
         anyhow::ensure!(
@@ -317,14 +332,23 @@ impl DevJitFed {
         std::env::set_var(FM_GWID_CLN_ENV, self.gw_cln().await?.gateway_id().await?);
         std::env::set_var(FM_GWID_LND_ENV, self.gw_lnd().await?.gateway_id().await?);
 
+        info!("calling self.internal_client_gw_registered().await?;");
         let _ = self.internal_client_gw_registered().await?;
+        info!("calling self.channel_opened.get_try().await?;");
         let _ = self.channel_opened.get_try().await?;
+        info!("calling self.gw_cln_registered().await?;");
         let _ = self.gw_cln_registered().await?;
+        info!("calling self.gw_lnd_registered().await?;");
         let _ = self.gw_lnd_registered().await?;
+        info!("calling self.cln().await?;");
         let _ = self.cln().await?;
+        info!("calling self.lnd().await?;");
         let _ = self.lnd().await?;
+        info!("calling self.electrs().await?;");
         let _ = self.electrs().await?;
+        info!("calling self.esplora().await?;");
         let _ = self.esplora().await?;
+        info!("calling self.fed_epoch_generated.get_try().await?;");
         let _ = self.fed_epoch_generated.get_try().await?;
 
         debug!(
@@ -334,11 +358,14 @@ impl DevJitFed {
             elapsed_ms = %self.start_time.elapsed()?.as_millis(),
             "Dev federation ready",
         );
+        info!("at end of finalize");
         Ok(())
     }
 
     pub async fn to_dev_fed(self, process_mgr: &ProcessManager) -> anyhow::Result<DevFed> {
+        info!("inside to_dev_fed");
         self.finalize(process_mgr).await?;
+        info!("past self.finalize");
         Ok(DevFed {
             bitcoind: self.bitcoind().await?.to_owned(),
             cln: self.cln().await?.to_owned(),

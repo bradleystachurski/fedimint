@@ -294,6 +294,9 @@ pub trait FederationApiExt: IRawFederationApi {
         params: ApiRequestErased,
         peer_id: PeerId,
     ) -> JsonRpcResult<jsonrpsee_core::JsonValue> {
+        if method == "set_config_gen_params" {
+            fedimint_core::util::write_log("inside request_single_peer");
+        }
         let request = async {
             self.request_raw(peer_id, &method, &[params.to_json()])
                 .await
@@ -476,6 +479,9 @@ pub trait FederationApiExt: IRawFederationApi {
     where
         Ret: serde::de::DeserializeOwned + Eq + Debug + Clone + MaybeSend,
     {
+        if method == "set_config_gen_params" {
+            fedimint_core::util::write_log("inside request_admin");
+        }
         let Some(self_peer_id) = self.self_peer() else {
             return Err(FederationError::general(
                 method,
@@ -483,6 +489,9 @@ pub trait FederationApiExt: IRawFederationApi {
                 anyhow::format_err!("Admin peer_id not set"),
             ));
         };
+        if method == "set_config_gen_params" {
+            fedimint_core::util::write_log("past self.self_peer()");
+        }
         self.request_single_peer_federation(
             None,
             method.into(),
@@ -807,6 +816,9 @@ impl<C: JsonRpcClient + Debug + 'static> IRawFederationApi for WsFederationApi<C
         method: &str,
         params: &[Value],
     ) -> JsonRpcResult<Value> {
+        if method == "set_config_gen_params" {
+            fedimint_core::util::write_log("inside request_raw");
+        }
         let peer = self
             .peers
             .iter()
@@ -961,6 +973,9 @@ where
 {
     #[instrument(level = "trace", fields(peer = %self.peer_id, %method), skip_all)]
     pub async fn request(&self, method: &str, params: &[Value]) -> JsonRpcResult<Value> {
+        if method == "set_config_gen_params" {
+            fedimint_core::util::write_log("inside request");
+        }
         for attempts in 0.. {
             debug_assert!(attempts <= 1);
             let rclient = self.client.read().await;

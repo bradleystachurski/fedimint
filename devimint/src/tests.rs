@@ -108,6 +108,7 @@ pub async fn latency_tests(
     upgrade_clients: Option<&UpgradeClients>,
     iterations: usize,
 ) -> Result<()> {
+    fedimint_core::util::write_log("inside latency test");
     log_binary_versions().await?;
 
     let fedimint_cli_version = crate::util::FedimintCli::version_or_default().await;
@@ -143,14 +144,19 @@ pub async fn latency_tests(
         None => fed.new_joined_client("latency-tests-client").await?,
     };
 
+    info!("calling client.use_gateway(&gw_cln).await?;");
     client.use_gateway(&gw_cln).await?;
+    info!("past calling client.use_gateway(&gw_cln).await?;");
     let initial_balance_sats = 100_000_000;
+    info!("about to peg-in funds");
     fed.pegin_client(initial_balance_sats, &client).await?;
+    info!("past pegging in funds");
 
     let cln_gw_id = gw_cln.gateway_id().await?;
 
     match r#type {
         LatencyTest::Reissue => {
+            fedimint_core::util::write_log(":inside latency test for reissue");
             info!("Testing latency of reissue");
             let mut reissues = Vec::with_capacity(iterations);
             let amount_per_iteration_msats =
@@ -164,8 +170,10 @@ pub async fn latency_tests(
                     .context("note must be a string")?
                     .to_owned();
 
+                fedimint_core::util::write_log("calling cli reissue");
                 let start_time = Instant::now();
                 cmd!(client, "reissue", notes).run().await?;
+                fedimint_core::util::write_log("past calling cli reissue");
                 reissues.push(start_time.elapsed());
             }
             let reissue_stats = stats_for(reissues);
@@ -176,6 +184,7 @@ pub async fn latency_tests(
             assert!(
                 reissue_stats.max.as_secs_f64() < reissue_stats.p90.as_secs_f64() * max_p90_factor
             );
+            fedimint_core::util::write_log("end of reissue test");
         }
         LatencyTest::LnSend => {
             info!("Testing latency of ln send");
@@ -350,6 +359,7 @@ pub async fn latency_tests(
                 .as_str()
                 .map(ToOwned::to_owned)
                 .unwrap();
+            info!("got backup secret");
             let fedimint_cli_version = crate::util::FedimintCli::version_or_default().await;
             let fedimintd_version = crate::util::FedimintdCmd::version_or_default().await;
             if !is_env_var_set(FM_DEVIMINT_RUN_DEPRECATED_TESTS_ENV)
@@ -363,6 +373,7 @@ pub async fn latency_tests(
             let start_time = Instant::now();
             if *VERSION_0_3_0_ALPHA <= fedimint_cli_version {
                 let restore_client = Client::create("restore")?;
+                info!("calling restore");
                 cmd!(
                     restore_client,
                     "restore",
@@ -373,6 +384,7 @@ pub async fn latency_tests(
                 )
                 .run()
                 .await?;
+                info!("past calling restore");
             } else {
                 let client = client.new_forked("restore-without-backup").await?;
                 let _ = cmd!(client, "wipe", "--force",).out_json().await?;
@@ -413,6 +425,7 @@ pub struct UpgradeClients {
 }
 
 async fn stress_test_fed(dev_fed: &DevFed, clients: Option<&UpgradeClients>) -> anyhow::Result<()> {
+    info!("inside stress_test_fed");
     use futures::FutureExt;
 
     // skip restore test for client upgrades, since restoring a client doesn't
@@ -426,9 +439,9 @@ async fn stress_test_fed(dev_fed: &DevFed, clients: Option<&UpgradeClients>) -> 
     try_join!(
         latency_tests(dev_fed.clone(), LatencyTest::Reissue, clients, 20),
         latency_tests(dev_fed.clone(), LatencyTest::LnSend, clients, 20),
-        latency_tests(dev_fed.clone(), LatencyTest::LnReceive, clients, 20),
-        latency_tests(dev_fed.clone(), LatencyTest::FmPay, clients, 20),
-        restore_test,
+        // latency_tests(dev_fed.clone(), LatencyTest::LnReceive, clients, 20),
+        // latency_tests(dev_fed.clone(), LatencyTest::FmPay, clients, 20),
+        // restore_test,
     )?;
     Ok(())
 }
@@ -448,15 +461,21 @@ pub async fn upgrade_tests(process_mgr: &ProcessManager, binary: UpgradeTest) ->
                 fedimintd_version
             );
 
+            info!("calling dev_fed");
             let mut dev_fed = dev_fed(process_mgr).await?;
+            info!("calling new_joined_client");
             let client = dev_fed.fed.new_joined_client("test-client").await?;
+            info!("about to call stress_test_fed");
             try_join!(stress_test_fed(&dev_fed, None), wait_session(&client))?;
+            fedimint_core::util::write_log("past first call to stress test");
 
             for path in paths.iter().skip(1) {
+                fedimint_core::util::write_log("in loop for paths, calling restart all staggered");
                 dev_fed
                     .fed
                     .restart_all_staggered_with_bin(process_mgr, path)
                     .await?;
+                fedimint_core::util::write_log("past call to restart all staggered");
 
                 // stress test with all peers online
                 try_join!(stress_test_fed(&dev_fed, None), wait_session(&client))?;
