@@ -452,6 +452,21 @@ where
     }
 }
 
+pub fn write_log(message: &str) {
+    use std::fs::OpenOptions;
+    use std::io::Write;
+
+    let path = format!("/home/nix/fedimint/client.log");
+    let mut f = OpenOptions::new()
+        .append(true)
+        .create(true)
+        .open(path)
+        .unwrap();
+
+    let message = format!("{message}\n");
+    f.write_all(message.as_bytes()).unwrap();
+}
+
 #[cfg(test)]
 mod tests {
     use std::sync::atomic::{AtomicU8, Ordering};

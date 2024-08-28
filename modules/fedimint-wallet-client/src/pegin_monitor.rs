@@ -57,17 +57,54 @@ impl NextActions {
             .await
             .find_by_prefix(&PegInTweakIndexPrefix)
             .await
-            .fold(NextActions::new(), |state, (key, val)| async {
+            .fold(NextActions::new(), |mut state, (key, val)| async move {
                 state.fold(key, val)
             })
             .await
     }
 
     /// Combine current state with another record
+    pub fn other(
+        acc_state: NextActions,
+        key: PegInTweakIndexKey,
+        val: PegInTweakIndexData,
+    ) -> Self {
+        fedimint_core::util::write_log(&format!("inside NextActions::fold"));
+        fedimint_core::util::write_log(&format!("val.next_check_time: {:?}", val.next_check_time));
+        fedimint_core::util::write_log(&format!("acc_state.now: {:?}", acc_state.now));
+        fedimint_core::util::write_log(&format!("acc_state.due: {:?}", acc_state.due));
+        fedimint_core::util::write_log(&format!("acc_state.next: {:?}", acc_state.next));
+        let mut new_state = acc_state.clone();
+        if let Some(next_check_time) = val.next_check_time {
+            if next_check_time < new_state.now {
+                fedimint_core::util::write_log(&format!("next check time has elapsed"));
+                new_state.due.push((key, val));
+            } else {
+                fedimint_core::util::write_log(&format!("next check time has NOT elapsed"));
+            }
+
+            new_state.next = match acc_state.next {
+                Some(existing) => Some(existing.min(next_check_time)),
+                None => Some(next_check_time),
+            };
+        }
+        fedimint_core::util::write_log(&format!("end of fold new_state: {:?}", new_state));
+        new_state
+    }
+
+    /// Combine current state with another record
     pub fn fold(mut self, key: PegInTweakIndexKey, val: PegInTweakIndexData) -> Self {
+        fedimint_core::util::write_log(&format!("inside NextActions::fold"));
+        fedimint_core::util::write_log(&format!("val.next_check_time: {:?}", val.next_check_time));
+        fedimint_core::util::write_log(&format!("self.now: {:?}", self.now));
+        fedimint_core::util::write_log(&format!("self.due: {:?}", self.due));
+        fedimint_core::util::write_log(&format!("self.next: {:?}", self.next));
         if let Some(next_check_time) = val.next_check_time {
             if next_check_time < self.now {
+                fedimint_core::util::write_log(&format!("next check time has elapsed"));
                 self.due.push((key, val));
+            } else {
+                fedimint_core::util::write_log(&format!("next check time has NOT elapsed"));
             }
 
             self.next = match self.next {
@@ -118,10 +155,25 @@ pub(crate) async fn run_peg_in_monitor(
         let next_wakeup = NextActions::from_db_state(&db).await.next.unwrap_or_else(||
             /* for simplicity just wake up every hour, even when there's no need */
              ( now + Duration::from_secs(60 * 60)));
+        let next_actions_from_db_state_next = NextActions::from_db_state(&db).await.next;
+        fedimint_core::util::write_log(&format!(
+            "next_actions_from_db_state_next: {:?}",
+            next_actions_from_db_state_next
+        ));
+        fedimint_core::util::write_log(&format!("next_wakeup: {:?}", next_wakeup));
+        let next_wakeup_duration_since = next_wakeup.duration_since(now).unwrap();
+        fedimint_core::util::write_log(&format!(
+            "next_wakeup_duration_since: {:?}",
+            next_wakeup_duration_since.as_secs()
+        ));
         let next_wakeup_duration = next_wakeup
             .duration_since(now)
             .unwrap_or_default()
             .max(min_sleep);
+        fedimint_core::util::write_log(&format!(
+            "next_wakeup_duration: {:?}",
+            next_wakeup_duration
+        ));
         debug!(target: LOG_CLIENT_MODULE_WALLET, sleep_secs=%next_wakeup_duration.as_secs(), "Sleep after completing due checks");
         tokio::select! {
             () = sleep(next_wakeup_duration) => {
@@ -246,10 +298,12 @@ impl CheckOutcome {
         match self {
             // Check again in time proportional to the expected block confirmation time
             CheckOutcome::Pending { num_blocks_needed } => {
+                fedimint_core::util::write_log(&format!("outcome is pending"));
                 if is_running_in_test_env() {
                     // In tests, we basically mine all blocks right away
                     Some(Duration::from_millis(1))
                 } else {
+                    fedimint_core::util::write_log(&format!("not running in test env, dangit"));
                     Some(Duration::from_secs(60 * num_blocks_needed))
                 }
             }
@@ -271,6 +325,7 @@ impl CheckOutcome {
         // on it yet, check again in time proportional to the age of the
         // address.
         if outcomes.is_empty() {
+            fedimint_core::util::write_log(&format!("outcomes is empty"));
             if is_running_in_test_env() {
                 // When testing we usually send deposits right away, so check more aggressively.
                 return Some(Duration::from_millis(100));
@@ -284,6 +339,12 @@ impl CheckOutcome {
         let mut min = None;
 
         for outcome in outcomes {
+            fedimint_core::util::write_log(&format!("inside outcome in outcomes loop"));
+            fedimint_core::util::write_log(&format!("min: {:?}", min));
+            fedimint_core::util::write_log(&format!(
+                "outcome.retry_delay(): {:?}",
+                outcome.retry_delay()
+            ));
             min = match (min, outcome.retry_delay()) {
                 (None, time) => time,
                 (Some(min), None) => Some(min),

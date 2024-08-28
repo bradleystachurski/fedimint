@@ -27,7 +27,9 @@ pub fn is_env_var_set(var: &str) -> bool {
 /// Use to detect if running in a test environment, either `cargo test` or
 /// `devimint`.
 pub fn is_running_in_test_env() -> bool {
+    tracing::info!("inside is_running_in_test_env");
     let unit_test = cfg!(test);
+    tracing::info!("unit_test: {:?}", unit_test);
 
     unit_test || is_env_var_set("NEXTEST") || is_env_var_set(FM_IN_DEVIMINT_ENV)
 }

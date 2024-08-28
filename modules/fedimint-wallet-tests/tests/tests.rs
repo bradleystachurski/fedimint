@@ -217,23 +217,26 @@ async fn on_chain_peg_in_and_peg_out_happy_case() -> anyhow::Result<()> {
 
     // Afaik technically not necessary, but useful to speed up test (should probably
     // just poll more often in tests?)
-    let await_update_while_rechecking = async {
-        loop {
-            select! {
-                update = deposit_updates.next() => {
-                    break update;
-                },
-                _ = sleep_in_test("Waiting for address recheck", Duration::from_secs(1)) => {
-                    wallet_module.recheck_pegin_address_by_op_id(op).await
-                        .expect("Operation exists");
-                }
-            }
-        }
-    };
+    // let await_update_while_rechecking = async {
+    //     loop {
+    //         select! {
+    //             update = deposit_updates.next() => {
+    //                 break update;
+    //             },
+    //             _ = sleep_in_test("Waiting for address recheck",
+    // Duration::from_secs(1)) => {
+    // wallet_module.recheck_pegin_address_by_op_id(op).await
+    // .expect("Operation exists");             }
+    //         }
+    //     }
+    // };
 
+    wallet_module
+        .await_num_deposit_by_operation_id(op, 1)
+        .await?;
     info!("Waiting for claim tx");
     assert!(matches!(
-        await_update_while_rechecking.await.unwrap(),
+        deposit_updates.next().await.unwrap(),
         DepositStateV2::Confirmed { btc_out_point, .. } if btc_out_point.txid == tx.txid()
     ));
 

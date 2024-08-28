@@ -937,17 +937,24 @@ impl WalletClientModule {
         let mut backoff = backoff_util::aggressive_backoff();
 
         loop {
+            tracing::info!("inside loop for checking num_deposits, sleeping");
             let pegins = self
                 .get_claimed_pegins(
                     &mut self.client_ctx.module_db().begin_transaction_nc().await,
                     tweak_idx,
                 )
                 .await;
+            tracing::info!("pegins.len() {}", pegins.len());
+            tracing::info!("num_deposits {}", num_deposits);
 
             if pegins.len() < num_deposits {
                 debug!(target: LOG_CLIENT_MODULE_WALLET, has=pegins.len(), "Not enough deposits");
                 self.recheck_pegin_address(tweak_idx).await?;
-                runtime::sleep(backoff.next().unwrap_or_default()).await;
+                if fedimint_core::envs::is_running_in_test_env() {
+                    runtime::sleep(std::time::Duration::from_millis(100)).await;
+                } else {
+                    runtime::sleep(backoff.next().unwrap_or_default()).await;
+                }
                 receiver.changed().await?;
                 continue;
             }
