@@ -713,7 +713,7 @@ async fn construct_wallet_summary() -> anyhow::Result<()> {
     let client = fed.new_client().await;
     let bitcoin = fixtures.bitcoin();
     let bitcoin = bitcoin.lock_exclusive().await;
-    let wallet_module = client.get_first_module::<WalletClientModule>()?;
+    let wallet_module = client.get_first_module::<WalletClientModule>();
     info!("Starting test construct_wallet_summary");
 
     let finality_delay = 10;
@@ -798,11 +798,10 @@ async fn construct_wallet_summary() -> anyhow::Result<()> {
 
     let mempool_tx = fedimint_core::util::retry(
         "get peg-out mempool tx",
-        fedimint_core::util::backoff_util::custom_backoff(
-            Duration::from_millis(100),
-            Duration::from_millis(100),
-            Some(100),
-        ),
+        fedimint_core::util::backon::FibonacciBuilder::default()
+            .with_min_delay(Duration::from_millis(100))
+            .with_max_delay(Duration::from_millis(100))
+            .with_max_times(100),
         || async {
             bitcoin
                 .get_mempool_tx(&txid)
