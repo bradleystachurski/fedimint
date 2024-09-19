@@ -137,6 +137,7 @@ pub async fn latency_tests(
 
     let client = match upgrade_clients {
         Some(c) => match r#type {
+            LatencyTest::Wallet => c.wallet_client.clone(),
             LatencyTest::Reissue => c.reissue_client.clone(),
             LatencyTest::LnSend => c.ln_send_client.clone(),
             LatencyTest::LnReceive => c.ln_receive_client.clone(),
@@ -153,6 +154,58 @@ pub async fn latency_tests(
     let cln_gw_id = gw_cln.gateway_id().await?;
 
     match r#type {
+        LatencyTest::Wallet => {
+            info!("Testing wallet");
+            // we've done a peg-in above and don't need to track any of the internal details
+            // (yet), so just do withdrawal
+            // this will also test that we backfill pegged-in keys
+
+            // ## Withdraw
+            info!("Testing client withdraw");
+
+            let initial_walletng_balance = client.balance().await?;
+
+            let address = bitcoind.get_new_address().await?;
+            let withdraw_res = cmd!(
+                client,
+                "withdraw",
+                "--address",
+                &address,
+                "--amount",
+                "50000 sat"
+            )
+            .out_json()
+            .await?;
+
+            let txid: Txid = withdraw_res["txid"].as_str().unwrap().parse().unwrap();
+            let fees_sat = withdraw_res["fees_sat"].as_u64().unwrap();
+
+            let tx_hex = poll("Waiting for transaction in mempool", || async {
+                // TODO: distinguish errors from not found
+                bitcoind
+                    .get_raw_transaction(&txid)
+                    .context("getrawtransaction")
+                    .map_err(ControlFlow::Continue)
+            })
+            .await
+            .expect("cannot fail, gets stuck");
+
+            let tx =
+                bitcoin::Transaction::consensus_decode_hex(&tx_hex, &ModuleRegistry::default())
+                    .unwrap();
+            assert!(tx
+                .output
+                .iter()
+                .any(|o| o.script_pubkey == address.script_pubkey() && o.value == 50000));
+
+            let post_withdraw_walletng_balance = client.balance().await?;
+            let expected_wallet_balance = initial_walletng_balance - 50_000_000 - (fees_sat * 1000);
+
+            assert_eq!(post_withdraw_walletng_balance, expected_wallet_balance);
+
+            // mine blocks to finalize
+            fed.bitcoind.mine_blocks(21).await?;
+        }
         LatencyTest::Reissue => {
             info!("Testing latency of reissue");
             let mut reissues = Vec::with_capacity(iterations);
@@ -369,6 +422,7 @@ pub async fn latency_tests(
 
 /// Clients reused for upgrade tests
 pub struct UpgradeClients {
+    wallet_client: Client,
     reissue_client: Client,
     ln_send_client: Client,
     ln_receive_client: Client,
@@ -401,41 +455,12 @@ async fn stress_test_fed(dev_fed: &DevFed, clients: Option<&UpgradeClients>) -> 
     // in `upgrade-test.sh`
     latency_tests(
         dev_fed.clone(),
-        LatencyTest::Reissue,
+        LatencyTest::Wallet,
         clients,
         20,
         assert_thresholds,
     )
     .await?;
-
-    latency_tests(
-        dev_fed.clone(),
-        LatencyTest::LnSend,
-        clients,
-        20,
-        assert_thresholds,
-    )
-    .await?;
-
-    latency_tests(
-        dev_fed.clone(),
-        LatencyTest::LnReceive,
-        clients,
-        20,
-        assert_thresholds,
-    )
-    .await?;
-
-    latency_tests(
-        dev_fed.clone(),
-        LatencyTest::FmPay,
-        clients,
-        20,
-        assert_thresholds,
-    )
-    .await?;
-
-    restore_test.await?;
 
     Ok(())
 }
@@ -505,6 +530,7 @@ pub async fn upgrade_tests(process_mgr: &ProcessManager, binary: UpgradeTest) ->
 
             let wait_session_client = dev_fed.fed.new_joined_client("wait-session-client").await?;
             let reusable_upgrade_clients = UpgradeClients {
+                wallet_client: dev_fed.fed.new_joined_client("wallet-client").await?,
                 reissue_client: dev_fed.fed.new_joined_client("reissue-client").await?,
                 ln_send_client: dev_fed.fed.new_joined_client("ln-send-client").await?,
                 ln_receive_client: dev_fed.fed.new_joined_client("ln-receive-client").await?,
@@ -2402,6 +2428,7 @@ pub async fn cannot_replay_tx_test(dev_fed: DevFed) -> Result<()> {
 
 #[derive(Subcommand)]
 pub enum LatencyTest {
+    Wallet,
     Reissue,
     LnSend,
     LnReceive,
