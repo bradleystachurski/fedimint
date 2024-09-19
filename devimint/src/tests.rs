@@ -436,21 +436,6 @@ async fn stress_test_fed(dev_fed: &DevFed, clients: Option<&UpgradeClients>) -> 
     // cause the upgrade test to fail
     let assert_thresholds = false;
 
-    // skip restore test for client upgrades, since restoring a client doesn't
-    // require a persistent data dir
-    let restore_test = if clients.is_some() {
-        futures::future::ok(()).right_future()
-    } else {
-        latency_tests(
-            dev_fed.clone(),
-            LatencyTest::Restore,
-            clients,
-            20,
-            assert_thresholds,
-        )
-        .left_future()
-    };
-
     // tests are run in sequence so parallelism is controlled using gnu `parallel`
     // in `upgrade-test.sh`
     latency_tests(

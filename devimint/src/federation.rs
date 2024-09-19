@@ -714,9 +714,11 @@ impl Federation {
 
         let (address, operation_id) = client.get_deposit_addr().await?;
 
-        self.bitcoind
+        let peg_in_txid = self
+            .bitcoind
             .send_to(address, amount + deposit_fees)
             .await?;
+        info!(?peg_in_txid);
         self.bitcoind.mine_blocks(21).await?;
 
         Ok(operation_id)
