@@ -123,7 +123,7 @@ function nix_build_binary_for_version() {
   fi
 
   >&2 echo "Compiling ${binary} for version ${version} ..."
-  echo "$(nix build 'github:elsirion/fedimint/'"$version"'#'"$binary" --no-link --print-out-paths)/bin/$binary"
+  echo "$(nix build 'github:bradleystachurski/fedimint/'"$version"'#'"$binary" --no-link --print-out-paths)/bin/$binary"
 }
 export -f nix_build_binary_for_version
 
