@@ -2535,6 +2535,7 @@ pub async fn cannot_replay_tx_test(dev_fed: DevFed) -> Result<()> {
         CLIENT_START_AMOUNT - CLIENT_SPEND_AMOUNT
     );
 
+    info!("about to attempt to reissue with double spender");
     // TODO(support:v0.2): remove
     if fedimint_cli_version >= *VERSION_0_3_0_ALPHA {
         cmd!(double_spend_client, "reissue", double_spend_notes)

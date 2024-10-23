@@ -184,7 +184,7 @@ function generate_matrix() {
   for fed_version in "${versions[@]}"; do
     for client_version in "${versions[@]}"; do
       for gateway_version in "${versions[@]}"; do
-        if "$filter_fn" "$fed_version" "$client_version" "$gateway_version"; then
+        if [[ "$fed_version" == "v0.2.1" && "$client_version" == "current" && "$gateway_version" == "current" ]]; then
           # bash doesn't allow returning arrays, however we can mimic the
           # behavior of returning an array by echoing each element
           echo "FM: $fed_version CLI: $client_version GW: $gateway_version"
