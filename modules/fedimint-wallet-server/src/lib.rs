@@ -43,7 +43,10 @@ use fedimint_core::config::{
     TypedServerModuleConfig, TypedServerModuleConsensusConfig,
 };
 use fedimint_core::core::ModuleInstanceId;
-use fedimint_core::db::{Database, DatabaseTransaction, IDatabaseTransactionOpsCoreTyped};
+use fedimint_core::db::{
+    CoreMigrationFn, Database, DatabaseTransaction, DatabaseVersion,
+    IDatabaseTransactionOpsCoreTyped,
+};
 use fedimint_core::encoding::{Decodable, Encodable};
 use fedimint_core::envs::{is_rbf_withdrawal_enabled, is_running_in_test_env, BitcoinRpcConfig};
 use fedimint_core::module::audit::Audit;
@@ -76,7 +79,7 @@ use fedimint_wallet_common::tweakable::Tweakable;
 use fedimint_wallet_common::{
     Rbf, WalletInputError, WalletOutputError, WalletOutputV0, MODULE_CONSENSUS_VERSION,
 };
-use futures::StreamExt;
+use futures::{FutureExt, StreamExt};
 use hex::ToHex;
 use metrics::{
     WALLET_INOUT_FEES_SATS, WALLET_INOUT_SATS, WALLET_PEGIN_FEES_SATS, WALLET_PEGIN_SATS,
@@ -92,9 +95,10 @@ use tokio::sync::watch;
 use tracing::{debug, info, instrument, trace, warn};
 
 use crate::db::{
-    BlockCountVoteKey, BlockCountVotePrefix, BlockHashKey, BlockHashKeyPrefix, DbKeyPrefix,
-    FeeRateVoteKey, FeeRateVotePrefix, PegOutBitcoinTransaction, PegOutBitcoinTransactionPrefix,
-    PegOutNonceKey, PegOutTxSignatureCI, PegOutTxSignatureCIPrefix, PendingTransactionKey,
+    migrate_to_v1, BlockCountVoteKey, BlockCountVotePrefix, BlockHashKey, BlockHashKeyPrefix,
+    ClaimedPegInOutpointKey, ClaimedPegInOutpointPrefixKey, DbKeyPrefix, FeeRateVoteKey,
+    FeeRateVotePrefix, PegOutBitcoinTransaction, PegOutBitcoinTransactionPrefix, PegOutNonceKey,
+    PegOutTxSignatureCI, PegOutTxSignatureCIPrefix, PendingTransactionKey,
     PendingTransactionPrefixKey, UTXOKey, UTXOPrefixKey, UnsignedTransactionKey,
     UnsignedTransactionPrefixKey,
 };
@@ -177,7 +181,6 @@ impl ModuleInit for WalletInit {
                         "UTXOs"
                     );
                 }
-
                 DbKeyPrefix::BlockCountVote => {
                     push_db_pair_items!(
                         dbtx,
@@ -188,7 +191,6 @@ impl ModuleInit for WalletInit {
                         "Block Count Votes"
                     );
                 }
-
                 DbKeyPrefix::FeeRateVote => {
                     push_db_pair_items!(
                         dbtx,
@@ -197,6 +199,16 @@ impl ModuleInit for WalletInit {
                         Feerate,
                         wallet,
                         "Fee Rate Votes"
+                    );
+                }
+                DbKeyPrefix::ClaimedPegInOutpoint => {
+                    push_db_pair_items!(
+                        dbtx,
+                        ClaimedPegInOutpointPrefixKey,
+                        PeggedInOutpointKey,
+                        (),
+                        wallet,
+                        "Claimed Peg-in Outpoint"
                     );
                 }
             }
@@ -358,6 +370,13 @@ impl ServerModuleInit for WalletInit {
             finality_delay: config.finality_delay,
             default_bitcoin_rpc: config.client_default_bitcoin_rpc,
         })
+    }
+
+    /// DB migrations to move from old to newer versions
+    fn get_database_migrations(&self) -> BTreeMap<DatabaseVersion, CoreMigrationFn> {
+        let mut migrations: BTreeMap<DatabaseVersion, CoreMigrationFn> = BTreeMap::new();
+        migrations.insert(DatabaseVersion(0), |ctx| migrate_to_v1(ctx).boxed());
+        migrations
     }
 }
 
@@ -535,21 +554,38 @@ impl ServerModule for Wallet {
         debug!(outpoint = %input.outpoint(), "Claiming peg-in");
 
         if dbtx
-            .insert_entry(
-                &UTXOKey(input.outpoint()),
-                &SpendableUTXO {
-                    tweak: input.tweak_contract_key().serialize(),
-                    amount: bitcoin::Amount::from_sat(input.tx_output().value),
-                },
-            )
+            .insert_entry(&ClaimedPegInOutpointKey(input.outpoint()), &())
             .await
             .is_some()
         {
             return Err(WalletInputError::PegInAlreadyClaimed);
         }
+
+        dbtx.insert_entry(
+            &UTXOKey(input.outpoint()),
+            &SpendableUTXO {
+                tweak: input.tweak_contract_key().serialize(),
+                amount: bitcoin::Amount::from_sat(input.tx_output().value),
+            },
+        )
+        .await;
+
         let amount = fedimint_core::Amount::from_sats(input.tx_output().value);
         let fee = self.cfg.consensus.fee_consensus.peg_in_abs;
         calculate_pegin_metrics(dbtx, amount, fee);
+        info!("at the end of process_input");
+        let utxo_keys = dbtx
+            .find_by_prefix(&UTXOPrefixKey)
+            .await
+            .collect::<Vec<(UTXOKey, SpendableUTXO)>>()
+            .await;
+        let claimed_peg_in_outpoint_keys = dbtx
+            .find_by_prefix(&ClaimedPegInOutpointPrefixKey)
+            .await
+            .collect::<Vec<(ClaimedPegInOutpointKey, ())>>()
+            .await;
+        info!(?utxo_keys);
+        info!(?claimed_peg_in_outpoint_keys);
         Ok(InputMeta {
             amount: TransactionItemAmount { amount, fee },
             pub_key: *input.tweak_contract_key(),
