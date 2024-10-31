@@ -147,6 +147,8 @@ pub enum TransactionError {
     Output(DynOutputError),
 }
 
+/// The transaction caused an overflow.
+///
 /// We can't add a new variant to transaction errors, so we define a special
 /// case for the retroactively added overflow error type. In a second iteration
 /// of the transaction submission API this should become a separate error
