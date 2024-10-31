@@ -573,19 +573,6 @@ impl ServerModule for Wallet {
         let amount = fedimint_core::Amount::from_sats(input.tx_output().value);
         let fee = self.cfg.consensus.fee_consensus.peg_in_abs;
         calculate_pegin_metrics(dbtx, amount, fee);
-        info!("at the end of process_input");
-        let utxo_keys = dbtx
-            .find_by_prefix(&UTXOPrefixKey)
-            .await
-            .collect::<Vec<(UTXOKey, SpendableUTXO)>>()
-            .await;
-        let claimed_peg_in_outpoint_keys = dbtx
-            .find_by_prefix(&ClaimedPegInOutpointPrefixKey)
-            .await
-            .collect::<Vec<(ClaimedPegInOutpointKey, ())>>()
-            .await;
-        info!(?utxo_keys);
-        info!(?claimed_peg_in_outpoint_keys);
         Ok(InputMeta {
             amount: TransactionItemAmount { amount, fee },
             pub_key: *input.tweak_contract_key(),
