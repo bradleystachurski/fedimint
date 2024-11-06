@@ -1,0 +1,184 @@
+./scripts/tests/upgrade-test.sh v0.4.0 current
+## Running upgrade tests
+versions: v0.4.0 current
+kinds: fedimintd
+   Compiling devimint v0.5.0-alpha (/home/nix/fedimint/devimint)
+   Compiling fedimint-mint-tests v0.5.0-alpha (/home/nix/fedimint/modules/fedimint-mint-tests)
+   Compiling fedimint-wallet-tests v0.5.0-alpha (/home/nix/fedimint/modules/fedimint-wallet-tests)
+   Compiling gateway-tests v0.5.0-alpha (/home/nix/fedimint/gateway/integration_tests)
+   Compiling fedimint-meta-tests v0.5.0-alpha (/home/nix/fedimint/modules/fedimint-meta-tests)
+   Compiling fedimint-lnv2-tests v0.5.0-alpha (/home/nix/fedimint/modules/fedimint-lnv2-tests)
+   Compiling fedimint-load-test-tool v0.5.0-alpha (/home/nix/fedimint/fedimint-load-test-tool)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 48.39s
+Compiling fedimintd for version v0.4.0 ...
+Using saved setting for 'extra-substituters = https://fedimint.cachix.org' from ~/.local/share/nix/trusted-settings.json.
+Using saved setting for 'extra-trusted-public-keys = fedimint.cachix.org-1:FpJJjy1iPVlvyv4OMiN5y9+/arFLPcnZhZVVCHCDYTs=' from ~/.local/share/nix/trusted-settings.json.
+## Starting all tests in parallel...
+parallel --jobs 1 --load 4 --delay 10 --halt-on-error 1 --joblog /tmp/nix-shell.t05sgY/xNIcy/joblog --noswap --memfree 2G --nice 15
+### LATENCY REISSUE: min: 2.6s, avg: 2.8s, median: 2.8s, p90: 2.9s, max: 3.0s, sum: 55.6s
+### LATENCY LN SEND: min: 1.7s, avg: 2.7s, median: 2.2s, p90: 6.7s, max: 7.2s, sum: 53.6s
+### LATENCY LN RECV: min: 1.0s, avg: 2.2s, median: 1.3s, p90: 8.0s, max: 12.8s, sum: 44.2s
+### LATENCY FM PAY: min: 1.6s, avg: 2.2s, median: 2.0s, p90: 2.8s, max: 6.8s, sum: 43.8s
+### LATENCY RESTORE: 10.056086117s
+### LATENCY REISSUE: min: 2.6s, avg: 2.7s, median: 2.7s, p90: 2.8s, max: 2.9s, sum: 54.3s
+### LATENCY LN SEND: min: 1.7s, avg: 2.2s, median: 2.2s, p90: 2.5s, max: 2.6s, sum: 43.1s
+### LATENCY LN RECV: min: 1.0s, avg: 1.5s, median: 1.2s, p90: 2.0s, max: 6.1s, sum: 29.9s
+### LATENCY FM PAY: min: 1.5s, avg: 3.6s, median: 1.9s, p90: 2.4s, max: 36.4s, sum: 72.2s
+### LATENCY RESTORE: 6.362389953s
+### LATENCY REISSUE: min: 2.5s, avg: 2.9s, median: 2.6s, p90: 2.9s, max: 7.7s, sum: 57.6s
+### LATENCY LN SEND: min: 1.7s, avg: 2.3s, median: 2.1s, p90: 2.7s, max: 6.9s, sum: 46.2s
+### LATENCY LN RECV: min: 1.0s, avg: 2.0s, median: 1.3s, p90: 2.0s, max: 13.9s, sum: 39.1s
+### LATENCY FM PAY: min: 1.5s, avg: 1.9s, median: 1.7s, p90: 2.3s, max: 2.3s, sum: 37.3s
+### LATENCY RESTORE: 7.179482639s
+[2m2024-11-05T16:39:39.551069Z[0m [32m INFO[0m [2mfm::devimint[0m[2m:[0m Devimint data dir [3mpath[0m[2m=[0m/tmp/nix-shell.t05sgY/devimint-1228594-819
+[2m2024-11-05T16:39:39.618107Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m running first stress test for fedimintd version: 0.4.0
+[2m2024-11-05T16:39:46.465035Z[0m [32m INFO[0m [2mfm::devimint[0m[2m:[0m DKG completed
+[2m2024-11-05T16:39:51.512028Z[0m [32m INFO[0m [2mfm::devimint[0m[2m:[0m Consensus running
+[2m2024-11-05T16:40:00.578951Z[0m [32m INFO[0m [2mfm::devimint[0m[2m:[0m Opening channel with 5000000 sats on each side... [3mfrom[0m[2m=[0mCLN [3mto[0m[2m=[0mLND
+[2m2024-11-05T16:40:00.579019Z[0m [32m INFO[0m [2mfm::devimint[0m[2m:[0m Opening channel with 5000000 sats on each side... [3mfrom[0m[2m=[0mLND [3mto[0m[2m=[0mLDK
+[2m2024-11-05T16:40:00.579034Z[0m [32m INFO[0m [2mfm::devimint[0m[2m:[0m Opening channel with 5000000 sats on each side... [3mfrom[0m[2m=[0mLDK [3mto[0m[2m=[0mCLN
+[2m2024-11-05T16:40:00.738318Z[0m [32m INFO[0m [2mfm::devimint[0m[2m:[0m Opened channel [3mfrom[0m[2m=[0mLDK [3mto[0m[2m=[0mCLN
+[2m2024-11-05T16:40:00.779572Z[0m [32m INFO[0m [2mfm::devimint[0m[2m:[0m Opened channel [3mfrom[0m[2m=[0mCLN [3mto[0m[2m=[0mLND
+[2m2024-11-05T16:40:00.840553Z[0m [32m INFO[0m [2mfm::devimint[0m[2m:[0m Opened channel [3mfrom[0m[2m=[0mLND [3mto[0m[2m=[0mLDK
+[2m2024-11-05T16:40:09.998391Z[0m [32m INFO[0m [2mdevimint::federation[0m[2m:[0m Waiting for a new session
+[2m2024-11-05T16:40:10.005357Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimint_cli_version[0m[2m=[0m"fedimint-cli 0.5.0-alpha"
+[2m2024-11-05T16:40:10.012022Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimint_cli_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:40:10.018256Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgateway_cli_version[0m[2m=[0m"fedimint-gateway-cli 0.5.0-alpha"
+[2m2024-11-05T16:40:10.025366Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgateway_cli_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:40:10.030498Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimintd_version_hash[0m[2m=[0m"d0877d0310453b737309cef404d98300f3dfa0d2"
+[2m2024-11-05T16:40:10.037463Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgatewayd_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:40:12.530640Z[0m [32m INFO[0m [2mdevimint::federation[0m[2m:[0m Pegging-in client funds [3mamount[0m[2m=[0m100000000 [3mdeposit_fees[0m[2m=[0m1000
+[2m2024-11-05T16:40:13.825476Z[0m [32m INFO[0m [2mdevimint::federation[0m[2m:[0m Awaiting session outcome 1
+[2m2024-11-05T16:40:48.399051Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m Testing latency of reissue
+[2m2024-11-05T16:40:50.664982Z[0m [32m INFO[0m [2mdevimint::federation[0m[2m:[0m session found in 36.839513723s
+[2m2024-11-05T16:41:48.008825Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimint_cli_version[0m[2m=[0m"fedimint-cli 0.5.0-alpha"
+[2m2024-11-05T16:41:48.015601Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimint_cli_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:41:48.022285Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgateway_cli_version[0m[2m=[0m"fedimint-gateway-cli 0.5.0-alpha"
+[2m2024-11-05T16:41:48.027659Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgateway_cli_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:41:48.032461Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimintd_version_hash[0m[2m=[0m"d0877d0310453b737309cef404d98300f3dfa0d2"
+[2m2024-11-05T16:41:48.038962Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgatewayd_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:41:48.328475Z[0m [32m INFO[0m [2mdevimint::federation[0m[2m:[0m Pegging-in client funds [3mamount[0m[2m=[0m100000000 [3mdeposit_fees[0m[2m=[0m1000
+[2m2024-11-05T16:41:54.639108Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m Testing latency of ln send
+[2m2024-11-05T16:42:48.317660Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimint_cli_version[0m[2m=[0m"fedimint-cli 0.5.0-alpha"
+[2m2024-11-05T16:42:48.323859Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimint_cli_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:42:48.329363Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgateway_cli_version[0m[2m=[0m"fedimint-gateway-cli 0.5.0-alpha"
+[2m2024-11-05T16:42:48.334615Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgateway_cli_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:42:48.339624Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimintd_version_hash[0m[2m=[0m"d0877d0310453b737309cef404d98300f3dfa0d2"
+[2m2024-11-05T16:42:48.346764Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgatewayd_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:42:48.626177Z[0m [32m INFO[0m [2mdevimint::federation[0m[2m:[0m Pegging-in client funds [3mamount[0m[2m=[0m100000000 [3mdeposit_fees[0m[2m=[0m1000
+[2m2024-11-05T16:42:55.441897Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m Testing latency of ln receive
+[2m2024-11-05T16:44:19.483513Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimint_cli_version[0m[2m=[0m"fedimint-cli 0.5.0-alpha"
+[2m2024-11-05T16:44:19.489713Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimint_cli_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:44:19.495508Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgateway_cli_version[0m[2m=[0m"fedimint-gateway-cli 0.5.0-alpha"
+[2m2024-11-05T16:44:19.501798Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgateway_cli_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:44:19.506482Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimintd_version_hash[0m[2m=[0m"d0877d0310453b737309cef404d98300f3dfa0d2"
+[2m2024-11-05T16:44:19.512949Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgatewayd_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:44:19.778739Z[0m [32m INFO[0m [2mdevimint::federation[0m[2m:[0m Pegging-in client funds [3mamount[0m[2m=[0m100000000 [3mdeposit_fees[0m[2m=[0m1000
+[2m2024-11-05T16:44:29.649572Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m Testing latency of internal payments within a federation
+[2m2024-11-05T16:44:29.921800Z[0m [32m INFO[0m [2mdevimint::federation[0m[2m:[0m Pegging-in client funds [3mamount[0m[2m=[0m10000000 [3mdeposit_fees[0m[2m=[0m1000
+[2m2024-11-05T16:45:33.292534Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimint_cli_version[0m[2m=[0m"fedimint-cli 0.5.0-alpha"
+[2m2024-11-05T16:45:33.298569Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimint_cli_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:45:33.304703Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgateway_cli_version[0m[2m=[0m"fedimint-gateway-cli 0.5.0-alpha"
+[2m2024-11-05T16:45:33.311503Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgateway_cli_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:45:33.316512Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimintd_version_hash[0m[2m=[0m"d0877d0310453b737309cef404d98300f3dfa0d2"
+[2m2024-11-05T16:45:33.322986Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgatewayd_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:45:33.593426Z[0m [32m INFO[0m [2mdevimint::federation[0m[2m:[0m Pegging-in client funds [3mamount[0m[2m=[0m100000000 [3mdeposit_fees[0m[2m=[0m1000
+[2m2024-11-05T16:45:39.972920Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m Testing latency of restore
+[2m2024-11-05T16:45:58.605079Z[0m [32m INFO[0m [2mdevimint::federation[0m[2m:[0m starting all servers
+[2m2024-11-05T16:46:17.230731Z[0m [32m INFO[0m [2mdevimint::federation[0m[2m:[0m Awaiting session outcome 25
+[2m2024-11-05T16:46:22.122708Z[0m [32m INFO[0m [2mdevimint::federation[0m[2m:[0m session found in 4.891976864s
+[2m2024-11-05T16:47:24.244329Z[0m [32m INFO[0m [2mfm::test[0m[2m:[0m Sleeping for 10.000 seconds because: waiting to restart remaining peers
+[2m2024-11-05T16:47:34.246957Z[0m [32m INFO[0m [2mfm::test[0m[2m:[0m Sleeping for 10.000 seconds because: waiting to restart remaining peers
+[2m2024-11-05T16:47:44.249783Z[0m [32m INFO[0m [2mfm::test[0m[2m:[0m Sleeping for 10.000 seconds because: waiting to restart remaining peers
+[2m2024-11-05T16:47:54.463677Z[0m [32m INFO[0m [2mdevimint::federation[0m[2m:[0m upgraded fedimintd to version: 0.5.0-alpha
+[2m2024-11-05T16:47:54.464542Z[0m [32m INFO[0m [2mdevimint::federation[0m[2m:[0m Waiting for a new session
+[2m2024-11-05T16:47:54.471289Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimint_cli_version[0m[2m=[0m"fedimint-cli 0.5.0-alpha"
+[2m2024-11-05T16:47:54.477967Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimint_cli_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:47:54.484404Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgateway_cli_version[0m[2m=[0m"fedimint-gateway-cli 0.5.0-alpha"
+[2m2024-11-05T16:47:54.490859Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgateway_cli_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:47:54.497717Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimintd_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:47:54.504485Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgatewayd_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:47:54.795428Z[0m [32m INFO[0m [2mdevimint::federation[0m[2m:[0m Pegging-in client funds [3mamount[0m[2m=[0m100000000 [3mdeposit_fees[0m[2m=[0m1000
+[2m2024-11-05T16:47:54.876973Z[0m [32m INFO[0m [2mdevimint::federation[0m[2m:[0m Awaiting session outcome 26
+[2m2024-11-05T16:48:01.284880Z[0m [32m INFO[0m [2mdevimint::federation[0m[2m:[0m session found in 6.407909647s
+[2m2024-11-05T16:48:05.037367Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m Testing latency of reissue
+[2m2024-11-05T16:49:03.604906Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimint_cli_version[0m[2m=[0m"fedimint-cli 0.5.0-alpha"
+[2m2024-11-05T16:49:03.610385Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimint_cli_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:49:03.616490Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgateway_cli_version[0m[2m=[0m"fedimint-gateway-cli 0.5.0-alpha"
+[2m2024-11-05T16:49:03.623214Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgateway_cli_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:49:03.629902Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimintd_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:49:03.636751Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgatewayd_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:49:03.910016Z[0m [32m INFO[0m [2mdevimint::federation[0m[2m:[0m Pegging-in client funds [3mamount[0m[2m=[0m100000000 [3mdeposit_fees[0m[2m=[0m1000
+[2m2024-11-05T16:49:10.040907Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m Testing latency of ln send
+[2m2024-11-05T16:49:53.302588Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimint_cli_version[0m[2m=[0m"fedimint-cli 0.5.0-alpha"
+[2m2024-11-05T16:49:53.310187Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimint_cli_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:49:53.316619Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgateway_cli_version[0m[2m=[0m"fedimint-gateway-cli 0.5.0-alpha"
+[2m2024-11-05T16:49:53.322831Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgateway_cli_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:49:53.329106Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimintd_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:49:53.336774Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgatewayd_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:49:53.631118Z[0m [32m INFO[0m [2mdevimint::federation[0m[2m:[0m Pegging-in client funds [3mamount[0m[2m=[0m100000000 [3mdeposit_fees[0m[2m=[0m1000
+[2m2024-11-05T16:50:00.008244Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m Testing latency of ln receive
+[2m2024-11-05T16:50:59.678552Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimint_cli_version[0m[2m=[0m"fedimint-cli 0.5.0-alpha"
+[2m2024-11-05T16:50:59.684558Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimint_cli_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:50:59.690938Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgateway_cli_version[0m[2m=[0m"fedimint-gateway-cli 0.5.0-alpha"
+[2m2024-11-05T16:50:59.697318Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgateway_cli_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:50:59.704042Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimintd_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:50:59.710722Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgatewayd_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:51:00.007956Z[0m [32m INFO[0m [2mdevimint::federation[0m[2m:[0m Pegging-in client funds [3mamount[0m[2m=[0m100000000 [3mdeposit_fees[0m[2m=[0m1000
+[2m2024-11-05T16:51:10.154989Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m Testing latency of internal payments within a federation
+[2m2024-11-05T16:51:10.400079Z[0m [32m INFO[0m [2mdevimint::federation[0m[2m:[0m Pegging-in client funds [3mamount[0m[2m=[0m10000000 [3mdeposit_fees[0m[2m=[0m1000
+[2m2024-11-05T16:52:49.567970Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimint_cli_version[0m[2m=[0m"fedimint-cli 0.5.0-alpha"
+[2m2024-11-05T16:52:49.575249Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimint_cli_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:52:49.581152Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgateway_cli_version[0m[2m=[0m"fedimint-gateway-cli 0.5.0-alpha"
+[2m2024-11-05T16:52:49.586160Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgateway_cli_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:52:49.592887Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimintd_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:52:49.599612Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgatewayd_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:52:49.904622Z[0m [32m INFO[0m [2mdevimint::federation[0m[2m:[0m Pegging-in client funds [3mamount[0m[2m=[0m100000000 [3mdeposit_fees[0m[2m=[0m1000
+[2m2024-11-05T16:53:00.455383Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m Testing latency of restore
+[2m2024-11-05T16:53:07.271852Z[0m [32m INFO[0m [2mdevimint::federation[0m[2m:[0m Waiting for a new session
+[2m2024-11-05T16:53:07.278555Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimint_cli_version[0m[2m=[0m"fedimint-cli 0.5.0-alpha"
+[2m2024-11-05T16:53:07.285600Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimint_cli_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:53:07.291711Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgateway_cli_version[0m[2m=[0m"fedimint-gateway-cli 0.5.0-alpha"
+[2m2024-11-05T16:53:07.297812Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgateway_cli_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:53:07.304821Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimintd_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:53:07.311841Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgatewayd_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:53:07.602093Z[0m [32m INFO[0m [2mdevimint::federation[0m[2m:[0m Pegging-in client funds [3mamount[0m[2m=[0m100000000 [3mdeposit_fees[0m[2m=[0m1000
+[2m2024-11-05T16:53:07.693951Z[0m [32m INFO[0m [2mdevimint::federation[0m[2m:[0m Awaiting session outcome 51
+[2m2024-11-05T16:53:09.062529Z[0m [32m INFO[0m [2mdevimint::federation[0m[2m:[0m session found in 1.368577871s
+[2m2024-11-05T16:53:14.842309Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m Testing latency of reissue
+[2m2024-11-05T16:54:16.531827Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimint_cli_version[0m[2m=[0m"fedimint-cli 0.5.0-alpha"
+[2m2024-11-05T16:54:16.537113Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimint_cli_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:54:16.543279Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgateway_cli_version[0m[2m=[0m"fedimint-gateway-cli 0.5.0-alpha"
+[2m2024-11-05T16:54:16.549221Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgateway_cli_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:54:16.555402Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimintd_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:54:16.562501Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgatewayd_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:54:16.841204Z[0m [32m INFO[0m [2mdevimint::federation[0m[2m:[0m Pegging-in client funds [3mamount[0m[2m=[0m100000000 [3mdeposit_fees[0m[2m=[0m1000
+[2m2024-11-05T16:54:24.955295Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m Testing latency of ln send
+[2m2024-11-05T16:55:11.221642Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimint_cli_version[0m[2m=[0m"fedimint-cli 0.5.0-alpha"
+[2m2024-11-05T16:55:11.227346Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimint_cli_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:55:11.233363Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgateway_cli_version[0m[2m=[0m"fedimint-gateway-cli 0.5.0-alpha"
+[2m2024-11-05T16:55:11.239334Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgateway_cli_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:55:11.245626Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimintd_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:55:11.252032Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgatewayd_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:55:11.530974Z[0m [32m INFO[0m [2mdevimint::federation[0m[2m:[0m Pegging-in client funds [3mamount[0m[2m=[0m100000000 [3mdeposit_fees[0m[2m=[0m1000
+[2m2024-11-05T16:55:19.888294Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m Testing latency of ln receive
+[2m2024-11-05T16:56:44.368689Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimint_cli_version[0m[2m=[0m"fedimint-cli 0.5.0-alpha"
+[2m2024-11-05T16:56:44.374626Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimint_cli_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:56:44.382516Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgateway_cli_version[0m[2m=[0m"fedimint-gateway-cli 0.5.0-alpha"
+[2m2024-11-05T16:56:44.389225Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgateway_cli_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:56:44.396213Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimintd_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:56:44.403383Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgatewayd_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:56:44.663752Z[0m [32m INFO[0m [2mdevimint::federation[0m[2m:[0m Pegging-in client funds [3mamount[0m[2m=[0m100000000 [3mdeposit_fees[0m[2m=[0m1000
+[2m2024-11-05T16:56:50.302558Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m Testing latency of internal payments within a federation
+[2m2024-11-05T16:56:50.553469Z[0m [32m INFO[0m [2mdevimint::federation[0m[2m:[0m Pegging-in client funds [3mamount[0m[2m=[0m10000000 [3mdeposit_fees[0m[2m=[0m1000
+[2m2024-11-05T16:57:47.410011Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimint_cli_version[0m[2m=[0m"fedimint-cli 0.5.0-alpha"
+[2m2024-11-05T16:57:47.416158Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimint_cli_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:57:47.422323Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgateway_cli_version[0m[2m=[0m"fedimint-gateway-cli 0.5.0-alpha"
+[2m2024-11-05T16:57:47.429070Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgateway_cli_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:57:47.435613Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mfedimintd_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:57:47.444034Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m [3mgatewayd_version_hash[0m[2m=[0m"c6056dff4e81757700000000e5061a535ae64149"
+[2m2024-11-05T16:57:47.740036Z[0m [32m INFO[0m [2mdevimint::federation[0m[2m:[0m Pegging-in client funds [3mamount[0m[2m=[0m100000000 [3mdeposit_fees[0m[2m=[0m1000
+[2m2024-11-05T16:57:55.099701Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m Testing latency of restore
+[2m2024-11-05T16:58:02.467539Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m ### fedimintd passed stress test for version 0.5.0-alpha
+[2m2024-11-05T16:58:02.467569Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m ## fedimintd upgraded all binaries successfully
+All tests successful
