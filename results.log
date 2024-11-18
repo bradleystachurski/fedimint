@@ -1,0 +1,86 @@
+./scripts/tests/upgrade-test.sh v0.4.0 current
+## Running upgrade tests
+versions: v0.4.0 current
+kinds: fedimint-cli
+   Compiling fedimint-logging v0.5.0-alpha (/home/nix/fedimint/fedimint-logging)
+   Compiling fedimint-derive v0.5.0-alpha (/home/nix/fedimint/fedimint-derive)
+   Compiling fedimint-client v0.5.0-alpha (/home/nix/fedimint/fedimint-client)
+   Compiling fedimint-server v0.5.0-alpha (/home/nix/fedimint/fedimint-server)
+   Compiling fedimint-ln-gateway v0.5.0-alpha (/home/nix/fedimint/gateway/ln-gateway)
+   Compiling fedimintd v0.5.0-alpha (/home/nix/fedimint/fedimintd)
+   Compiling devimint v0.5.0-alpha (/home/nix/fedimint/devimint)
+   Compiling fedimint-dbtool v0.5.0-alpha (/home/nix/fedimint/fedimint-dbtool)
+   Compiling fedimint-cli v0.5.0-alpha (/home/nix/fedimint/fedimint-cli)
+   Compiling fedimint-gateway-cli v0.5.0-alpha (/home/nix/fedimint/gateway/cli)
+   Compiling fedimint-recoverytool v0.5.0-alpha (/home/nix/fedimint/fedimint-recoverytool)
+   Compiling fedimint-core v0.5.0-alpha (/home/nix/fedimint/fedimint-core)
+   Compiling fedimint-api-client v0.5.0-alpha (/home/nix/fedimint/fedimint-api-client)
+   Compiling fedimint-derive-secret v0.5.0-alpha (/home/nix/fedimint/crypto/derive-secret)
+   Compiling fedimint-tbs v0.5.0-alpha (/home/nix/fedimint/crypto/tbs)
+   Compiling fedimint-wallet-common v0.5.0-alpha (/home/nix/fedimint/modules/fedimint-wallet-common)
+   Compiling fedimint-tpe v0.5.0-alpha (/home/nix/fedimint/crypto/tpe)
+   Compiling fedimint-bitcoind v0.5.0-alpha (/home/nix/fedimint/fedimint-bitcoind)
+   Compiling fedimint-meta-common v0.5.0-alpha (/home/nix/fedimint/modules/fedimint-meta-common)
+   Compiling fedimint-rocksdb v0.5.0-alpha (/home/nix/fedimint/fedimint-rocksdb)
+   Compiling fedimint-metrics v0.5.0-alpha (/home/nix/fedimint/fedimint-metrics)
+   Compiling fedimint-unknown-common v0.5.0-alpha (/home/nix/fedimint/modules/fedimint-unknown-common)
+   Compiling fedimint-portalloc v0.5.0-alpha (/home/nix/fedimint/utils/portalloc)
+   Compiling fedimint-dummy-common v0.5.0-alpha (/home/nix/fedimint/modules/fedimint-dummy-common)
+   Compiling fedimint-mint-common v0.5.0-alpha (/home/nix/fedimint/modules/fedimint-mint-common)
+   Compiling fedimint-meta-server v0.5.0-alpha (/home/nix/fedimint/modules/fedimint-meta-server)
+   Compiling fedimint-unknown-server v0.5.0-alpha (/home/nix/fedimint/modules/fedimint-unknown-server)
+   Compiling fedimint-empty-common v0.5.0-alpha (/home/nix/fedimint/modules/fedimint-empty-common)
+   Compiling fedimint-dummy-server v0.5.0-alpha (/home/nix/fedimint/modules/fedimint-dummy-server)
+   Compiling fedimint-empty-server v0.5.0-alpha (/home/nix/fedimint/modules/fedimint-empty-server)
+   Compiling fedimint-ln-common v0.5.0-alpha (/home/nix/fedimint/modules/fedimint-ln-common)
+   Compiling fedimint-mint-client v0.5.0-alpha (/home/nix/fedimint/modules/fedimint-mint-client)
+   Compiling fedimint-wallet-client v0.5.0-alpha (/home/nix/fedimint/modules/fedimint-wallet-client)
+   Compiling fedimint-bip39 v0.5.0-alpha (/home/nix/fedimint/fedimint-bip39)
+   Compiling fedimint-testing-core v0.5.0-alpha (/home/nix/fedimint/fedimint-testing-core)
+   Compiling fedimint-dummy-client v0.5.0-alpha (/home/nix/fedimint/modules/fedimint-dummy-client)
+   Compiling fedimint-meta-client v0.5.0-alpha (/home/nix/fedimint/modules/fedimint-meta-client)
+   Compiling fedimint-empty-client v0.5.0-alpha (/home/nix/fedimint/modules/fedimint-empty-client)
+   Compiling fedimint-wallet-server v0.5.0-alpha (/home/nix/fedimint/modules/fedimint-wallet-server)
+   Compiling fedimint-mint-server v0.5.0-alpha (/home/nix/fedimint/modules/fedimint-mint-server)
+   Compiling fedimint-lnv2-common v0.5.0-alpha (/home/nix/fedimint/modules/fedimint-lnv2-common)
+   Compiling fedimint-ln-client v0.5.0-alpha (/home/nix/fedimint/modules/fedimint-ln-client)
+   Compiling fedimint-ln-server v0.5.0-alpha (/home/nix/fedimint/modules/fedimint-ln-server)
+   Compiling fedimint-lnv2-client v0.5.0-alpha (/home/nix/fedimint/modules/fedimint-lnv2-client)
+   Compiling fedimint-lnv2-server v0.5.0-alpha (/home/nix/fedimint/modules/fedimint-lnv2-server)
+   Compiling fedimint-fuzz v0.5.0-alpha (/home/nix/fedimint/fuzz)
+   Compiling fedimint-wasm-tests v0.5.0-alpha (/home/nix/fedimint/fedimint-wasm-tests)
+   Compiling fedimint-testing v0.5.0-alpha (/home/nix/fedimint/fedimint-testing)
+   Compiling fedimint-dummy-tests v0.5.0-alpha (/home/nix/fedimint/modules/fedimint-dummy-tests)
+   Compiling fedimint-ln-tests v0.5.0-alpha (/home/nix/fedimint/modules/fedimint-ln-tests)
+   Compiling fedimint-wallet-tests v0.5.0-alpha (/home/nix/fedimint/modules/fedimint-wallet-tests)
+   Compiling fedimint-lnv2-tests v0.5.0-alpha (/home/nix/fedimint/modules/fedimint-lnv2-tests)
+   Compiling fedimint-mint-tests v0.5.0-alpha (/home/nix/fedimint/modules/fedimint-mint-tests)
+   Compiling gateway-tests v0.5.0-alpha (/home/nix/fedimint/gateway/integration_tests)
+   Compiling fedimint-meta-tests v0.5.0-alpha (/home/nix/fedimint/modules/fedimint-meta-tests)
+   Compiling fedimint-load-test-tool v0.5.0-alpha (/home/nix/fedimint/fedimint-load-test-tool)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2m 50s
+Compiling fedimint-cli for version v0.4.0 ...
+Using saved setting for 'extra-substituters = https://fedimint.cachix.org' from ~/.local/share/nix/trusted-settings.json.
+Using saved setting for 'extra-trusted-public-keys = fedimint.cachix.org-1:FpJJjy1iPVlvyv4OMiN5y9+/arFLPcnZhZVVCHCDYTs=' from ~/.local/share/nix/trusted-settings.json.
+## Starting all tests in parallel...
+parallel --jobs 1 --load 4 --delay 10 --halt-on-error 1 --joblog /tmp/nix-shell.gkhICt/baWSz/joblog --noswap --memfree 2G --nice 15
+[2m2024-11-18T20:02:46.742148Z[0m [32m INFO[0m [2mfm::devimint[0m[2m:[0m Devimint data dir [3mpath[0m[2m=[0m/tmp/nix-shell.gkhICt/devimint-1952029-918
+[2m2024-11-18T20:02:46.825348Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m running first stress test for fedimint-cli version: 0.4.0
+[2m2024-11-18T20:02:57.892327Z[0m [32m INFO[0m [2mfm::devimint[0m[2m:[0m DKG completed
+thread 'tokio-runtime-worker' panicked at devimint/src/gatewayd.rs:506:60:
+Could not parse block height: Error("invalid type: null, expected u32", line: 0, column: 0)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+[2m2024-11-18T20:03:05.391698Z[0m [32m INFO[0m [2mfm::devimint[0m[2m:[0m Consensus running
+Error: Polling gateways registered failed after 110 retries (timeout: 60s)
+
+Caused by:
+    0: Internal client joining Federation
+    1: command: /nix/store/wvxj5ikvc47mm7ab0yigjynps3xyciyj-fedimint-cli/bin/fedimint-cli --data-dir=/tmp/nix-shell.gkhICt/devimint-1952029-918/clients/default-0 join-federation fed11qgqpw9thwvaz7te3xgmjuvpwxqhrzw33xverxve0qqqjqtsf2v8wc3e4nugxkdelazy2mlnem08uhvhjqpvryz3tt9n9fdmwnd6u5v
+parallel: This job failed:
+devimint upgrade-tests fedimint-cli --paths /nix/store/wvxj5ikvc47mm7ab0yigjynps3xyciyj-fedimint-cli/bin/fedimint-cli fedimint-cli 
+Some tests failed:
+Seq	Host	Starttime	JobRuntime	Send	Receive	Exitval	Signal	Command
+
+1	:	1731960166.681	    82.391	0	0	1	0	devimint upgrade-tests fedimint-cli --paths /nix/store/wvxj5ikvc47mm7ab0yigjynps3xyciyj-fedimint-cli/bin/fedimint-cli fedimint-cli 
+
+error: Recipe `test-upgrades` failed on line 32 with exit code 1
