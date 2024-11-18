@@ -1,0 +1,32 @@
+./scripts/tests/upgrade-test.sh v0.4.0 current
+## Running upgrade tests
+versions: v0.4.0 current
+kinds: fedimint-cli
+   Compiling fedimint-core v0.6.0-alpha (/home/nix/fedimint/fedimint-core)
+error[E0432]: unresolved import `crate::encoding::btc::NetworkSaneEncodingWrapper`
+   --> fedimint-core/src/encoding/btc.rs:225:9
+    |
+225 |     use crate::encoding::btc::NetworkSaneEncodingWrapper;
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ no `NetworkSaneEncodingWrapper` in `encoding::btc`
+
+   Compiling fedimint-api-client v0.6.0-alpha (/home/nix/fedimint/fedimint-api-client)
+   Compiling fedimint-derive-secret v0.6.0-alpha (/home/nix/fedimint/crypto/derive-secret)
+   Compiling fedimint-tbs v0.6.0-alpha (/home/nix/fedimint/crypto/tbs)
+   Compiling fedimint-wallet-common v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-wallet-common)
+   Compiling fedimint-tpe v0.6.0-alpha (/home/nix/fedimint/crypto/tpe)
+   Compiling fedimint-bitcoind v0.6.0-alpha (/home/nix/fedimint/fedimint-bitcoind)
+   Compiling fedimint-meta-common v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-meta-common)
+   Compiling fedimint-rocksdb v0.6.0-alpha (/home/nix/fedimint/fedimint-rocksdb)
+   Compiling fedimint-metrics v0.6.0-alpha (/home/nix/fedimint/fedimint-metrics)
+   Compiling fedimint-unknown-common v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-unknown-common)
+   Compiling fedimint-portalloc v0.6.0-alpha (/home/nix/fedimint/utils/portalloc)
+   Compiling fedimint-mint-common v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-mint-common)
+   Compiling fedimint-meta-server v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-meta-server)
+   Compiling fedimint-unknown-server v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-unknown-server)
+   Compiling fedimint-dummy-common v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-dummy-common)
+   Compiling fedimint-empty-common v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-empty-common)
+   Compiling fedimint-dummy-server v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-dummy-server)
+For more information about this error, try `rustc --explain E0432`.
+   Compiling fedimint-empty-server v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-empty-server)
+error: could not compile `fedimint-core` (lib test) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
