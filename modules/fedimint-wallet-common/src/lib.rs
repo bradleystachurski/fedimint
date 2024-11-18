@@ -9,10 +9,9 @@ use std::hash::Hasher;
 
 use bitcoin::address::NetworkUnchecked;
 use bitcoin::psbt::raw::ProprietaryKey;
-use bitcoin::{secp256k1, Address, Amount, BlockHash, Txid};
+use bitcoin::{secp256k1, Address, Amount, BlockHash, Network, Txid};
 use config::WalletClientConfig;
 use fedimint_core::core::{Decoder, ModuleInstanceId, ModuleKind};
-use fedimint_core::encoding::btc::NetworkLegacyEncodingWrapper;
 use fedimint_core::encoding::{Decodable, Encodable};
 use fedimint_core::module::{CommonModuleInit, ModuleCommon, ModuleConsensusVersion};
 use fedimint_core::{extensible_associated_module_type, plugin_types_trait_impl_common, Feerate};
@@ -407,7 +406,7 @@ plugin_types_trait_impl_common!(
 #[derive(Debug, Error, Encodable, Decodable, Hash, Clone, Eq, PartialEq)]
 pub enum WalletCreationError {
     #[error("Connected bitcoind is on wrong network, expected {0}, got {1}")]
-    WrongNetwork(NetworkLegacyEncodingWrapper, NetworkLegacyEncodingWrapper),
+    WrongNetwork(Network, Network),
     #[error("Error querying bitcoind: {0}")]
     RpcError(String),
 }
@@ -427,7 +426,7 @@ pub enum WalletInputError {
 #[derive(Debug, Error, Encodable, Decodable, Hash, Clone, Eq, PartialEq)]
 pub enum WalletOutputError {
     #[error("Connected bitcoind is on wrong network, expected {0}, got {1}")]
-    WrongNetwork(NetworkLegacyEncodingWrapper, NetworkLegacyEncodingWrapper),
+    WrongNetwork(Network, Network),
     #[error("Peg-out fee rate {0:?} is set below consensus {1:?}")]
     PegOutFeeBelowConsensus(Feerate, Feerate),
     #[error("Not enough SpendableUTXO")]
