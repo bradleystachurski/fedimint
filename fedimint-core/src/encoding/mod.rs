@@ -10,7 +10,7 @@
 
 pub mod as_hex;
 mod bls12_381;
-pub mod btc;
+mod btc;
 mod secp256k1;
 mod threshold_crypto;
 
