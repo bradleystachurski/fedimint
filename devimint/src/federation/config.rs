@@ -80,21 +80,6 @@ pub fn attach_default_module_init_params(
 
     // TODO(support:v0.3): v0.4 introduced lnv2 modules, so we need to skip
     // attaching the module for old fedimintd versions
-    if fedimintd_version >= &VERSION_0_4_0_ALPHA {
-        module_init_params.attach_config_gen_params(
-            fedimint_lnv2_server::LightningInit::kind(),
-            fedimint_lnv2_common::config::LightningGenParams {
-                local: fedimint_lnv2_common::config::LightningGenParamsLocal {
-                    bitcoin_rpc: bitcoin_rpc.clone(),
-                },
-                consensus: fedimint_lnv2_common::config::LightningGenParamsConsensus {
-                    fee_consensus: fedimint_lnv2_common::config::FeeConsensus::new(1000)
-                        .expect("Relative fee is within range"),
-                    network,
-                },
-            },
-        );
-    }
 
     if !is_env_var_set(FM_DISABLE_META_MODULE_ENV) {
         module_init_params.attach_config_gen_params(MetaInit::kind(), MetaGenParams::default());

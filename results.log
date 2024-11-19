@@ -1,0 +1,429 @@
+./scripts/tests/upgrade-test.sh v0.4.0 current
+## Running upgrade tests
+versions: v0.4.0 current
+kinds: fedimint-cli
+   Compiling fedimint-core v0.6.0-alpha (/home/nix/fedimint/fedimint-core)
+   Compiling fedimint-client v0.6.0-alpha (/home/nix/fedimint/fedimint-client)
+   Compiling fedimint-server v0.6.0-alpha (/home/nix/fedimint/fedimint-server)
+   Compiling fedimint-ln-gateway v0.6.0-alpha (/home/nix/fedimint/gateway/ln-gateway)
+   Compiling fedimintd v0.6.0-alpha (/home/nix/fedimint/fedimintd)
+   Compiling devimint v0.6.0-alpha (/home/nix/fedimint/devimint)
+   Compiling fedimint-dbtool v0.6.0-alpha (/home/nix/fedimint/fedimint-dbtool)
+   Compiling fedimint-cli v0.6.0-alpha (/home/nix/fedimint/fedimint-cli)
+   Compiling fedimint-gateway-cli v0.6.0-alpha (/home/nix/fedimint/gateway/cli)
+   Compiling fedimint-recoverytool v0.6.0-alpha (/home/nix/fedimint/fedimint-recoverytool)
+   Compiling fedimint-api-client v0.6.0-alpha (/home/nix/fedimint/fedimint-api-client)
+   Compiling fedimint-derive-secret v0.6.0-alpha (/home/nix/fedimint/crypto/derive-secret)
+   Compiling fedimint-tbs v0.6.0-alpha (/home/nix/fedimint/crypto/tbs)
+   Compiling fedimint-wallet-common v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-wallet-common)
+   Compiling fedimint-tpe v0.6.0-alpha (/home/nix/fedimint/crypto/tpe)
+   Compiling fedimint-bitcoind v0.6.0-alpha (/home/nix/fedimint/fedimint-bitcoind)
+   Compiling fedimint-meta-common v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-meta-common)
+   Compiling fedimint-rocksdb v0.6.0-alpha (/home/nix/fedimint/fedimint-rocksdb)
+   Compiling fedimint-metrics v0.6.0-alpha (/home/nix/fedimint/fedimint-metrics)
+   Compiling fedimint-unknown-common v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-unknown-common)
+   Compiling fedimint-portalloc v0.6.0-alpha (/home/nix/fedimint/utils/portalloc)
+   Compiling fedimint-dummy-common v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-dummy-common)
+   Compiling fedimint-mint-common v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-mint-common)
+   Compiling fedimint-unknown-server v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-unknown-server)
+   Compiling fedimint-meta-server v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-meta-server)
+   Compiling fedimint-empty-common v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-empty-common)
+   Compiling fedimint-dummy-server v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-dummy-server)
+   Compiling fedimint-empty-server v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-empty-server)
+   Compiling fedimint-ln-common v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-ln-common)
+   Compiling fedimint-mint-client v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-mint-client)
+   Compiling fedimint-wallet-client v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-wallet-client)
+   Compiling fedimint-bip39 v0.6.0-alpha (/home/nix/fedimint/fedimint-bip39)
+   Compiling fedimint-testing-core v0.6.0-alpha (/home/nix/fedimint/fedimint-testing-core)
+   Compiling fedimint-dummy-client v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-dummy-client)
+   Compiling fedimint-meta-client v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-meta-client)
+   Compiling fedimint-empty-client v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-empty-client)
+   Compiling fedimint-wallet-server v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-wallet-server)
+   Compiling fedimint-mint-server v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-mint-server)
+   Compiling fedimint-lnv2-common v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-lnv2-common)
+   Compiling fedimint-ln-client v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-ln-client)
+   Compiling fedimint-ln-server v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-ln-server)
+   Compiling fedimint-lnv2-client v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-lnv2-client)
+   Compiling fedimint-lnv2-server v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-lnv2-server)
+   Compiling fedimint-fuzz v0.6.0-alpha (/home/nix/fedimint/fuzz)
+   Compiling fedimint-wasm-tests v0.6.0-alpha (/home/nix/fedimint/fedimint-wasm-tests)
+   Compiling fedimint-testing v0.6.0-alpha (/home/nix/fedimint/fedimint-testing)
+warning: unused import: `VERSION_0_4_0_ALPHA`
+  --> devimint/src/federation/config.rs:22:32
+   |
+22 | use crate::version_constants::{VERSION_0_4_0_ALPHA, VERSION_0_5_0_ALPHA};
+   |                                ^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` on by default
+
+   Compiling fedimint-dummy-tests v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-dummy-tests)
+   Compiling fedimint-ln-tests v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-ln-tests)
+warning: `devimint` (lib) generated 1 warning (run `cargo fix --lib -p devimint` to apply 1 suggestion)
+   Compiling fedimint-wallet-tests v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-wallet-tests)
+   Compiling gateway-tests v0.6.0-alpha (/home/nix/fedimint/gateway/integration_tests)
+   Compiling fedimint-lnv2-tests v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-lnv2-tests)
+   Compiling fedimint-mint-tests v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-mint-tests)
+warning: `devimint` (lib test) generated 1 warning (1 duplicate)
+   Compiling fedimint-load-test-tool v0.6.0-alpha (/home/nix/fedimint/fedimint-load-test-tool)
+   Compiling fedimint-meta-tests v0.6.0-alpha (/home/nix/fedimint/modules/fedimint-meta-tests)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 4m 04s
+Compiling fedimint-cli for version v0.4.0 ...
+Using saved setting for 'extra-substituters = https://fedimint.cachix.org' from ~/.local/share/nix/trusted-settings.json.
+Using saved setting for 'extra-trusted-public-keys = fedimint.cachix.org-1:FpJJjy1iPVlvyv4OMiN5y9+/arFLPcnZhZVVCHCDYTs=' from ~/.local/share/nix/trusted-settings.json.
+## Starting all tests in parallel...
+parallel --jobs 1 --load 4 --delay 10 --halt-on-error 1 --joblog /tmp/nix-shell.n5WpqV/eugOd/joblog --noswap --memfree 2G --nice 15
+[2m2024-11-19T16:18:37.391504Z[0m [32m INFO[0m [2mfm::devimint[0m[2m:[0m Devimint data dir [3mpath[0m[2m=[0m/tmp/nix-shell.n5WpqV/devimint-2768072-458
+[2m2024-11-19T16:18:37.483311Z[0m [32m INFO[0m [2mdevimint::tests[0m[2m:[0m running first stress test for fedimint-cli version: 0.4.0
+[2m2024-11-19T16:18:49.050093Z[0m [32m INFO[0m [2mfm::devimint[0m[2m:[0m DKG completed
+[2m2024-11-19T16:18:54.512507Z[0m [32m INFO[0m [2mfm::devimint[0m[2m:[0m Opening channel with 5000000 sats on each side... [3mfrom[0m[2m=[0mCLN [3mto[0m[2m=[0mLND
+[2m2024-11-19T16:18:54.512600Z[0m [32m INFO[0m [2mfm::devimint[0m[2m:[0m Opening channel with 5000000 sats on each side... [3mfrom[0m[2m=[0mLND [3mto[0m[2m=[0mLDK
+[2m2024-11-19T16:18:54.512637Z[0m [32m INFO[0m [2mfm::devimint[0m[2m:[0m Opening channel with 5000000 sats on each side... [3mfrom[0m[2m=[0mLDK [3mto[0m[2m=[0mCLN
+[2m2024-11-19T16:18:54.704349Z[0m [32m INFO[0m [2mfm::devimint[0m[2m:[0m Opened channel [3mfrom[0m[2m=[0mLDK [3mto[0m[2m=[0mCLN
+[2m2024-11-19T16:18:54.748145Z[0m [32m INFO[0m [2mfm::devimint[0m[2m:[0m Opened channel [3mfrom[0m[2m=[0mCLN [3mto[0m[2m=[0mLND
+[2m2024-11-19T16:18:54.815082Z[0m [32m INFO[0m [2mfm::devimint[0m[2m:[0m Opened channel [3mfrom[0m[2m=[0mLND [3mto[0m[2m=[0mLDK
+[2m2024-11-19T16:18:54.928627Z[0m [32m INFO[0m [2mfm::devimint[0m[2m:[0m Consensus running
+thread 'tokio-runtime-worker' panicked at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/context/current.rs:50:46:
+already borrowed: BorrowMutError
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+thread 'tokio-runtime-worker' panicked at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/context/runtime_mt.rs:17:17:
+closure claimed permanent executor
+stack backtrace:
+   0:     0x55f446a31baa - std::backtrace_rs::backtrace::libunwind::trace::h99efb0985cae5d78
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/std/src/../../backtrace/src/backtrace/libunwind.rs:116:5
+   1:     0x55f446a31baa - std::backtrace_rs::backtrace::trace_unsynchronized::he2c1aa63b3f7fad8
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/std/src/../../backtrace/src/backtrace/mod.rs:66:5
+   2:     0x55f446a31baa - std::sys::backtrace::_print_fmt::h8a221d40f5e0f88b
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/std/src/sys/backtrace.rs:66:9
+   3:     0x55f446a31baa - <std::sys::backtrace::BacktraceLock::print::DisplayBacktrace as core::fmt::Display>::fmt::h304520fd6a30aa07
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/std/src/sys/backtrace.rs:39:26
+   4:     0x55f446a61b8b - core::fmt::rt::Argument::fmt::h5da9c218ec984eaf
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/core/src/fmt/rt.rs:177:76
+   5:     0x55f446a61b8b - core::fmt::write::hf5713710ce10ff22
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/core/src/fmt/mod.rs:1178:21
+   6:     0x55f446a2c953 - std::io::Write::write_fmt::hda708db57927dacf
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/std/src/io/mod.rs:1823:15
+   7:     0x55f446a33032 - std::sys::backtrace::BacktraceLock::print::hbcdbec4d97c91528
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/std/src/sys/backtrace.rs:42:9
+   8:     0x55f446a33032 - std::panicking::default_hook::{{closure}}::he1ad87607d0c11c5
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/std/src/panicking.rs:266:22
+   9:     0x55f446a32c9e - std::panicking::default_hook::h81c8cd2e7c59ee33
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/std/src/panicking.rs:293:9
+  10:     0x55f446a3392f - std::panicking::rust_panic_with_hook::had2118629c312a4a
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/std/src/panicking.rs:797:13
+  11:     0x55f446a335e3 - std::panicking::begin_panic_handler::{{closure}}::h7fa5985d111bafa2
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/std/src/panicking.rs:664:13
+  12:     0x55f446a32089 - std::sys::backtrace::__rust_end_short_backtrace::h704d151dbefa09c5
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/std/src/sys/backtrace.rs:170:18
+  13:     0x55f446a332a4 - rust_begin_unwind
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/std/src/panicking.rs:662:5
+  14:     0x55f446a5ed13 - core::panicking::panic_fmt::h3eea515d05f7a35e
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/core/src/panicking.rs:74:14
+  15:     0x55f4468499a3 - <tokio::runtime::context::runtime_mt::exit_runtime::Reset as core::ops::drop::Drop>::drop::{{closure}}::h4a4e2fd7a56f1ee1
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/context/runtime_mt.rs:17:17
+  16:     0x55f4468499a3 - std::thread::local::LocalKey<T>::try_with::h642001e836f7da64
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/std/src/thread/local.rs:283:12
+  17:     0x55f4468499a3 - std::thread::local::LocalKey<T>::with::hdabdee3b1bf06bc3
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/std/src/thread/local.rs:260:9
+  18:     0x55f4468499a3 - <tokio::runtime::context::runtime_mt::exit_runtime::Reset as core::ops::drop::Drop>::drop::hd3f97f4e80730851
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/context/runtime_mt.rs:16:13
+  19:     0x55f444fb82eb - core::ptr::drop_in_place<tokio::runtime::context::runtime_mt::exit_runtime::Reset>::h8192d70509eb98f7
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/core/src/ptr/mod.rs:574:1
+  20:     0x55f4447d5d1d - tokio::runtime::context::runtime_mt::exit_runtime::h69d026eb061eec72
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/context/runtime_mt.rs:36:1
+  21:     0x55f444976bea - tokio::runtime::scheduler::multi_thread::worker::block_in_place::h4a24ffb310a668a2
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/scheduler/multi_thread/worker.rs:455:9
+  22:     0x55f444b3ac9b - tokio::runtime::scheduler::block_in_place::block_in_place::hbd0043f3bdd12e05
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/scheduler/block_in_place.rs:20:5
+  23:     0x55f4448d657b - tokio::task::blocking::block_in_place::ha3e35b3817e6bd49
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/task/blocking.rs:78:9
+  24:     0x55f4449ca8d2 - fedimint_core::runtime::impl::block_in_place::h94e677346f50b747
+                               at /home/nix/fedimint/fedimint-core/src/runtime.rs:44:9
+  25:     0x55f4448d4dc3 - <devimint::util::ProcessHandleInner as core::ops::drop::Drop>::drop::h3006bac33c74eb44
+                               at /home/nix/fedimint/devimint/src/util.rs:151:9
+  26:     0x55f4448b6de7 - core::ptr::drop_in_place<devimint::util::ProcessHandleInner>::h2e39f73333fffb40
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/core/src/ptr/mod.rs:574:1
+  27:     0x55f4448bd88b - core::ptr::drop_in_place<core::cell::UnsafeCell<devimint::util::ProcessHandleInner>>::h1ad725ebe5f88667
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/core/src/ptr/mod.rs:574:1
+  28:     0x55f4448bf90f - core::ptr::drop_in_place<tokio::sync::mutex::Mutex<devimint::util::ProcessHandleInner>>::h77ad4e044201561d
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/core/src/ptr/mod.rs:574:1
+  29:     0x55f4448df86f - alloc::sync::Arc<T,A>::drop_slow::h188fd99d14127a80
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/alloc/src/sync.rs:1831:18
+  30:     0x55f4448c492a - <alloc::sync::Arc<T,A> as core::ops::drop::Drop>::drop::h84ec190900c0bf44
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/alloc/src/sync.rs:2524:13
+  31:     0x55f444894f5b - core::ptr::drop_in_place<alloc::sync::Arc<tokio::sync::mutex::Mutex<devimint::util::ProcessHandleInner>>>::h6972af441882efd1
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/core/src/ptr/mod.rs:574:1
+  32:     0x55f4448b315b - core::ptr::drop_in_place<devimint::util::ProcessHandle>::hbfaf8ad9263c438a
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/core/src/ptr/mod.rs:574:1
+  33:     0x55f4448b4dac - core::ptr::drop_in_place<devimint::federation::Fedimintd>::h2069bea3348d895e
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/core/src/ptr/mod.rs:574:1
+  34:     0x55f44489de05 - core::ptr::drop_in_place<<devimint::federation::Federation as core::ops::drop::Drop>::drop::{{closure}}::{{closure}}::{{closure}}>::hfc82027da05aef61
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/core/src/ptr/mod.rs:68:31
+  35:     0x55f4448a0feb - core::ptr::drop_in_place<tokio::runtime::task::core::Stage<<devimint::federation::Federation as core::ops::drop::Drop>::drop::{{closure}}::{{closure}}::{{closure}}>>::h843b0c920dc80f5f
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/core/src/ptr/mod.rs:574:1
+  36:     0x55f444b23c6c - tokio::runtime::task::core::Core<T,S>::set_stage::{{closure}}::h378d65f984bb863c
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/task/core.rs:385:41
+  37:     0x55f444b1df9e - tokio::loom::std::unsafe_cell::UnsafeCell<T>::with_mut::h10ab6d8da2a85a86
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/loom/std/unsafe_cell.rs:16:9
+  38:     0x55f444b1df9e - tokio::runtime::task::core::Core<T,S>::set_stage::ha3d44888584ff819
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/task/core.rs:385:9
+  39:     0x55f444b05d89 - tokio::runtime::task::core::Core<T,S>::drop_future_or_output::h49cd6bb98d235a9b
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/task/core.rs:350:13
+  40:     0x55f444811c5e - tokio::runtime::task::harness::cancel_task::{{closure}}::he84226fd3d2dbe98
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/task/harness.rs:467:9
+  41:     0x55f44488bb87 - core::ops::function::FnOnce::call_once::h8304bbf66590d914
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/core/src/ops/function.rs:250:5
+  42:     0x55f44496d10f - <core::panic::unwind_safe::AssertUnwindSafe<F> as core::ops::function::FnOnce<()>>::call_once::h7ec69db4147a4161
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/core/src/panic/unwind_safe.rs:272:9
+  43:     0x55f444a56bb6 - std::panicking::try::do_call::h7326a8342307b6e6
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/std/src/panicking.rs:554:40
+  44:     0x55f44488529b - __rust_try
+  45:     0x55f444878e40 - std::panicking::try::h2fba8d98d99dcb12
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/std/src/panicking.rs:518:19
+  46:     0x55f444878e40 - std::panic::catch_unwind::h8bd0f22f46fe6652
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/std/src/panic.rs:345:14
+  47:     0x55f444810ba4 - tokio::runtime::task::harness::cancel_task::hd45bc459307bb36e
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/task/harness.rs:466:15
+  48:     0x55f444861e49 - tokio::runtime::task::harness::Harness<T,S>::shutdown::h05ea00a86d8a069c
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/task/harness.rs:248:9
+  49:     0x55f444998b5d - tokio::runtime::task::raw::shutdown::h810a686fe937e62d
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/task/raw.rs:311:5
+  50:     0x55f4461db762 - tokio::runtime::task::list::OwnedTasks<S>::bind_inner::h8ac2a376873ba08c
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/task/list.rs:141:13
+  51:     0x55f444786032 - tokio::runtime::task::list::OwnedTasks<S>::bind::h3367ec8206173c4a
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/task/list.rs:101:33
+  52:     0x55f444b3540d - tokio::runtime::scheduler::multi_thread::handle::Handle::bind_new_task::h52ee8bcc7e13957c
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/scheduler/multi_thread/handle.rs:56:34
+  53:     0x55f444b38a04 - tokio::runtime::scheduler::multi_thread::handle::Handle::spawn::hbed6d8fbcc9c42b1
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/scheduler/multi_thread/handle.rs:44:9
+  54:     0x55f444b5b856 - tokio::runtime::scheduler::Handle::spawn::h90b90b5396ba10aa
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/scheduler/mod.rs:150:43
+  55:     0x55f444a74127 - tokio::task::spawn::spawn_inner::{{closure}}::h61acbb8ffe8fe28f
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/task/spawn.rs:202:46
+  56:     0x55f4449622ff - core::option::Option<T>::map::hf725bfd204c123b9
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/core/src/option.rs:1105:29
+  57:     0x55f4447b703c - tokio::runtime::context::current::with_current::{{closure}}::hc0c6e6d47a271f0b
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/context/current.rs:41:34
+  58:     0x55f4448d6e38 - std::thread::local::LocalKey<T>::try_with::h05a32dcad3d846ab
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/std/src/thread/local.rs:283:12
+  59:     0x55f4447b44ef - tokio::runtime::context::current::with_current::hd232def1a3a4b4b7
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/context/current.rs:41:11
+  60:     0x55f444a731b7 - tokio::task::spawn::spawn_inner::hcb15d298398d46ad
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/task/spawn.rs:202:15
+  61:     0x55f444a75978 - tokio::task::spawn::spawn::h7f523f98c4b7d254
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/task/spawn.rs:175:13
+  62:     0x55f4448e4ebe - tokio::task::join_set::JoinSet<T>::spawn::h08a65b95974e702e
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/task/join_set.rs:138:21
+  63:     0x55f444aa94b4 - <devimint::federation::Federation as core::ops::drop::Drop>::drop::{{closure}}::{{closure}}::h5aebd4c14b62838e
+                               at /home/nix/fedimint/devimint/src/federation.rs:68:21
+  64:     0x55f4448ed62e - tokio::runtime::park::CachedParkThread::block_on::{{closure}}::ha5bdf282879c70e0
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/park.rs:281:63
+  65:     0x55f4448ec1b0 - tokio::runtime::coop::with_budget::h889dde51dac23e04
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/coop.rs:107:5
+  66:     0x55f4448ec1b0 - tokio::runtime::coop::budget::h48dc7b970beb4311
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/coop.rs:73:5
+  67:     0x55f4448ec1b0 - tokio::runtime::park::CachedParkThread::block_on::h595bd2f7cd76733a
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/park.rs:281:31
+  68:     0x55f444912363 - tokio::runtime::context::blocking::BlockingRegionGuard::block_on::h1e810a1fb58fd67f
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/context/blocking.rs:66:9
+  69:     0x55f4447ad261 - tokio::runtime::handle::Handle::block_on_inner::{{closure}}::h22236c8e71d51979
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/handle.rs:327:13
+  70:     0x55f444788976 - tokio::runtime::context::runtime::enter_runtime::h0f41ecc9ac80d1da
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/context/runtime.rs:65:16
+  71:     0x55f4447ad0dc - tokio::runtime::handle::Handle::block_on_inner::h5a93caeaffb7d02b
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/handle.rs:326:9
+  72:     0x55f4447ae55c - tokio::runtime::handle::Handle::block_on::h2c24faf0e4a148c0
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/handle.rs:305:13
+  73:     0x55f4449d3ca0 - fedimint_core::runtime::impl::block_on::hc9d1777d6c19c7b3
+                               at /home/nix/fedimint/fedimint-core/src/runtime.rs:51:9
+  74:     0x55f444aa9303 - <devimint::federation::Federation as core::ops::drop::Drop>::drop::{{closure}}::h15019e6561d12f5f
+                               at /home/nix/fedimint/devimint/src/federation.rs:64:13
+  75:     0x55f4447d5f3d - tokio::runtime::context::runtime_mt::exit_runtime::hb6a64c16a20b58e5
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/context/runtime_mt.rs:35:5
+  76:     0x55f444976f5a - tokio::runtime::scheduler::multi_thread::worker::block_in_place::h84842130b50c608f
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/scheduler/multi_thread/worker.rs:455:9
+  77:     0x55f444b3ac5b - tokio::runtime::scheduler::block_in_place::block_in_place::haf3293e08af2f97b
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/scheduler/block_in_place.rs:20:5
+  78:     0x55f4448d648b - tokio::task::blocking::block_in_place::h470b8e29414286df
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/task/blocking.rs:78:9
+  79:     0x55f4449ca832 - fedimint_core::runtime::impl::block_in_place::h0eab77410ba42d9a
+                               at /home/nix/fedimint/fedimint-core/src/runtime.rs:44:9
+  80:     0x55f4448d4d8f - <devimint::federation::Federation as core::ops::drop::Drop>::drop::hd3ab04ccb1c55425
+                               at /home/nix/fedimint/devimint/src/federation.rs:63:9
+  81:     0x55f4448b5c37 - core::ptr::drop_in_place<devimint::federation::Federation>::h52904c60a7ae5eee
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/core/src/ptr/mod.rs:574:1
+  82:     0x55f4448df81f - alloc::sync::Arc<T,A>::drop_slow::h11bb6e8a5a8329c7
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/alloc/src/sync.rs:1831:18
+  83:     0x55f4448c3fca - <alloc::sync::Arc<T,A> as core::ops::drop::Drop>::drop::h3e165c1a8af8561f
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/alloc/src/sync.rs:2524:13
+  84:     0x55f4448ba7ab - core::ptr::drop_in_place<alloc::sync::Arc<devimint::federation::Federation>>::hc341363803362881
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/core/src/ptr/mod.rs:574:1
+  85:     0x55f4448970cb - core::ptr::drop_in_place<core::result::Result<alloc::sync::Arc<devimint::federation::Federation>,alloc::string::String>>::h81c963f880d425f0
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/core/src/ptr/mod.rs:574:1
+  86:     0x55f444a25304 - <tokio::sync::once_cell::OnceCell<T> as core::ops::drop::Drop>::drop::{{closure}}::h1d08646382aad57f
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/sync/once_cell.rs:109:37
+  87:     0x55f4448d2efd - tokio::loom::std::unsafe_cell::UnsafeCell<T>::with_mut::h0123851521c1ff77
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/loom/std/unsafe_cell.rs:16:9
+  88:     0x55f4448d2efd - <tokio::sync::once_cell::OnceCell<T> as core::ops::drop::Drop>::drop::hcf799cc295615903
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/sync/once_cell.rs:108:17
+  89:     0x55f44489c6fb - core::ptr::drop_in_place<tokio::sync::once_cell::OnceCell<core::result::Result<alloc::sync::Arc<devimint::federation::Federation>,alloc::string::String>>>::haaaff35255fafa1f
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/core/src/ptr/mod.rs:574:1
+  90:     0x55f44489792c - core::ptr::drop_in_place<fedimint_core::task::jit::JitInner<alloc::sync::Arc<devimint::federation::Federation>,anyhow::Error>>::h6519ce7455a87c59
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/core/src/ptr/mod.rs:574:1
+  91:     0x55f4448dfe0f - alloc::sync::Arc<T,A>::drop_slow::h9af36799d9d2ac78
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/alloc/src/sync.rs:1831:18
+  92:     0x55f4448c3a2a - <alloc::sync::Arc<T,A> as core::ops::drop::Drop>::drop::h09b0eee711c305cc
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/alloc/src/sync.rs:2524:13
+  93:     0x55f44489b75b - core::ptr::drop_in_place<alloc::sync::Arc<fedimint_core::task::jit::JitInner<alloc::sync::Arc<devimint::federation::Federation>,anyhow::Error>>>::h363c294a7b129b5d
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/core/src/ptr/mod.rs:574:1
+  94:     0x55f4448977ab - core::ptr::drop_in_place<fedimint_core::task::jit::JitCore<alloc::sync::Arc<devimint::federation::Federation>,anyhow::Error>>::hd78b5076a3bc6a8f
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/core/src/ptr/mod.rs:574:1
+  95:     0x55f444893ee5 - core::ptr::drop_in_place<devimint::devfed::DevJitFed::new::{{closure}}::{{closure}}>::h7b1357406af97abc
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/core/src/ptr/mod.rs:215:13
+  96:     0x55f4448a6449 - core::ptr::drop_in_place<fedimint_core::task::jit::JitCore<alloc::sync::Arc<()>,anyhow::Error>::new_try<devimint::devfed::DevJitFed::new::{{closure}}::{{closure}},devimint::devfed::DevJitFed::new::{{closure}}>::{{closure}}>::hb51ab0dd39ec75a3
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/core/src/ptr/mod.rs:92:73
+  97:     0x55f44495f7fb - core::mem::manually_drop::ManuallyDrop<T>::drop::h5f2862e6d58bcef6
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/core/src/mem/manually_drop.rs:150:18
+  98:     0x55f4448fc185 - tracing::instrument::_::<impl core::ops::drop::Drop for tracing::instrument::Instrumented<T>>::drop::__drop_inner::hb2dd65d96bd663c9
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tracing-0.1.40/src/instrument.rs:285:22
+  99:     0x55f4448d2638 - tracing::instrument::_::<impl core::ops::drop::Drop for tracing::instrument::Instrumented<T>>::drop::h453f50576c06d963
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pin-project-lite-0.2.13/src/lib.rs:1300:17
+ 100:     0x55f4448aad67 - core::ptr::drop_in_place<tracing::instrument::Instrumented<fedimint_core::task::jit::JitCore<alloc::sync::Arc<()>,anyhow::Error>::new_try<devimint::devfed::DevJitFed::new::{{closure}}::{{closure}},devimint::devfed::DevJitFed::new::{{closure}}>::{{closure}}>>::hc667200b65b0ca4f
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/core/src/ptr/mod.rs:574:1
+ 101:     0x55f4448ad05b - core::ptr::drop_in_place<tokio::runtime::task::core::Stage<tracing::instrument::Instrumented<fedimint_core::task::jit::JitCore<alloc::sync::Arc<()>,anyhow::Error>::new_try<devimint::devfed::DevJitFed::new::{{closure}}::{{closure}},devimint::devfed::DevJitFed::new::{{closure}}>::{{closure}}>>>::hcd8df84606671c32
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/core/src/ptr/mod.rs:574:1
+ 102:     0x55f444b28079 - tokio::runtime::task::core::Core<T,S>::set_stage::{{closure}}::hc8ee48a8f042814c
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/task/core.rs:385:41
+ 103:     0x55f444b1b65b - tokio::loom::std::unsafe_cell::UnsafeCell<T>::with_mut::h5076fe7b9bad4a4e
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/loom/std/unsafe_cell.rs:16:9
+ 104:     0x55f444b1b65b - tokio::runtime::task::core::Core<T,S>::set_stage::h7119aeec00357d94
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/task/core.rs:385:9
+ 105:     0x55f444b061b2 - tokio::runtime::task::core::Core<T,S>::drop_future_or_output::h8f2a2899ac148c1e
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/task/core.rs:350:13
+ 106:     0x55f444811a2e - tokio::runtime::task::harness::cancel_task::{{closure}}::ha1f5f5fcf6a4b4f5
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/task/harness.rs:467:9
+ 107:     0x55f44488ce07 - core::ops::function::FnOnce::call_once::ha3754bba45561514
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/core/src/ops/function.rs:250:5
+ 108:     0x55f44496c88f - <core::panic::unwind_safe::AssertUnwindSafe<F> as core::ops::function::FnOnce<()>>::call_once::h6c1d3df97401b512
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/core/src/panic/unwind_safe.rs:272:9
+ 109:     0x55f444a554c6 - std::panicking::try::do_call::h58bda92bf778ac47
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/std/src/panicking.rs:554:40
+ 110:     0x55f44488529b - __rust_try
+ 111:     0x55f444872050 - std::panicking::try::h7f17b83494f38e2b
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/std/src/panicking.rs:518:19
+ 112:     0x55f444872050 - std::panic::catch_unwind::h43a1ef8f159e7d17
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/std/src/panic.rs:345:14
+ 113:     0x55f44480f534 - tokio::runtime::task::harness::cancel_task::h6572af57772449ae
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/task/harness.rs:466:15
+ 114:     0x55f44482ebb0 - tokio::runtime::task::harness::Harness<T,S>::poll_inner::h6b3aff6c8b5f5942
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/task/harness.rs:225:17
+ 115:     0x55f444846137 - tokio::runtime::task::harness::Harness<T,S>::poll::hbdf578ab13711a2e
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/task/harness.rs:154:15
+ 116:     0x55f44498ca7d - tokio::runtime::task::raw::poll::ha63d05585e071263
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/task/raw.rs:271:5
+ 117:     0x55f44684460f - tokio::runtime::task::raw::RawTask::poll::h6b1fb9d1cbec2306
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/task/raw.rs:201:18
+ 118:     0x55f44684460f - tokio::runtime::task::LocalNotified<S>::run::h58c1d563b43ace19
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/task/mod.rs:435:9
+ 119:     0x55f44684460f - tokio::runtime::scheduler::multi_thread::worker::Context::run_task::{{closure}}::hfd2794af03e52c11
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/scheduler/multi_thread/worker.rs:596:13
+ 120:     0x55f44684460f - tokio::runtime::coop::with_budget::h4b7966204bba48c4
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/coop.rs:107:5
+ 121:     0x55f44684460f - tokio::runtime::coop::budget::h97cb3936a7ed51c6
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/coop.rs:73:5
+ 122:     0x55f44684460f - tokio::runtime::scheduler::multi_thread::worker::Context::run_task::h958a9cf372b699f9
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/scheduler/multi_thread/worker.rs:595:9
+ 123:     0x55f44684335b - tokio::runtime::scheduler::multi_thread::worker::Context::run::h794a6e1520811827
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/scheduler/multi_thread/worker.rs:546:24
+ 124:     0x55f44685532a - tokio::runtime::scheduler::multi_thread::worker::run::{{closure}}::{{closure}}::h60d2158e0a31e4c5
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/scheduler/multi_thread/worker.rs:511:21
+ 125:     0x55f44685532a - tokio::runtime::context::scoped::Scoped<T>::set::h0a60741a12b6e0c8
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/context/scoped.rs:40:9
+ 126:     0x55f446853ea4 - tokio::runtime::context::set_scheduler::{{closure}}::h82217e077f430313
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/context.rs:180:26
+ 127:     0x55f446853ea4 - std::thread::local::LocalKey<T>::try_with::h3323828ff668c5ec
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/std/src/thread/local.rs:283:12
+ 128:     0x55f446853ea4 - std::thread::local::LocalKey<T>::with::ha58d64940ea615fa
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/std/src/thread/local.rs:260:9
+ 129:     0x55f44685021c - tokio::runtime::context::set_scheduler::h238c0390264bc2d6
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/context.rs:180:9
+ 130:     0x55f44685021c - tokio::runtime::scheduler::multi_thread::worker::run::{{closure}}::h4a27e10d228a16a0
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/scheduler/multi_thread/worker.rs:506:9
+ 131:     0x55f44685021c - tokio::runtime::context::runtime::enter_runtime::hc72f831d2a8a9c55
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/context/runtime.rs:65:16
+ 132:     0x55f446842bdd - tokio::runtime::scheduler::multi_thread::worker::run::h27eaea1a7a6aead5
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/scheduler/multi_thread/worker.rs:498:5
+ 133:     0x55f444979c4b - tokio::runtime::scheduler::multi_thread::worker::block_in_place::{{closure}}::{{closure}}::hef98658b711ae3f1
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/scheduler/multi_thread/worker.rs:439:41
+ 134:     0x55f4448e841d - <tokio::runtime::blocking::task::BlockingTask<T> as core::future::future::Future>::poll::hd6a13bfb0532ad84
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/blocking/task.rs:42:21
+ 135:     0x55f444b0e9b3 - tokio::runtime::task::core::Core<T,S>::poll::{{closure}}::h0e5417477b026f61
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/task/core.rs:331:17
+ 136:     0x55f444b0cfac - tokio::loom::std::unsafe_cell::UnsafeCell<T>::with_mut::h0b9f49d3211fe605
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/loom/std/unsafe_cell.rs:16:9
+ 137:     0x55f444b0cfac - tokio::runtime::task::core::Core<T,S>::poll::hde5eed0c59638350
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/task/core.rs:320:13
+ 138:     0x55f44482ad79 - tokio::runtime::task::harness::poll_future::{{closure}}::hfe7d0ed7b90d182c
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/task/harness.rs:499:19
+ 139:     0x55f444970311 - <core::panic::unwind_safe::AssertUnwindSafe<F> as core::ops::function::FnOnce<()>>::call_once::hefc8c4a42100ed7f
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/core/src/panic/unwind_safe.rs:272:9
+ 140:     0x55f444a57599 - std::panicking::try::do_call::h81cef4e3203e94d8
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/std/src/panicking.rs:554:40
+ 141:     0x55f44488529b - __rust_try
+ 142:     0x55f444884636 - std::panicking::try::h0b474c6faea97a1c
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/std/src/panicking.rs:518:19
+ 143:     0x55f444884636 - std::panic::catch_unwind::hf6fb228d261a700b
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/std/src/panic.rs:345:14
+ 144:     0x55f44481f6c0 - tokio::runtime::task::harness::poll_future::hb149e016d9922c9c
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/task/harness.rs:487:18
+ 145:     0x55f44482e8fe - tokio::runtime::task::harness::Harness<T,S>::poll_inner::h69b6c6caf3d04274
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/task/harness.rs:209:27
+ 146:     0x55f444844d87 - tokio::runtime::task::harness::Harness<T,S>::poll::h7c1acaf6e09f48ce
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/task/harness.rs:154:15
+ 147:     0x55f44498c05d - tokio::runtime::task::raw::poll::h1255f5693f11e4eb
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/task/raw.rs:271:5
+ 148:     0x55f44683f0e9 - tokio::runtime::task::raw::RawTask::poll::h6b1fb9d1cbec2306
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/task/raw.rs:201:18
+ 149:     0x55f44683f0e9 - tokio::runtime::task::UnownedTask<S>::run::h3dc829dadb5c2ba6
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/task/mod.rs:472:9
+ 150:     0x55f44683f0e9 - tokio::runtime::blocking::pool::Task::run::hde99eb2ed3c9f7cc
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/blocking/pool.rs:161:9
+ 151:     0x55f44683f0e9 - tokio::runtime::blocking::pool::Inner::run::h98e41674d26231e3
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/blocking/pool.rs:511:17
+ 152:     0x55f446866e12 - tokio::runtime::blocking::pool::Spawner::spawn_thread::{{closure}}::h7dd5ff0018275484
+                               at /home/nix/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.41.1/src/runtime/blocking/pool.rs:469:13
+ 153:     0x55f446866e12 - std::sys::backtrace::__rust_begin_short_backtrace::h27871110f915fce3
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/std/src/sys/backtrace.rs:154:18
+ 154:     0x55f446851b56 - std::thread::Builder::spawn_unchecked_::{{closure}}::{{closure}}::h23942ade5232af43
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/std/src/thread/mod.rs:522:17
+ 155:     0x55f446851b56 - <core::panic::unwind_safe::AssertUnwindSafe<F> as core::ops::function::FnOnce<()>>::call_once::hcfdff57748a1a975
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/core/src/panic/unwind_safe.rs:272:9
+ 156:     0x55f446851b56 - std::panicking::try::do_call::h518256cbb917256f
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/std/src/panicking.rs:554:40
+ 157:     0x55f446851b56 - std::panicking::try::ha09e2e98e70f6893
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/std/src/panicking.rs:518:19
+ 158:     0x55f446851b56 - std::panic::catch_unwind::he50e710b7f142915
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/std/src/panic.rs:345:14
+ 159:     0x55f446851b56 - std::thread::Builder::spawn_unchecked_::{{closure}}::h6a085c3869392a1b
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/std/src/thread/mod.rs:521:30
+ 160:     0x55f446851b56 - core::ops::function::FnOnce::call_once{{vtable.shim}}::h709da22f31495fe9
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/core/src/ops/function.rs:250:5
+ 161:     0x55f446a39d8b - <alloc::boxed::Box<F,A> as core::ops::function::FnOnce<Args>>::call_once::hd6eefa32c9acf934
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/alloc/src/boxed.rs:2231:9
+ 162:     0x55f446a39d8b - <alloc::boxed::Box<F,A> as core::ops::function::FnOnce<Args>>::call_once::h6bca3a1f077b8c81
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/alloc/src/boxed.rs:2231:9
+ 163:     0x55f446a39d8b - std::sys::pal::unix::thread::Thread::new::thread_start::hcdbd1049068002f4
+                               at /rustc/f6e511eec7342f59a25f7c0534f1dbea00d01b14/library/std/src/sys/pal/unix/thread.rs:105:17
+ 164:     0x7fcf520f3272 - start_thread
+ 165:     0x7fcf5216ec24 - __clone
+ 166:                0x0 - <unknown>
+thread 'tokio-runtime-worker' panicked at core/src/panicking.rs:229:5:
+panic in a destructor during cleanup
+thread caused non-unwinding panic. aborting.
+parallel: This job failed:
+devimint upgrade-tests fedimint-cli --paths /nix/store/wvxj5ikvc47mm7ab0yigjynps3xyciyj-fedimint-cli/bin/fedimint-cli fedimint-cli 
+Some tests failed:
+Seq	Host	Starttime	JobRuntime	Send	Receive	Exitval	Signal	Command
+
+1	:	1732033117.322	    90.138	0	0	134	6	devimint upgrade-tests fedimint-cli --paths /nix/store/wvxj5ikvc47mm7ab0yigjynps3xyciyj-fedimint-cli/bin/fedimint-cli fedimint-cli 
+
+error: Recipe `test-upgrades` failed on line 32 with exit code 1
