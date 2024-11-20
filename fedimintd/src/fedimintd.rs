@@ -349,25 +349,6 @@ impl Fedimintd {
                 },
             );
 
-        let s = if is_env_var_set(FM_ENABLE_MODULE_LNV2_ENV) {
-            s.with_module_kind(fedimint_lnv2_server::LightningInit)
-                .with_module_instance(
-                    fedimint_lnv2_server::LightningInit::kind(),
-                    fedimint_lnv2_common::config::LightningGenParams {
-                        local: fedimint_lnv2_common::config::LightningGenParamsLocal {
-                            bitcoin_rpc: bitcoind_rpc.clone(),
-                        },
-                        consensus: fedimint_lnv2_common::config::LightningGenParamsConsensus {
-                            // TODO: actually make the relative fee configurable
-                            fee_consensus: fedimint_lnv2_common::config::FeeConsensus::new(1_000)?,
-                            network,
-                        },
-                    },
-                )
-        } else {
-            s
-        };
-
         let s = if is_env_var_set(FM_DISABLE_META_MODULE_ENV) {
             s
         } else {
