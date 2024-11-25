@@ -969,6 +969,19 @@ pub async fn cli_tests(dev_fed: DevFed) -> Result<()> {
     // Assert balances changed by 2_000_000 msat (amount sent) + 0 msat (fee)
     let final_lnd_outgoing_client_balance = client.balance().await?;
     let final_lnd_outgoing_gateway_balance = gw_lnd.ecash_balance(fed_id.clone()).await?;
+
+    /*
+    this is the failing check
+    balance is off by 1%
+    Error: Client balance changed by 2020000 on LND outgoing payment, expected 2_000_000
+    */
+
+    anyhow::ensure!(
+        final_cln_incoming_client_balance - final_lnd_outgoing_client_balance == 2_000_000,
+        "Client balance changed by {} on LND outgoing payment, expected 2_000_000",
+        (final_cln_incoming_client_balance - final_lnd_outgoing_client_balance)
+    );
+
     // TODO: actually fix, but for now need to unblock further failures
     if gatewayd_version >= *VERSION_0_5_0_ALPHA {
         anyhow::ensure!(

@@ -309,12 +309,12 @@ tests_to_run_in_parallel+=(
   # "reconnect_test"
   # "lightning_reconnect_test"
   # "gateway_reboot_test"
-  "gateway_config_test_cln"
+  # "gateway_config_test_cln"
   # "gateway_config_test_lnd"
   # "gateway_restore_test"
   # "gateway_liquidity_test"
   # "lnv2_module"
-  # "devimint_cli_test"
+  "devimint_cli_test"
   # "devimint_cli_test_single"
   # "load_test_tool_test"
   # "recoverytool_tests"
@@ -367,7 +367,6 @@ joblog="$tmpdir/joblog"
 PATH="$(pwd)/scripts/dev/run-test/:$PATH"
 
 parallel_args+=(
-  --halt-on-error 1
   --joblog "$joblog"
   --noswap
   --memfree 2G
