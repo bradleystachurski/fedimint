@@ -12,6 +12,7 @@ use devimint::util::ProcessManager;
 use devimint::version_constants::{VERSION_0_3_0, VERSION_0_4_0_ALPHA, VERSION_0_5_0_ALPHA};
 use devimint::{cmd, util, Gatewayd, LightningNode};
 use fedimint_core::config::FederationId;
+use fedimint_core::envs::{is_env_var_set, FM_DEVIMINT_DISABLE_MODULE_LNV2_ENV};
 use fedimint_core::{Amount, BitcoinAmountOrAll};
 use fedimint_testing::gateway::LightningNodeType;
 use itertools::Itertools;
@@ -92,7 +93,9 @@ async fn backup_restore_test() -> anyhow::Result<()> {
 
             let fedimintd_version = crate::util::FedimintdCmd::version_or_default().await;
             // TODO: reconsider what version threshold to use, just getting tests to pass
-            let gw = if fedimintd_version >= *VERSION_0_5_0_ALPHA {
+            let gw = if fedimintd_version >= *VERSION_0_5_0_ALPHA
+                && !is_env_var_set(FM_DEVIMINT_DISABLE_MODULE_LNV2_ENV)
+            {
                 dev_fed
                     .gw_ldk_connected()
                     .await?
@@ -132,7 +135,9 @@ async fn backup_restore_test() -> anyhow::Result<()> {
             // Recovery with a backup does not work properly prior to v0.3.0
             let fedimintd_version = util::FedimintdCmd::version_or_default().await;
             // TODO: verify this with m1sterc001guy and tommy
-            if fedimintd_version >= *VERSION_0_5_0_ALPHA {
+            if fedimintd_version >= *VERSION_0_5_0_ALPHA
+                && !is_env_var_set(FM_DEVIMINT_DISABLE_MODULE_LNV2_ENV)
+            {
                 // Recover with a backup
                 info!("Wiping gateway and recovering with a backup...");
                 info!("Creating backup...");
