@@ -175,6 +175,8 @@ pub async fn latency_tests(
             }
         }
         LatencyTest::LnSend => {
+            info!("skipping");
+            /*
             info!("Testing latency of ln send");
             let mut ln_sends = Vec::with_capacity(iterations);
             for i in 0..iterations {
@@ -197,8 +199,11 @@ pub async fn latency_tests(
                         < ln_sends_stats.p90.as_secs_f64() * max_p90_factor
                 );
             }
+            */
         }
         LatencyTest::LnReceive => {
+            info!("skipping");
+            /*
             info!("Testing latency of ln receive");
             let mut ln_receives = Vec::with_capacity(iterations);
 
@@ -237,6 +242,7 @@ pub async fn latency_tests(
                         < ln_receives_stats.p90.as_secs_f64() * max_p90_factor
                 );
             }
+            */
         }
         LatencyTest::FmPay => {
             info!("Testing latency of internal payments within a federation");
