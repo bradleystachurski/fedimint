@@ -136,6 +136,8 @@ parallel_args+=(
 >&2 echo "## Starting all tests in parallel..."
 >&2 echo "parallel ${parallel_args[*]}"
 
+start=$(date +%s)  # Record start time in nanoseconds
+
 echo "$parsed_test_commands" | if parallel "${parallel_args[@]}"; then
   >&2 echo "All tests successful"
 else
@@ -143,3 +145,8 @@ else
   awk '{ if($7 != "0") print $0 "\n" }' < "$joblog"
   exit 1
 fi
+
+end=$(date +%s)    # Record end time in nanoseconds
+runtime=$((end - start)) # Calculate the difference
+echo "Runtime: $runtime seconds"
+
