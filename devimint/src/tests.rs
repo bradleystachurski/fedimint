@@ -385,8 +385,10 @@ async fn stress_test_fed(dev_fed: &DevFed, clients: Option<&UpgradeClients>) -> 
     // cause the upgrade test to fail
     let assert_thresholds = false;
 
+    // running only one iteration greatly improves the total test time while still
+    // testing the same types of database entries
     let iterations = 1;
-    
+
     // skip restore test for client upgrades, since restoring a client doesn't
     // require a persistent data dir
     let restore_test = if clients.is_some() {
