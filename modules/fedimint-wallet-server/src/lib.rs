@@ -626,7 +626,6 @@ impl ServerModule for Wallet {
                 )
             }
             WalletInput::V1(input) => {
-                info!("input.outpoint: {:?}", input.outpoint);
                 let input_tx_out = dbtx
                     .get_value(&UnspentTxOutKey(input.outpoint))
                     .await
