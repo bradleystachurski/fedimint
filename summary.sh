@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # File to search
 log_file="results.log"
 

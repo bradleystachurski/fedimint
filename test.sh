@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # for i in {1..10}; do
 #   RUST_BACKTRACE=1 \
 #   FM_DEVIMINT_DISABLE_MODULE_LNV2=1 \
