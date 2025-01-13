@@ -6,7 +6,8 @@ use fedimint_core::task::{MaybeSend, MaybeSync};
 use fedimint_core::{apply, async_trait_maybe_send, PeerId};
 use fedimint_wallet_common::endpoint_constants::{
     BITCOIN_KIND_ENDPOINT, BITCOIN_RPC_CONFIG_ENDPOINT, BLOCK_COUNT_ENDPOINT,
-    MODULE_CONSENSUS_VERSION_ENDPOINT, PEG_OUT_FEES_ENDPOINT, WALLET_SUMMARY_ENDPOINT,
+    MODULE_CONSENSUS_VERSION_ENDPOINT, PEG_OUT_FEES_ENDPOINT, UTXO_CONFIRMED_ENDPOINT,
+    WALLET_SUMMARY_ENDPOINT,
 };
 use fedimint_wallet_common::{PegOutFees, WalletSummary};
 
@@ -27,6 +28,8 @@ pub trait WalletFederationApi {
     async fn fetch_bitcoin_rpc_config(&self, auth: ApiAuth) -> FederationResult<BitcoinRpcConfig>;
 
     async fn fetch_wallet_summary(&self) -> FederationResult<WalletSummary>;
+
+    async fn is_utxo_confirmed(&self, outpoint: bitcoin::OutPoint) -> FederationResult<bool>;
 }
 
 #[apply(async_trait_maybe_send!)]
@@ -51,6 +54,26 @@ where
         }
 
         response
+    }
+
+    async fn is_utxo_confirmed(&self, outpoint: bitcoin::OutPoint) -> FederationResult<bool> {
+        let res = self
+            .request_current_consensus(
+                UTXO_CONFIRMED_ENDPOINT.to_string(),
+                ApiRequestErased::new(outpoint),
+            )
+            .await;
+
+        fedimint_core::util::write_log(&format!("res: {:?}", res));
+
+        if let Err(e) = &res {
+            if e.any_peer_error_method_not_found() {
+                fedimint_core::util::write_log(&format!("any_peer_error_method_not_found worked!"));
+                return Ok(false);
+            }
+        }
+
+        res
     }
 
     async fn fetch_consensus_block_count(&self) -> FederationResult<u64> {

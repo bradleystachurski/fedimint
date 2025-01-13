@@ -185,12 +185,15 @@ fn transition_deposit_timeout(old_state: &DepositStateMachine) -> DepositStateMa
     }
 }
 
+// TODO: verify that we're still using the deposit state machine
+// otherwise, we don't even need to touch this, since it would
+// likely require a migration
 #[instrument(target = LOG_CLIENT_MODULE_WALLET, skip_all, level = "debug")]
 async fn await_btc_transaction_confirmed(
     context: WalletClientContext,
     global_context: DynGlobalClientContext,
     waiting_state: WaitingForConfirmationsDepositState,
-) -> (TxOutProof, ModuleConsensusVersion) {
+) -> (TxOutProof, bool) {
     loop {
         // TODO: make everything subscriptions
         // Wait for confirmation
@@ -249,8 +252,21 @@ async fn await_btc_transaction_confirmed(
             }
         };
 
-        debug!(proof_block_hash = ?txout_proof.block_header.block_hash(), "Generated merkle proof");
+        // TODO: if works, refactor higher so we only compute once
+        let outpoint = bitcoin::OutPoint::new(
+            waiting_state.btc_transaction.compute_txid(),
+            waiting_state.out_idx,
+        );
 
+        debug!(proof_block_hash = ?txout_proof.block_header.block_hash(), "Generated merkle proof");
+        let utxo_is_known = global_context
+            .module_api()
+            .is_utxo_confirmed(outpoint)
+            .await
+            .expect("TODO: bleh");
+
+        // TODO: also here
+        /*
         let consensus_version = match global_context.module_api().module_consensus_version().await {
             Ok(version) => version,
             Err(e) => {
@@ -259,8 +275,9 @@ async fn await_btc_transaction_confirmed(
                 continue;
             }
         };
+        */
 
-        return (txout_proof, consensus_version);
+        return (txout_proof, utxo_is_known);
     }
 }
 
@@ -268,7 +285,7 @@ pub(crate) async fn transition_btc_tx_confirmed(
     dbtx: &mut ClientSMDatabaseTransaction<'_, '_>,
     global_context: DynGlobalClientContext,
     old_state: DepositStateMachine,
-    (txout_proof, consensus_version): (TxOutProof, ModuleConsensusVersion),
+    (txout_proof, utxo_is_known): (TxOutProof, bool),
 ) -> DepositStateMachine {
     let DepositStates::WaitingForConfirmations(awaiting_confirmation_state) = old_state.state
     else {
@@ -285,7 +302,7 @@ pub(crate) async fn transition_btc_tx_confirmed(
 
     let amount = pegin_proof.tx_output().value.into();
 
-    let wallet_input = if consensus_version >= ModuleConsensusVersion::new(2, 2) {
+    let wallet_input = if utxo_is_known {
         WalletInput::new_v1(&pegin_proof)
     } else {
         WalletInput::new_v0(pegin_proof)

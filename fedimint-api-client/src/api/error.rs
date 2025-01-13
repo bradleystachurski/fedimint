@@ -6,6 +6,7 @@ use fedimint_core::fmt_utils::AbbreviateJson;
 use fedimint_core::PeerId;
 use fedimint_logging::LOG_CLIENT_NET_API;
 use jsonrpsee_core::client::Error as JsonRpcClientError;
+use jsonrpsee_types::error::METHOD_NOT_FOUND_CODE;
 #[cfg(target_family = "wasm")]
 use jsonrpsee_wasm_client::{Client as WsClient, WasmClientBuilder as WsClientBuilder};
 use serde::Serialize;
@@ -167,6 +168,35 @@ impl FederationError {
     pub fn get_peer_errors(&self) -> impl Iterator<Item = (PeerId, &PeerError)> {
         self.peer_errors.iter().map(|(peer, error)| (*peer, error))
     }
+
+    pub fn any_peer_error_method_not_found(&self) -> bool {
+        self.peer_errors.values().any(|peer_err| {
+            matches!(
+                peer_err,
+                PeerError::Rpc(JsonRpcClientError::Call(err)) if err.code() == METHOD_NOT_FOUND_CODE
+            )
+        })
+    }
+
+    /*
+    pub fn any_peer_error_method_not_found(&self) -> bool {
+        self.peer_errors.values().any(|peer_err| match peer_err {
+            PeerError::Rpc(JsonRpcClientError::Call(err)) => err.code() == METHOD_NOT_FOUND_CODE,
+            _ => false,
+        })
+
+        /*
+        for e in self.peer_errors.values() {
+            if let PeerError::Rpc(JsonRpcClientError::Call(special_error)) = e {
+                if special_error.code() == METHOD_NOT_FOUND_CODE {
+                    return true;
+                }
+            }
+        }
+        false
+        */
+    }
+    */
 }
 
 #[derive(Debug, Error)]
