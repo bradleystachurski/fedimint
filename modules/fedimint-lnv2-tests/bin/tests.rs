@@ -34,11 +34,6 @@ async fn main() -> anyhow::Result<()> {
             return Ok(());
         }
 
-        if is_env_var_set(FM_DEVIMINT_DISABLE_MODULE_LNV2_ENV) {
-            info!("lnv2 is disabled, skipping");
-            return Ok(());
-        }
-
         test_gateway_registration(&dev_fed).await?;
         test_payments(&dev_fed).await?;
 

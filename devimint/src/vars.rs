@@ -102,6 +102,8 @@ use fedimint_server::net::api::ApiSecrets;
 use fedimintd::envs::FM_FORCE_API_SECRETS_ENV;
 use format as f;
 
+use crate::version_constants::{VERSION_0_4_0_ALPHA, VERSION_0_5_0, VERSION_0_6_0_ALPHA};
+
 pub fn utf8(path: &Path) -> &str {
     path.as_os_str().to_str().expect("must be valid utf8")
 }
@@ -110,7 +112,7 @@ declare_vars! {
     Global = (test_dir: &Path, fed_size: usize, offline_nodes: usize) =>
     {
         FM_USE_UNKNOWN_MODULE: String = std::env::var(FM_USE_UNKNOWN_MODULE_ENV).unwrap_or_else(|_| "1".into()); env: "FM_USE_UNKNOWN_MODULE";
-        FM_ENABLE_MODULE_LNV2: String = if is_env_var_set(FM_DEVIMINT_DISABLE_MODULE_LNV2_ENV) { "0".to_owned() } else { "1".into() }; env: FM_ENABLE_MODULE_LNV2_ENV;
+        FM_ENABLE_MODULE_LNV2: String = if crate::util::FedimintdCmd::version_or_default().await < *VERSION_0_5_0 { "0".to_owned() } else { "1".into() }; env: FM_ENABLE_MODULE_LNV2_ENV;
 
 
         FM_FORCE_API_SECRETS: ApiSecrets = std::env::var(FM_FORCE_API_SECRETS_ENV).ok().and_then(|s| {

@@ -12,11 +12,10 @@ use devimint::envs::FM_DATA_DIR_ENV;
 use devimint::federation::Federation;
 use devimint::util::ProcessManager;
 use devimint::version_constants::{
-    VERSION_0_3_0, VERSION_0_4_0, VERSION_0_5_0_ALPHA, VERSION_0_6_0_ALPHA,
+    VERSION_0_3_0, VERSION_0_4_0, VERSION_0_5_0, VERSION_0_6_0_ALPHA,
 };
 use devimint::{cmd, util, Gatewayd, LightningNode};
 use fedimint_core::config::FederationId;
-use fedimint_core::envs::{is_env_var_set, FM_DEVIMINT_DISABLE_MODULE_LNV2_ENV};
 use fedimint_core::util::backoff_util::aggressive_backoff_long;
 use fedimint_core::util::retry;
 use fedimint_core::{Amount, BitcoinAmountOrAll};
@@ -83,12 +82,12 @@ async fn backup_restore_test() -> anyhow::Result<()> {
     Box::pin(devimint::run_devfed_test(
         |dev_fed, process_mgr| async move {
             let gatewayd_version = util::Gatewayd::version_or_default().await;
-            if gatewayd_version < *VERSION_0_5_0_ALPHA {
+            if gatewayd_version < *VERSION_0_5_0 {
                 warn!("Gateway backup-restore is not supported below v0.5.0");
                 return Ok(());
             }
 
-            let gw = if is_env_var_set(FM_DEVIMINT_DISABLE_MODULE_LNV2_ENV) {
+            let gw = if gatewayd_version < *VERSION_0_5_0 {
                 dev_fed.gw_lnd_registered().await?
             } else {
                 dev_fed
@@ -121,7 +120,7 @@ async fn backup_restore_test() -> anyhow::Result<()> {
             // Recovery with a backup does not work properly prior to v0.3.0
             let fedimintd_version = util::FedimintdCmd::version_or_default().await;
             if fedimintd_version >= *VERSION_0_3_0
-                && !is_env_var_set(FM_DEVIMINT_DISABLE_MODULE_LNV2_ENV)
+                && !(gatewayd_version < *VERSION_0_5_0 || fedimintd_version < *VERSION_0_5_0)
             {
                 // Recover with a backup
                 info!("Wiping gateway and recovering with a backup...");
@@ -238,7 +237,7 @@ async fn mnemonic_upgrade_test(
 
         // Gateway mnemonic is only support in >= v0.5.0
         let new_gatewayd_version = util::Gatewayd::version_or_default().await;
-        if new_gatewayd_version < *VERSION_0_5_0_ALPHA {
+        if new_gatewayd_version < *VERSION_0_5_0 {
             warn!("Gateway mnemonic test is not supported below v0.5.0");
             return Ok(());
         }
@@ -302,7 +301,7 @@ async fn config_test(gw_type: LightningNodeType) -> anyhow::Result<()> {
     Box::pin(devimint::run_devfed_test(
         |dev_fed, process_mgr| async move {
             let gatewayd_version = util::Gatewayd::version_or_default().await;
-            if gatewayd_version < *VERSION_0_5_0_ALPHA && gw_type == LightningNodeType::Ldk {
+            if gatewayd_version < *VERSION_0_5_0 && gw_type == LightningNodeType::Ldk {
                 return Ok(());
             }
 
@@ -371,9 +370,7 @@ async fn config_test(gw_type: LightningNodeType) -> anyhow::Result<()> {
 
                 // TODO(support:v0.4): a bug calling `gateway-cli config` was fixed in v0.5.0
                 // see: https://github.com/fedimint/fedimint/pull/5803
-                if gatewayd_version >= *VERSION_0_5_0_ALPHA
-                    && gatewayd_version < *VERSION_0_6_0_ALPHA
-                {
+                if gatewayd_version >= *VERSION_0_5_0 && gatewayd_version < *VERSION_0_6_0_ALPHA {
                     // Get the federation's config and verify it parses correctly
                     let config_val = cmd!(gw, "config", "--federation-id", fed_id)
                         .out_json()
@@ -519,7 +516,7 @@ async fn liquidity_test() -> anyhow::Result<()> {
         let gatewayd_version = util::Gatewayd::version_or_default().await;
         // LDK Gateway is not available when fedimintd version is < v0.5
         let fedimintd_version = util::FedimintdCmd::version_or_default().await;
-        if gatewayd_version < *VERSION_0_5_0_ALPHA || fedimintd_version < *VERSION_0_5_0_ALPHA || is_env_var_set(FM_DEVIMINT_DISABLE_MODULE_LNV2_ENV) {
+        if gatewayd_version < *VERSION_0_5_0 || fedimintd_version < *VERSION_0_5_0 {
             info!(%gatewayd_version, "Version did not support gateway liquidity management, skipping");
             return Ok(());
         }
@@ -624,10 +621,10 @@ async fn leave_federation(gw: &Gatewayd, fed_id: String, expected_scid: u64) -> 
 
     // TODO(support:v0.4): `federation_index` was introduced in v0.5.0
     // see: https://github.com/fedimint/fedimint/pull/5971
-    let scid = if gatewayd_version < *VERSION_0_5_0_ALPHA {
+    let scid = if gatewayd_version < *VERSION_0_5_0 {
         let channel_id: Option<u64> = serde_json::from_value(leave_fed["channel_id"].clone())?;
         channel_id.expect("must have channel id")
-    } else if gatewayd_version >= *VERSION_0_5_0_ALPHA && gatewayd_version < *VERSION_0_6_0_ALPHA {
+    } else if gatewayd_version >= *VERSION_0_5_0 && gatewayd_version < *VERSION_0_6_0_ALPHA {
         serde_json::from_value::<u64>(leave_fed["federation_index"].clone())?
     } else {
         serde_json::from_value::<u64>(leave_fed["config"]["federation_index"].clone())?

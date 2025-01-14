@@ -22,7 +22,7 @@ use fedimintd::default_esplora_server;
 use fedimintd::envs::FM_DISABLE_META_MODULE_ENV;
 use legacy_types::{LegacyFeeConsensus, LegacyMintGenParams, LegacyMintGenParamsConsensus};
 
-use crate::version_constants::VERSION_0_5_0_ALPHA;
+use crate::version_constants::VERSION_0_5_0;
 
 /// Duplicate default fedimint module setup
 pub fn attach_default_module_init_params(
@@ -45,7 +45,7 @@ pub fn attach_default_module_init_params(
     // TODO(support:v0.4): v0.5 introduced relative fees for the mint module by
     // changing the field names for FeeConsensus. We need to support the old fields
     // in devimint since fedimint-cli uses JSON encoding for admin dkg
-    if fedimintd_version >= &VERSION_0_5_0_ALPHA {
+    if fedimintd_version >= &VERSION_0_5_0 {
         module_init_params.attach_config_gen_params(
             MintInit::kind(),
             MintGenParams {
@@ -83,9 +83,7 @@ pub fn attach_default_module_init_params(
 
     // TODO(support:v0.3): v0.5 introduced lnv2 modules, so we need to skip
     // attaching the module for old fedimintd versions
-    if fedimintd_version >= &VERSION_0_5_0_ALPHA
-        && !is_env_var_set(FM_DEVIMINT_DISABLE_MODULE_LNV2_ENV)
-    {
+    if fedimintd_version >= &VERSION_0_5_0 {
         module_init_params.attach_config_gen_params(
             fedimint_lnv2_server::LightningInit::kind(),
             fedimint_lnv2_common::config::LightningGenParams {

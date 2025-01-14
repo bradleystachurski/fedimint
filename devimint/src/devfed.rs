@@ -16,7 +16,7 @@ use crate::external::{
 use crate::federation::{Client, Federation};
 use crate::gatewayd::Gatewayd;
 use crate::util::ProcessManager;
-use crate::version_constants::{VERSION_0_4_0_ALPHA, VERSION_0_5_0_ALPHA};
+use crate::version_constants::{VERSION_0_4_0_ALPHA, VERSION_0_5_0};
 use crate::LightningNode;
 
 async fn spawn_drop<T>(t: T)
@@ -222,11 +222,7 @@ impl DevJitFed {
                 // TODO(support:v0.4.0): Only run LDK gateway when the federation supports LNv2
                 let fedimintd_version = crate::util::FedimintdCmd::version_or_default().await;
                 let gatewayd_version = crate::util::Gatewayd::version_or_default().await;
-                if gatewayd_version >= *VERSION_0_5_0_ALPHA
-                    && fedimintd_version >= *VERSION_0_5_0_ALPHA
-                    // and lnv2 was not explicitly disabled
-                    && !is_env_var_set(FM_DEVIMINT_DISABLE_MODULE_LNV2_ENV)
-                {
+                if gatewayd_version >= *VERSION_0_5_0 && fedimintd_version >= *VERSION_0_5_0 {
                     debug!(target: LOG_DEVIMINT, "Starting ldk gateway...");
                     let start_time = fedimint_core::time::now();
                     let ldk_gw = Gatewayd::new(&process_mgr, LightningNode::Ldk).await?;
@@ -273,10 +269,9 @@ impl DevJitFed {
 
                 let bitcoind = bitcoind.get_try().await?.deref().clone();
 
-                if gateway_cli_version <= *VERSION_0_4_0_ALPHA
-                    || gatewayd_version <= *VERSION_0_4_0_ALPHA
-                    || fedimintd_version <= *VERSION_0_4_0_ALPHA
-                    || is_env_var_set(FM_DEVIMINT_DISABLE_MODULE_LNV2_ENV)
+                if gateway_cli_version < *VERSION_0_5_0
+                    || gatewayd_version < *VERSION_0_5_0
+                    || fedimintd_version < *VERSION_0_5_0
                 {
                     let lnd = lnd.get_try().await?.deref().clone();
                     let cln = cln.get_try().await?.deref().clone();

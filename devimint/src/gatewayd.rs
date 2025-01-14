@@ -24,7 +24,7 @@ use crate::external::{Bitcoind, LightningNode};
 use crate::federation::Federation;
 use crate::util::{poll, Command, ProcessHandle, ProcessManager};
 use crate::vars::utf8;
-use crate::version_constants::{VERSION_0_4_0_ALPHA, VERSION_0_5_0_ALPHA, VERSION_0_6_0_ALPHA};
+use crate::version_constants::{VERSION_0_4_0_ALPHA, VERSION_0_5_0, VERSION_0_6_0_ALPHA};
 
 #[derive(Clone)]
 pub struct Gatewayd {
@@ -65,9 +65,7 @@ impl Gatewayd {
         // TODO(support:v0.4.0): Run the gateway in LNv1 mode only before v0.5.0 because
         // that is the only module it supported.
         let fedimintd_version = crate::util::FedimintdCmd::version_or_default().await;
-        if fedimintd_version < *VERSION_0_5_0_ALPHA
-            || is_env_var_set(FM_DEVIMINT_DISABLE_MODULE_LNV2_ENV)
-        {
+        if fedimintd_version < *VERSION_0_5_0 {
             gateway_env.insert(
                 FM_GATEWAY_LIGHTNING_MODULE_MODE_ENV.to_owned(),
                 "LNv1".to_string(),
@@ -239,7 +237,7 @@ impl Gatewayd {
 
         // TODO(support:v0.4): `ecash pegin` was introduced in v0.5.0
         // see: https://github.com/fedimint/fedimint/pull/6270
-        let address = if gateway_cli_version < *VERSION_0_5_0_ALPHA {
+        let address = if gateway_cli_version < *VERSION_0_5_0 {
             cmd!(self, "address", "--federation-id={fed_id}")
                 .out_json()
                 .await?
@@ -259,7 +257,7 @@ impl Gatewayd {
 
     pub async fn get_ln_onchain_address(&self) -> Result<String> {
         let gateway_cli_version = crate::util::GatewayCli::version_or_default().await;
-        let address = if gateway_cli_version < *VERSION_0_5_0_ALPHA {
+        let address = if gateway_cli_version < *VERSION_0_5_0 {
             cmd!(self, "lightning", "get-funding-address")
                 .out_string()
                 .await?
@@ -342,7 +340,7 @@ impl Gatewayd {
         let gateway_cli_version = crate::util::GatewayCli::version_or_default().await;
         // TODO(support:v0.4): `get_balances` was introduced in v0.5.0
         // see: https://github.com/fedimint/fedimint/pull/5823
-        if gateway_cli_version < *VERSION_0_5_0_ALPHA {
+        if gateway_cli_version < *VERSION_0_5_0 {
             let ecash_balance = cmd!(self, "balance", "--federation-id={federation_id}",)
                 .out_json()
                 .await?
@@ -440,7 +438,7 @@ impl Gatewayd {
         );
 
         let gatewayd_version = crate::util::Gatewayd::version_or_default().await;
-        if gatewayd_version < *VERSION_0_5_0_ALPHA {
+        if gatewayd_version < *VERSION_0_5_0 {
             command.run().await?;
 
             Ok(None)
