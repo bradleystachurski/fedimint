@@ -350,6 +350,8 @@ impl Federation {
         }
 
         if !skip_setup {
+            fedimint_core::util::write_log(&format!("inside !skip_setup"));
+
             let fedimint_cli_version = crate::util::FedimintCli::version_or_default().await;
 
             if fedimint_cli_version >= *VERSION_0_7_0_ALPHA {
@@ -1048,8 +1050,70 @@ pub async fn run_cli_dkg(
     params: HashMap<PeerId, ConfigGenParams>,
     endpoints: BTreeMap<PeerId, String>,
 ) -> Result<()> {
+    info!("inside run_cli_dkg");
+    fedimint_core::util::write_log("inside run_cli_dkg");
+    let fm_test_dir = std::env::var("FM_TEST_DIR")?;
+    fedimint_core::util::write_log(&format!("fm_test_dir: {}", &fm_test_dir));
+    // TODO: swap cli to match fedimintd
+    // then at end swap back to existing fedimint-cli path
+
+    // steps
+    // 1. get fedimintd version
+    // 2. convert version -> tr '-' "_" | tr '.' '_'
+    // 3. set fedimint-cli path to fm_bin_fedimint_cli_parsed_version
+    let fedimintd_version = crate::util::FedimintdCmd::version_or_default().await;
+    fedimint_core::util::write_log(&format!(
+        "fedimintd version before switch: {}",
+        fedimintd_version
+    ));
+
+    let parsed_fedimintd_version = crate::util::FedimintdCmd::version_or_default()
+        .await
+        .to_string()
+        .replace("-", "_")
+        .replace(".", "_");
+
+    // matches the format defined by nix_binary_version_var_name in
+    // scripts/_common.sh
+    let fedimint_cli_path_var = format!("fm_bin_fedimint_cli_v{parsed_fedimintd_version}");
+    fedimint_core::util::write_log(&format!(
+        "fedimint_cli_path_var: {}",
+        &fedimint_cli_path_var
+    ));
+    let fedimint_cli_path = std::env::var(fedimint_cli_path_var)?;
+    fedimint_core::util::write_log(&format!("fedimint_cli_path: {}", &fedimint_cli_path));
+
+    let original_fedimint_cli_path = crate::util::get_fedimint_cli_path().join(" ");
+    fedimint_core::util::write_log(&format!(
+        "original_fedimint_cli_path: {}",
+        &original_fedimint_cli_path
+    ));
+    std::env::set_var("FM_FEDIMINT_CLI_BASE_EXECUTABLE", fedimint_cli_path);
+
+    let original_fm_mint_client = std::env::var("FM_MINT_CLIENT")?;
+    let fm_client_dir = std::env::var("FM_CLIENT_DIR")?;
+    fedimint_core::util::write_log(&format!("fm_client_dir: {fm_client_dir}"));
+    let fm_client_dir_path_buf: PathBuf = PathBuf::from(fm_client_dir);
+    fedimint_core::util::write_log(&format!(
+        "original_fm_mint_client: {original_fm_mint_client}"
+    ));
+
+    let fm_mint_client: String = format!(
+        "{fedimint_cli} --data-dir {datadir}",
+        fedimint_cli = crate::util::get_fedimint_cli_path().join(" "),
+        datadir = crate::vars::utf8(&fm_client_dir_path_buf)
+    );
+    fedimint_core::util::write_log(&format!("fm_mint_client: {fm_mint_client}"));
+    // TODO: do we need to unset here after? probably
+    std::env::set_var("FM_MINT_CLIENT", fm_mint_client);
+
+    let fedimint_cli_version = crate::util::FedimintCli::version_or_default().await;
+    fedimint_core::util::write_log("fedimint_cli_version after switch");
+    fedimint_core::util::write_log(&format!("fedimint_cli_version: {fedimint_cli_version}"));
+
     let auth_for = |peer: &PeerId| -> &ApiAuth { &params[peer].local.api_auth };
 
+    fedimint_core::util::write_log(&format!("Running DKG"));
     debug!(target: LOG_DEVIMINT, "Running DKG");
     for endpoint in endpoints.values() {
         poll("trying-to-connect-to-peers", || async {
@@ -1062,6 +1126,7 @@ pub async fn run_cli_dkg(
         .await?;
     }
 
+    fedimint_core::util::write_log(&format!("Connected to all peers"));
     debug!(target: LOG_DEVIMINT, "Connected to all peers");
 
     for (peer_id, endpoint) in &endpoints {
@@ -1073,6 +1138,7 @@ pub async fn run_cli_dkg(
         );
     }
 
+    fedimint_core::util::write_log(&format!("Setting passwords"));
     debug!(target: LOG_DEVIMINT, "Setting passwords");
     for (peer_id, endpoint) in &endpoints {
         crate::util::FedimintCli
@@ -1085,6 +1151,7 @@ pub async fn run_cli_dkg(
         .filter(|(id, _)| *id != leader_id)
         .collect::<BTreeMap<_, _>>();
 
+    fedimint_core::util::write_log(&format!("calling set_config_gen_connections for leader"));
     debug!(target: LOG_DEVIMINT, "calling set_config_gen_connections for leader");
     let leader_name = "leader".to_string();
     crate::util::FedimintCli
@@ -1097,6 +1164,7 @@ pub async fn run_cli_dkg(
 
     let server_gen_params = &params[leader_id].consensus.modules;
 
+    fedimint_core::util::write_log(&format!("calling set_config_gen_params for leader"));
     debug!(target: LOG_DEVIMINT, "calling set_config_gen_params for leader");
     cli_set_config_gen_params(
         leader_endpoint,
@@ -1123,6 +1191,9 @@ pub async fn run_cli_dkg(
         let name = followers_names
             .get(peer_id)
             .context("missing follower name")?;
+        fedimint_core::util::write_log(&format!(
+            "calling set_config_gen_connections for {peer_id} {name}"
+        ));
         debug!(target: LOG_DEVIMINT, "calling set_config_gen_connections for {peer_id} {name}");
 
         crate::util::FedimintCli
@@ -1132,6 +1203,7 @@ pub async fn run_cli_dkg(
         cli_set_config_gen_params(endpoint, auth_for(peer_id), server_gen_params.clone()).await?;
     }
 
+    fedimint_core::util::write_log(&format!("calling get_config_gen_peers for leader"));
     debug!(target: LOG_DEVIMINT, "calling get_config_gen_peers for leader");
     let peers = crate::util::FedimintCli
         .get_config_gen_peers(leader_endpoint)
@@ -1148,9 +1220,11 @@ pub async fn run_cli_dkg(
         .collect::<HashSet<_>>();
     assert_eq!(found_names, all_names);
 
+    fedimint_core::util::write_log(&format!("Waiting for SharingConfigGenParams"));
     debug!(target: LOG_DEVIMINT, "Waiting for SharingConfigGenParams");
     cli_wait_server_status(leader_endpoint, ServerStatusLegacy::SharingConfigGenParams).await?;
 
+    fedimint_core::util::write_log(&format!("Getting consensus configs"));
     debug!(target: LOG_DEVIMINT, "Getting consensus configs");
     let mut configs = vec![];
     for endpoint in endpoints.values() {
@@ -1172,6 +1246,7 @@ pub async fn run_cli_dkg(
     let dkg_results = endpoints
         .iter()
         .map(|(peer_id, endpoint)| crate::util::FedimintCli.run_dkg(auth_for(peer_id), endpoint));
+    fedimint_core::util::write_log(&format!("Running DKG"));
     debug!(target: LOG_DEVIMINT, "Running DKG");
     let (dkg_results, leader_wait_result) = tokio::join!(
         join_all(dkg_results),
@@ -1183,6 +1258,7 @@ pub async fn run_cli_dkg(
     leader_wait_result?;
 
     // verify config hashes equal for all peers
+    fedimint_core::util::write_log(&format!("Verifying config hashes"));
     debug!(target: LOG_DEVIMINT, "Verifying config hashes");
     let mut hashes = HashSet::new();
     for (peer_id, endpoint) in &endpoints {
@@ -1202,6 +1278,16 @@ pub async fn run_cli_dkg(
         }
         cli_wait_server_status(endpoint, ServerStatusLegacy::ConsensusRunning).await?;
     }
+
+    // we're done with dkg, use original fedimint-cli version
+    std::env::set_var(
+        "FM_FEDIMINT_CLI_BASE_EXECUTABLE",
+        original_fedimint_cli_path,
+    );
+
+    // trying to reset fm_mint_client_dir
+    std::env::set_var("FM_MINT_CLIENT", original_fm_mint_client);
+
     Ok(())
 }
 
@@ -1473,9 +1559,11 @@ async fn cli_set_config_gen_params(
     auth: &ApiAuth,
     mut server_gen_params: ServerModuleConfigGenParamsRegistry,
 ) -> Result<()> {
+    fedimint_core::util::write_log(&format!("inside cli_set_config_gen_params"));
     // TODO(support:v0.3): v0.4 introduced lnv2 modules, so we need to skip
     // attaching the module for old fedimintd versions
     let fedimintd_version = crate::util::FedimintdCmd::version_or_default().await;
+    fedimint_core::util::write_log(&format!("fedimintd_version: {}", &fedimintd_version));
     self::config::attach_default_module_init_params(
         &BitcoinRpcConfig::get_defaults_from_env_vars()?,
         &mut server_gen_params,
@@ -1483,6 +1571,7 @@ async fn cli_set_config_gen_params(
         10,
         &fedimintd_version,
     );
+    fedimint_core::util::write_log(&format!("parsing FM_EXTRA_DKG_META_ENV"));
     // Since we are not actually calling `fedimintd` binary, parse and handle
     // `FM_EXTRA_META_DATA` like it would do.
     let extra_meta_data = parse_map(
@@ -1497,9 +1586,13 @@ async fn cli_set_config_gen_params(
             .chain(extra_meta_data)
             .collect();
 
+    fedimint_core::util::write_log(&format!("calling set_config_gen_params"));
+    let fedimint_cli_version = crate::util::FedimintCli::version_or_default().await;
+    fedimint_core::util::write_log(&format!("fedimint_cli_version: {}", &fedimint_cli_version));
     crate::util::FedimintCli
         .set_config_gen_params(auth, endpoint, meta, server_gen_params)
         .await?;
+    fedimint_core::util::write_log(&format!("past calling set_config_gen_params"));
     Ok(())
 }
 

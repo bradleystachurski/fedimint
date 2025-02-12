@@ -483,6 +483,7 @@ pub async fn upgrade_tests(process_mgr: &ProcessManager, binary: UpgradeTest) ->
         UpgradeTest::FedimintCli { paths } => {
             let set_fedimint_cli_path = |path: &PathBuf| {
                 std::env::set_var("FM_FEDIMINT_CLI_BASE_EXECUTABLE", path);
+                // might need to do something similar to this
                 let fm_mint_client: String = format!(
                     "{fedimint_cli} --data-dir {datadir}",
                     fedimint_cli = crate::util::get_fedimint_cli_path().join(" "),

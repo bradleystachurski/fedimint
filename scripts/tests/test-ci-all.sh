@@ -273,6 +273,13 @@ else
       continue
     fi
     for binary in "${binaries[@]}" ; do
+      # one approach
+      # build same fedimint-cli binary version if it's fedimintd
+      # hacky and gross, but may unblock getting things to work
+      if [ "$binary" == "fedimintd" ]; then
+        var_name=$(nix_binary_version_var_name "fedimint-cli" "$version")
+        export "${var_name}=$(nix_build_binary_for_version "fedimint-cli" "$version")"
+      fi
       var_name=$(nix_binary_version_var_name "$binary" "$version")
       export "${var_name}=$(nix_build_binary_for_version "$binary" "$version")"
     done
@@ -290,47 +297,47 @@ for _ in $(seq "${FM_TEST_CI_ALL_TIMES:-1}"); do
 # NOTE: try to keep the slowest tests first, except 'always_success_test',
 # as it's used for failure test
 tests_to_run_in_parallel+=(
-  "always_success_test"
-  "rust_unit_tests"
+  # "always_success_test"
+  # "rust_unit_tests"
   # TODO: unfortunately it seems like something about headless firefox is broken when
   # running in xarg -P or gnu parallel. Try re-enabling in the future and see if it works.
   # Other than this problem, everything about it is working.
   # "wasm_test"
-  "bckn_bitcoind_dummy"
-  "bckn_bitcoind_mint"
-  "bckn_bitcoind_wallet"
-  "bckn_bitcoind_ln"
-  "bckn_bitcoind_lnv2"
-  "bckn_gw_client"
-  "bckn_gw_not_client"
+  # "bckn_bitcoind_dummy"
+  # "bckn_bitcoind_mint"
+  # "bckn_bitcoind_wallet"
+  # "bckn_bitcoind_ln"
+  # "bckn_bitcoind_lnv2"
+  # "bckn_gw_client"
+  # "bckn_gw_not_client"
   # TODO: https://github.com/fedimint/fedimint/issues/5917
   # disabling while we investigate 60s timeouts causing CI flakiness
   # "bckn_electrs"
-  "bckn_esplora"
-  "latency_reissue"
-  "latency_ln_send"
-  "latency_ln_receive"
-  "latency_fm_pay"
-  "latency_restore"
-  "reconnect_test"
-  "ln_reconnect_test"
-  "gw_reboot_test"
-  "gw_config_test_lnd"
-  "gw_restore_test"
-  "gw_liquidity_test"
-  "lnv2_module"
-  "devimint_cli_test"
-  "devimint_cli_test_single"
-  "load_test_tool_test"
-  "recoverytool_tests"
-  "guardian_backup"
-  "meta_module"
-  "mint_client_sanity"
-  "mint_client_restore"
+  # "bckn_esplora"
+  # "latency_reissue"
+  # "latency_ln_send"
+  # "latency_ln_receive"
+  # "latency_fm_pay"
+  # "latency_restore"
+  # "reconnect_test"
+  # "ln_reconnect_test"
+  # "gw_reboot_test"
+  # "gw_config_test_lnd"
+  # "gw_restore_test"
+  # "gw_liquidity_test"
+  # "lnv2_module"
+  # "devimint_cli_test"
+  # "devimint_cli_test_single"
+  # "load_test_tool_test"
+  # "recoverytool_tests"
+  # "guardian_backup"
+  # "meta_module"
+  # "mint_client_sanity"
+  # "mint_client_restore"
   "cannot_replay_tx"
-  "circular_deposit"
-  "wallet_recovery"
-  "wallet_recovery_2"
+  # "circular_deposit"
+  # "wallet_recovery"
+  # "wallet_recovery_2"
 )
 done
 

@@ -504,6 +504,17 @@ pub fn get_average(vals: &[u64]) -> Option<u64> {
     Some(sum / vals.len() as u64)
 }
 
+pub fn write_log(message: &str) {
+    use std::fs::OpenOptions;
+    let path = format!("/home/stachurski/code/fedimint/debug.log");
+    let mut f = OpenOptions::new()
+        .append(true)
+        .create(true)
+        .open(path)
+        .unwrap();
+    f.write_all(format!("{message}\n").as_bytes()).unwrap();
+}
+
 #[cfg(test)]
 mod tests {
     use std::sync::atomic::{AtomicU8, Ordering};
