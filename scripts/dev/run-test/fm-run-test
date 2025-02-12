@@ -30,11 +30,11 @@ on_error() {
 on_exit() {
     echo "on_exit"
     cat "$test_out_path"
-    exit_status=$?
-    if [ $exit_status -eq 0 ]; then
-        # if successful, don't waste space keeping the test dir
-        rm -Rf "$FM_RUN_TEST_TMPDIR"
-    fi
+    # exit_status=$?
+    # if [ $exit_status -eq 0 ]; then
+    #     # if successful, don't waste space keeping the test dir
+    #     rm -Rf "$FM_RUN_TEST_TMPDIR"
+    # fi
 }
 trap on_error ERR
 trap on_exit EXIT

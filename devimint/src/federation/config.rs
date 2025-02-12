@@ -32,7 +32,6 @@ pub fn attach_default_module_init_params(
     finality_delay: u32,
     fedimintd_version: &semver::Version,
 ) {
-    fedimint_core::util::write_log(&format!("inside attach_default_module_init_params"));
     module_init_params.attach_config_gen_params(
         LightningInit::kind(),
         LightningGenParams {
@@ -110,7 +109,6 @@ pub fn attach_default_module_init_params(
         module_init_params
             .attach_config_gen_params(UnknownInit::kind(), UnknownGenParams::default());
     }
-    fedimint_core::util::write_log(&format!("at the end of attach_default_module_init_params"));
 }
 
 mod legacy_types {
