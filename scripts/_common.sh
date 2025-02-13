@@ -191,14 +191,16 @@ export -f use_gateway_binaries_for_version
 #   $2+ - versions: Variadic versions to include (e.g. v0.2.1 v0.2.2)
 # Returns: Array of strings where each element is a matrix row of version combinations
 function generate_matrix() {
-  _filter_fn="$1"
+  filter_fn="$1"
   shift
 
   versions=("$@")
   for fed_version in "${versions[@]}"; do
     for client_version in "${versions[@]}"; do
       for gateway_version in "${versions[@]}"; do
-        if [ "$fed_version" == "v0.4.4" ] && [ "$client_version" == "current" ] && [ "$gateway_version" == "current" ]; then
+        if "$filter_fn" "$fed_version" "$client_version" "$gateway_version"; then
+          # bash doesn't allow returning arrays, however we can mimic the
+          # behavior of returning an array by echoing each element
           echo "FM: $fed_version CLI: $client_version GW: $gateway_version"
         fi
       done

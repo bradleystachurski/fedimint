@@ -352,19 +352,34 @@ impl Federation {
         if !skip_setup {
             fedimint_core::util::write_log(&format!("inside !skip_setup"));
 
-            let parsed_fedimintd_version = crate::util::FedimintdCmd::version_or_default()
-                .await
-                .to_string()
-                .replace("-", "_")
-                .replace(".", "_");
-
-            // matches the format defined by nix_binary_version_var_name in
-            // scripts/_common.sh
-            let fedimint_cli_path_var = format!("fm_bin_fedimint_cli_v{parsed_fedimintd_version}");
-            let fedimint_cli_path = std::env::var(fedimint_cli_path_var)?;
+            let pkg_version = env!("CARGO_PKG_VERSION");
+            fedimint_core::util::write_log(&format!("pkg_version: {}", &pkg_version));
+            let fedimintd_version = crate::util::FedimintdCmd::version_or_default().await;
+            fedimint_core::util::write_log(&format!("fedimintd_version: {}", &fedimintd_version));
 
             let original_fedimint_cli_path = crate::util::get_fedimint_cli_path().join(" ");
-            std::env::set_var("FM_FEDIMINT_CLI_BASE_EXECUTABLE", fedimint_cli_path);
+
+            if pkg_version == fedimintd_version.to_string() {
+                std::env::remove_var("FM_FEDIMINT_CLI_BASE_EXECUTABLE");
+                fedimint_core::util::write_log(&format!(
+                    "pkg_version == fedimintd_version, would do logic here"
+                ));
+            } else {
+                let parsed_fedimintd_version = crate::util::FedimintdCmd::version_or_default()
+                    .await
+                    .to_string()
+                    .replace("-", "_")
+                    .replace(".", "_");
+
+                // matches the format defined by nix_binary_version_var_name in
+                // scripts/_common.sh
+                let fedimint_cli_path_var =
+                    format!("fm_bin_fedimint_cli_v{parsed_fedimintd_version}");
+                let fedimint_cli_path = std::env::var(fedimint_cli_path_var)?;
+                fedimint_core::util::write_log(&format!("able to read fedimint_cli_path var"));
+
+                std::env::set_var("FM_FEDIMINT_CLI_BASE_EXECUTABLE", fedimint_cli_path);
+            }
 
             let original_fm_mint_client = std::env::var("FM_MINT_CLIENT")?;
             fedimint_core::util::write_log(&format!(
