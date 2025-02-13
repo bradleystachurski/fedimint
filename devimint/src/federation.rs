@@ -407,6 +407,12 @@ impl Federation {
             // trying to reset fm_mint_client_dir
             std::env::set_var("FM_MINT_CLIENT", original_fm_mint_client);
 
+            fedimint_core::util::write_log(&format!("done resetting fedmint-cli and mint client"));
+            let fedimint_cli_version = crate::util::FedimintCli::version_or_default().await;
+            fedimint_core::util::write_log(&format!(
+                "fedimint_cli_version: {}",
+                &fedimint_cli_version
+            ));
             // move configs to config directory
             let client_dir = utf8(&process_mgr.globals.FM_CLIENT_DIR);
             let invite_code_filename_original = "invite-code";
@@ -1209,10 +1215,12 @@ pub async fn run_cli_dkg(
 
     fedimint_core::util::write_log(&format!("Getting consensus configs"));
     debug!(target: LOG_DEVIMINT, "Getting consensus configs");
+    let raw_version = crate::util::FedimintCli.raw_version().await?;
+    fedimint_core::util::write_log(&format!("raw_version: {}", &raw_version));
     let mut configs = vec![];
     for endpoint in endpoints.values() {
         let config = crate::util::FedimintCli
-            .consensus_config_gen_params(endpoint)
+            .consensus_config_gen_params_legacy(endpoint)
             .await?;
         configs.push(config);
     }
@@ -1263,6 +1271,7 @@ pub async fn run_cli_dkg(
         }
         cli_wait_server_status(endpoint, ServerStatusLegacy::ConsensusRunning).await?;
     }
+    fedimint_core::util::write_log(&format!("end of run_cli_dkg"));
 
     Ok(())
 }

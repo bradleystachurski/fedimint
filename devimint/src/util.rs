@@ -10,7 +10,8 @@ use std::{env, unreachable};
 use anyhow::{anyhow, bail, format_err, Context, Result};
 use fedimint_api_client::api::StatusResponse;
 use fedimint_core::admin_client::{
-    ConfigGenParamsRequest, ConfigGenParamsResponse, PeerServerParams, ServerStatus,
+    ConfigGenParamsRequest, ConfigGenParamsResponse, ConfigGenParamsResponseLegacy,
+    PeerServerParams, ServerStatus,
 };
 use fedimint_core::config::ServerModuleConfigGenParamsRegistry;
 use fedimint_core::envs::is_env_var_set;
@@ -833,6 +834,13 @@ impl FedimintCli {
         .await
     }
 
+    pub async fn raw_version(self) -> Result<String> {
+        fedimint_core::util::write_log(&format!("inside raw_version"));
+        let res = cmd!(self, "--version").out_string().await;
+        fedimint_core::util::write_log(&format!("res: {:?}", &res));
+        res
+    }
+
     pub async fn consensus_config_gen_params(
         self,
         endpoint: &str,
@@ -870,6 +878,27 @@ impl FedimintCli {
         .await
         .context("non-json returned for get_default_config_gen_params")?;
         Ok(serde_json::from_value(result)?)
+    }
+
+    pub async fn consensus_config_gen_params_legacy(
+        self,
+        endpoint: &str,
+    ) -> Result<ConfigGenParamsResponseLegacy> {
+        fedimint_core::util::write_log(&format!("inside consensus_config_gen_params"));
+
+        let result = cmd!(
+            self,
+            "admin",
+            "dkg",
+            "--ws",
+            endpoint,
+            "consensus-config-gen-params"
+        )
+        .out_json()
+        .await;
+        // .context("non-json returned for consensus_config_gen_params")?;
+        fedimint_core::util::write_log(&format!("result: {:?}", &result));
+        Ok(serde_json::from_value(result?)?)
     }
 
     pub async fn set_config_gen_connections(
