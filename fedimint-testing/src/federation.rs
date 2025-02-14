@@ -39,6 +39,7 @@ pub struct FederationTest {
     client_init: ClientModuleInitRegistry,
     primary_module_kind: ModuleKind,
     _task: TaskGroup,
+    num_offline: u16,
 }
 
 impl FederationTest {
@@ -140,6 +141,10 @@ impl FederationTest {
         })
         .await
         .expect("Failed to connect federation");
+    }
+
+    pub fn num_offline(&self) -> u16 {
+        self.num_offline
     }
 }
 
@@ -280,6 +285,7 @@ impl FederationTestBuilder {
             client_init: self.client_init,
             primary_module_kind: self.primary_module_kind,
             _task: task_group,
+            num_offline: self.num_offline,
         }
     }
 }

@@ -127,6 +127,7 @@ async fn await_consensus_upgrade(client: &ClientHandleArc) {
                 .get_first_module::<WalletClientModule>()?
                 .btc_tx_has_no_size_limit()
                 .await?;
+
             dbg!(res);
             anyhow::ensure!(res);
 
@@ -771,6 +772,7 @@ async fn peg_ins_that_are_unconfirmed_are_rejected() -> anyhow::Result<()> {
 async fn construct_wallet_summary() -> anyhow::Result<()> {
     let fixtures = fixtures();
     let fed = fixtures.new_default_fed().await;
+    fed.num_offline();
     let client = fed.new_client().await;
     let bitcoin = fixtures.bitcoin();
     let bitcoin = bitcoin.lock_exclusive().await;

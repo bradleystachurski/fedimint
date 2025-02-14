@@ -1711,8 +1711,12 @@ impl Wallet {
     ) -> watch::Receiver<Option<ModuleConsensusVersion>> {
         let (sender, receiver) = watch::channel(None);
         task_group.spawn_cancellable("fetch-peer-consensus-versions", async move {
+            info!("spawning fetch-peer-consensus-versions");
             loop {
+                info!("inside loop in fetch-peer-consensus-versions");
                 let request_futures = api_client.all_peers().iter().filter_map(|&peer| {
+                    dbg!(&peer.to_usize());
+                    dbg!(&our_peer_id.to_usize());
                     if peer == our_peer_id {
                         return None;
                     }
@@ -1726,6 +1730,13 @@ impl Wallet {
                                 peer,
                             )
                             .await
+                            .inspect(|res| info!(
+                                target: LOG_MODULE_WALLET,
+                                %peer,
+                                %our_peer_id,
+                                ?res,
+                                "Fetched supported module consensus version from peer"
+                            ))
                             .inspect_err(|err| warn!(
                                 target: LOG_MODULE_WALLET,
                                  %peer,
@@ -1742,11 +1753,17 @@ impl Wallet {
                     .flatten()
                     .collect::<Vec<_>>();
 
+                dbg!(&peer_consensus_versions.len());
+
                 let sorted_consensus_versions = peer_consensus_versions
                     .into_iter()
                     .chain(std::iter::once(MODULE_CONSENSUS_VERSION))
                     .sorted()
                     .collect::<Vec<_>>();
+
+                dbg!(&sorted_consensus_versions.len());
+                dbg!(&api_client.all_peers().len());
+
                 let all_peers_supported_version =
                     if sorted_consensus_versions.len() == api_client.all_peers().len() {
                         let min_supported_version = *sorted_consensus_versions
@@ -1765,7 +1782,7 @@ impl Wallet {
                             sorted_consensus_versions.len() <= api_client.all_peers().len(),
                             "Too many peer responses",
                         );
-                        trace!(
+                        info!(
                             target: LOG_MODULE_WALLET,
                             ?sorted_consensus_versions,
                             "Not all peers have reported their consensus version yet"
@@ -1780,7 +1797,7 @@ impl Wallet {
 
                 if is_running_in_test_env() {
                     // Even in tests we don't want to spam the federation with requests about it
-                    sleep(Duration::from_secs(30)).await;
+                    sleep(Duration::from_secs(5)).await;
                 } else {
                     sleep(Duration::from_secs(600)).await;
                 }
