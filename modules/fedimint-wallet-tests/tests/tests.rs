@@ -122,10 +122,13 @@ async fn await_consensus_upgrade(client: &ClientHandleArc) {
         "waiting for consensus upgrade",
         fedimint_core::util::backoff_util::aggressive_backoff(),
         || async {
-            client
+            info!("inside await_consensus_upgrade");
+            let res = client
                 .get_first_module::<WalletClientModule>()?
                 .btc_tx_has_no_size_limit()
                 .await?;
+            dbg!(res);
+            anyhow::ensure!(res);
 
             Ok(())
         },
@@ -137,11 +140,16 @@ async fn await_consensus_upgrade(client: &ClientHandleArc) {
 #[tokio::test(flavor = "multi_thread")]
 async fn sanity_check_bitcoin_blocks() -> anyhow::Result<()> {
     let fixtures = fixtures();
+    info!("after fixtures");
     let fed = fixtures.new_default_fed().await;
+    info!("after fed");
     let client = fed.new_client().await;
+    info!("after client");
     let bitcoin = fixtures.bitcoin();
+    info!("after bitcoin");
     // Avoid other tests from interfering here
     let bitcoin = bitcoin.lock_exclusive().await;
+    info!("after bitcoin lock exclusive");
     let dyn_bitcoin_rpc = fixtures.dyn_bitcoin_rpc();
     info!("Starting test sanity_check_bitcoin_blocks");
 
