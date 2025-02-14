@@ -33,10 +33,10 @@ pub trait WalletFederationApi {
 
     async fn is_utxo_confirmed(&self, outpoint: bitcoin::OutPoint) -> FederationResult<bool>;
 
-    /*
     async fn activate_consensus_version_voting(&self, auth: ApiAuth) -> FederationResult<()>;
-    */
+    /*
     async fn activate_consensus_version_voting(&self, peer_id: PeerId) -> PeerResult<()>;
+    */
 }
 
 #[apply(async_trait_maybe_send!)]
@@ -124,6 +124,7 @@ where
         .await
     }
 
+    /*
     async fn activate_consensus_version_voting(&self, peer_id: PeerId) -> PeerResult<()> {
         dbg!("inside modules/fedimint-wallet-client/src/api.rs activate_consensus_version_voting");
         dbg!(&peer_id);
@@ -139,7 +140,7 @@ where
         dbg!(&res);
         res
     }
-    /*
+    */
     async fn activate_consensus_version_voting(&self, auth: ApiAuth) -> FederationResult<()> {
         self.request_admin(
             ACTIVATE_CONSENSUS_VERSION_VOTING_ENDPOINT,
@@ -148,5 +149,4 @@ where
         )
         .await
     }
-    */
 }

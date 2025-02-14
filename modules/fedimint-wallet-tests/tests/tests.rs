@@ -6,14 +6,14 @@ use anyhow::{bail, Context};
 use assert_matches::assert_matches;
 use bitcoin::secp256k1;
 use fedimint_api_client::api::net::Connector;
-use fedimint_api_client::api::DynGlobalApi;
+use fedimint_api_client::api::{DynGlobalApi, FederationApiExt};
 use fedimint_bitcoind::shared::ServerModuleSharedBitcoin;
 use fedimint_client::secret::{PlainRootSecretStrategy, RootSecretStrategy};
 use fedimint_client::ClientHandleArc;
 use fedimint_core::db::mem_impl::MemDatabase;
 use fedimint_core::db::{DatabaseTransaction, IRawDatabaseExt};
 use fedimint_core::envs::BitcoinRpcConfig;
-use fedimint_core::module::{serde_json, ApiAuth};
+use fedimint_core::module::{serde_json, ApiAuth, ApiRequestErased};
 use fedimint_core::task::sleep_in_test;
 use fedimint_core::util::{retry, BoxStream, NextOrPending};
 use fedimint_core::{sats, Amount, BitcoinHash, Feerate, InPoint, PeerId, TransactionId};
@@ -28,6 +28,7 @@ use fedimint_testing::fixtures::Fixtures;
 use fedimint_wallet_client::api::WalletFederationApi;
 use fedimint_wallet_client::{DepositStateV2, WalletClientInit, WalletClientModule, WithdrawState};
 use fedimint_wallet_common::config::{WalletConfig, WalletGenParams};
+use fedimint_wallet_common::endpoint_constants::ACTIVATE_CONSENSUS_VERSION_VOTING_ENDPOINT;
 use fedimint_wallet_common::tweakable::Tweakable;
 use fedimint_wallet_common::txoproof::PegInProof;
 use fedimint_wallet_common::{PegOutFees, Rbf, TxOutputSummary};
@@ -142,9 +143,51 @@ async fn await_consensus_upgrade(client: &ClientHandleArc, fed: &FederationTest)
 
                 for peer_id in 0..num_online {
                     info!("activating consensus version voting for peer {peer_id}");
+
+                    /*
+                    let api = DynGlobalApi::new_admin(
+                        peer_id,
+                        config.consensus.api_endpoints[&peer_id].url.clone(),
+                        &None,
+                        &Connector::default(),
+                    );
+
+                    api
+                        .request_admin_no_auth::<u64>(SESSION_COUNT_ENDPOINT, ApiRequestErased::default())
+                        .await;
+                    */
+
+                    info!("calling new_admin_api");
+                    let admin_api = fed
+                        .new_admin_api(peer_id.into())
+                        .with_module(wallet_module_client.id);
+                    info!("calling request_admin");
+                    admin_api
+                        .request_admin::<()>(
+                            ACTIVATE_CONSENSUS_VERSION_VOTING_ENDPOINT,
+                            ApiRequestErased::default(),
+                            ApiAuth("pass".to_string()),
+                        )
+                        .await?;
+
+                    /*
+                    let admin_client = fed
+                        .new_admin_client(peer_id.into(), ApiAuth("pass".to_string()))
+                        .await;
+                    info!("in test, past new_admin_client");
+                    let admin_wallet_module_client =
+                        admin_client.get_first_module::<WalletClientModule>()?;
+                    info!("in test, past get_first_module::<WalletClientModule>");
+                    admin_wallet_module_client
+                        .activate_consensus_version_voting()
+                        .await?;
+                    */
+                    info!("in test, past activate_consensus_version_voting");
+                    /*
                     wallet_module_client
                         .activate_consensus_version_voting(peer_id.into())
                         .await?;
+                    */
                 }
 
                 /*

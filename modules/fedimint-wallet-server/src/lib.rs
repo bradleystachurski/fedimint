@@ -943,13 +943,14 @@ impl ServerModule for Wallet {
                 ApiVersion::new(0, 2),
                 async |_module: &Wallet, context, _params: ()| -> () {
                     info!("inside ACTIVATE_CONSENSUS_VERSION_VOTING_ENDPOINT");
-                    // check_auth(context)?;
+                    check_auth(context)?;
                     info!("checked auth");
 
                     let mut dbtx = context.dbtx();
 
                     dbtx.insert_entry(&ConsensusVersionVotingActivationKey, &()).await;
 
+                    // still passes with committing, but because we retry
                     // dbtx.commit_tx_result().await.map_err(|e| ApiError::server_error(e.to_string()))?;
 
                     Ok(())

@@ -1269,11 +1269,10 @@ impl WalletClientModule {
             .ok_or_else(|| anyhow::format_err!("Admin auth not set"))
     }
 
-    pub async fn activate_consensus_version_voting(&self, peer_id: PeerId) -> anyhow::Result<()> {
+    pub async fn activate_consensus_version_voting(&self) -> anyhow::Result<()> {
         dbg!("inside activate_consensus_version_voting");
-        dbg!(peer_id);
         self.module_api
-            .activate_consensus_version_voting(peer_id)
+            .activate_consensus_version_voting(self.admin_auth()?)
             .await?;
         dbg!("past call to self.module_api activate_consensus_version_voting");
 

@@ -77,17 +77,39 @@ impl FederationTest {
         .await
     }
 
+    pub fn new_admin_api(&self, peer_id: PeerId) -> DynGlobalApi {
+        let config = self.configs.get(&peer_id).expect("peer to have config");
+        DynGlobalApi::new_admin(
+            peer_id,
+            config.consensus.api_endpoints[&peer_id].url.clone(),
+            &None,
+            &Connector::default(),
+        )
+    }
+
     /// Create a new admin client connected to this fed
     pub async fn new_admin_client(&self, peer_id: PeerId, auth: ApiAuth) -> ClientHandleArc {
-        let client_config = self.configs[&PeerId::from(0)]
+        info!("inside new_admin_client");
+        dbg!(&peer_id);
+        dbg!(&auth);
+        let client_config = self
+            .configs
+            .get(&peer_id)
+            .expect("peer should have config")
             .consensus
             .to_client_config(&self.server_init)
             .unwrap();
 
+        info!("got client config");
+
         let admin_creds = AdminCreds { peer_id, auth };
 
-        self.new_client_with(client_config, MemDatabase::new().into(), Some(admin_creds))
-            .await
+        let client = self
+            .new_client_with(client_config, MemDatabase::new().into(), Some(admin_creds))
+            .await;
+
+        info!("past new_client_with call");
+        client
     }
 
     pub async fn new_client_with(
@@ -266,6 +288,7 @@ impl FederationTestBuilder {
                 continue;
             }
 
+            // here
             // FIXME: (@leonardo) Currently there is no support for Tor while testing,
             // defaulting to Tcp variant.
             let api = DynGlobalApi::new_admin(

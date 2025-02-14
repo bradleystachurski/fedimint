@@ -1494,6 +1494,8 @@ impl Client {
         db: Database,
         num_responses_sender: watch::Sender<usize>,
     ) {
+        println!("inside refresh_peers_api_versions");
+        dbg!("inside refresh_peers_api_versions");
         // Make a single request to a peer after a delay
         //
         // The delay is here to unify the type of a future both for initial request and
