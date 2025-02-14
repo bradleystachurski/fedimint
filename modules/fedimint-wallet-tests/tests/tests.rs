@@ -141,13 +141,9 @@ async fn await_consensus_upgrade(client: &ClientHandleArc, fed: &FederationTest)
                 let num_online = num_peers - num_offline;
 
                 for peer_id in 0..num_online {
-                    let admin_client = fed
-                        .new_admin_client(peer_id.into(), ApiAuth("pass".to_string()))
-                        .await;
-                    let wallet_module_admin_client =
-                        admin_client.get_first_module::<WalletClientModule>()?;
-                    wallet_module_admin_client
-                        .activate_consensus_version_voting()
+                    info!("activating consensus version voting for peer {peer_id}");
+                    wallet_module_client
+                        .activate_consensus_version_voting(peer_id.into())
                         .await?;
                 }
 

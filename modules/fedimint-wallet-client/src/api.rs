@@ -1,5 +1,7 @@
 use bitcoin::{Address, Amount};
-use fedimint_api_client::api::{FederationApiExt, FederationResult, IModuleFederationApi};
+use fedimint_api_client::api::{
+    FederationApiExt, FederationResult, IModuleFederationApi, PeerResult,
+};
 use fedimint_core::envs::BitcoinRpcConfig;
 use fedimint_core::module::{ApiAuth, ApiRequestErased, ModuleConsensusVersion};
 use fedimint_core::task::{MaybeSend, MaybeSync};
@@ -31,7 +33,10 @@ pub trait WalletFederationApi {
 
     async fn is_utxo_confirmed(&self, outpoint: bitcoin::OutPoint) -> FederationResult<bool>;
 
+    /*
     async fn activate_consensus_version_voting(&self, auth: ApiAuth) -> FederationResult<()>;
+    */
+    async fn activate_consensus_version_voting(&self, peer_id: PeerId) -> PeerResult<()>;
 }
 
 #[apply(async_trait_maybe_send!)]
@@ -119,6 +124,22 @@ where
         .await
     }
 
+    async fn activate_consensus_version_voting(&self, peer_id: PeerId) -> PeerResult<()> {
+        dbg!("inside modules/fedimint-wallet-client/src/api.rs activate_consensus_version_voting");
+        dbg!(&peer_id);
+        let res = self
+            .request_single_peer(
+                ACTIVATE_CONSENSUS_VERSION_VOTING_ENDPOINT.to_string(),
+                ApiRequestErased::default(),
+                peer_id,
+            )
+            .await;
+        dbg!("past call to request_single_peer_federation");
+        dbg!(&peer_id);
+        dbg!(&res);
+        res
+    }
+    /*
     async fn activate_consensus_version_voting(&self, auth: ApiAuth) -> FederationResult<()> {
         self.request_admin(
             ACTIVATE_CONSENSUS_VERSION_VOTING_ENDPOINT,
@@ -127,4 +148,5 @@ where
         )
         .await
     }
+    */
 }

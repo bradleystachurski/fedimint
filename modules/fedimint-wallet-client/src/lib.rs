@@ -61,7 +61,7 @@ use fedimint_core::util::backoff_util::background_backoff;
 use fedimint_core::util::{backoff_util, retry};
 use fedimint_core::{
     apply, async_trait_maybe_send, push_db_pair_items, runtime, secp256k1, Amount, OutPoint,
-    TransactionId,
+    PeerId, TransactionId,
 };
 use fedimint_logging::LOG_CLIENT_MODULE_WALLET;
 use fedimint_wallet_common::config::{FeeConsensus, WalletClientConfig};
@@ -1269,10 +1269,11 @@ impl WalletClientModule {
             .ok_or_else(|| anyhow::format_err!("Admin auth not set"))
     }
 
-    pub async fn activate_consensus_version_voting(&self) -> anyhow::Result<()> {
+    pub async fn activate_consensus_version_voting(&self, peer_id: PeerId) -> anyhow::Result<()> {
         dbg!("inside activate_consensus_version_voting");
+        dbg!(peer_id);
         self.module_api
-            .activate_consensus_version_voting(self.admin_auth()?)
+            .activate_consensus_version_voting(peer_id)
             .await?;
         dbg!("past call to self.module_api activate_consensus_version_voting");
 
