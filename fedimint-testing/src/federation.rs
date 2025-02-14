@@ -39,6 +39,7 @@ pub struct FederationTest {
     client_init: ClientModuleInitRegistry,
     primary_module_kind: ModuleKind,
     _task: TaskGroup,
+    num_peers: u16,
     num_offline: u16,
 }
 
@@ -100,7 +101,10 @@ impl FederationTest {
         client_builder.with_module_inits(self.client_init.clone());
         client_builder.with_primary_module_kind(self.primary_module_kind.clone());
         if let Some(admin_creds) = admin_creds {
+            info!("yes admin creds");
             client_builder.set_admin_creds(admin_creds);
+        } else {
+            info!("no admin creds");
         }
         let client_secret = Client::load_or_generate_client_secret(client_builder.db_no_decoders())
             .await
@@ -141,6 +145,10 @@ impl FederationTest {
         })
         .await
         .expect("Failed to connect federation");
+    }
+
+    pub fn num_peers(&self) -> u16 {
+        self.num_peers
     }
 
     pub fn num_offline(&self) -> u16 {
@@ -285,6 +293,7 @@ impl FederationTestBuilder {
             client_init: self.client_init,
             primary_module_kind: self.primary_module_kind,
             _task: task_group,
+            num_peers: self.num_peers,
             num_offline: self.num_offline,
         }
     }
@@ -334,10 +343,12 @@ pub fn local_config_gen_params(
             let p2p_bind = parse_host_port(&connections[peer].clone().p2p_url)?;
             let api_bind = parse_host_port(&connections[peer].clone().api_url)?;
 
+            info!("setting up params with auth for peer {:?}", peer);
             let params = ConfigGenParams {
                 local: ConfigGenParamsLocal {
                     our_id: *peer,
                     our_private_key: tls_keys[peer].1.clone(),
+                    // TODO: consider pulling out to shared const
                     api_auth: ApiAuth("pass".to_string()),
                     p2p_bind: p2p_bind.parse().expect("Valid address"),
                     api_bind: api_bind.parse().expect("Valid address"),

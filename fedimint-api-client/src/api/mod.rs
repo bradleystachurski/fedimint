@@ -1091,10 +1091,11 @@ impl ReconnectClientConnections {
         request: ApiRequestErased,
     ) -> PeerResult<Value> {
         trace!(target: LOG_NET_API, %method, "Api request");
+        dbg!(self.connections.keys().cloned().collect::<Vec<_>>());
         let res = self
             .connections
             .get(&peer)
-            .expect("Could not find client connection for peer {peer}")
+            .expect(&format!("Could not find client connection for peer {peer}"))
             .connection()
             .await
             .context("Failed to connect to peer")

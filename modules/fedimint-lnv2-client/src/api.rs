@@ -27,6 +27,7 @@ pub trait LightningFederationApi {
 
     async fn gateways_from_peer(&self, peer: PeerId) -> PeerResult<Vec<SafeUrl>>;
 
+    // potential reference
     async fn add_gateway(&self, auth: ApiAuth, gateway: SafeUrl) -> FederationResult<bool>;
 
     async fn remove_gateway(&self, auth: ApiAuth, gateway: SafeUrl) -> FederationResult<bool>;

@@ -468,6 +468,7 @@ impl ServerModule for Wallet {
 
         items.push(WalletConsensusItem::Feerate(fee_rate_proposal));
 
+        info!("inside wallet consensus proposals");
         // Consensus upgrade activation voting
         let manual_vote = dbtx
             .get_value(&ConsensusVersionVotingActivationKey)
@@ -477,6 +478,8 @@ impl ServerModule for Wallet {
                 // supported one in case we support a too high one already
                 MODULE_CONSENSUS_VERSION
             });
+
+        dbg!(&manual_vote);
 
         let active_consensus_version = self.consensus_module_consensus_version(dbtx).await;
         let automatic_vote = self.peer_supported_consensus_version.borrow().and_then(
@@ -939,7 +942,9 @@ impl ServerModule for Wallet {
                 ACTIVATE_CONSENSUS_VERSION_VOTING_ENDPOINT,
                 ApiVersion::new(0, 2),
                 async |_module: &Wallet, context, _params: ()| -> () {
+                    info!("inside ACTIVATE_CONSENSUS_VERSION_VOTING_ENDPOINT");
                     check_auth(context)?;
+                    info!("checked auth");
 
                     let mut dbtx = context.dbtx();
 

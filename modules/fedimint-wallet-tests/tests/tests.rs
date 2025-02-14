@@ -13,7 +13,7 @@ use fedimint_client::ClientHandleArc;
 use fedimint_core::db::mem_impl::MemDatabase;
 use fedimint_core::db::{DatabaseTransaction, IRawDatabaseExt};
 use fedimint_core::envs::BitcoinRpcConfig;
-use fedimint_core::module::serde_json;
+use fedimint_core::module::{serde_json, ApiAuth};
 use fedimint_core::task::sleep_in_test;
 use fedimint_core::util::{retry, BoxStream, NextOrPending};
 use fedimint_core::{sats, Amount, BitcoinHash, Feerate, InPoint, PeerId, TransactionId};
@@ -23,6 +23,7 @@ use fedimint_dummy_server::DummyInit;
 use fedimint_server::core::{ServerModule, ServerModuleShared as _};
 use fedimint_testing::btc::BitcoinTest;
 use fedimint_testing::envs::{FM_TEST_BACKEND_BITCOIN_RPC_KIND_ENV, FM_TEST_USE_REAL_DAEMONS_ENV};
+use fedimint_testing::federation::FederationTest;
 use fedimint_testing::fixtures::Fixtures;
 use fedimint_wallet_client::api::WalletFederationApi;
 use fedimint_wallet_client::{DepositStateV2, WalletClientInit, WalletClientModule, WithdrawState};
@@ -54,11 +55,12 @@ async fn peg_in<'a>(
     client: &'a ClientHandleArc,
     bitcoin: &dyn BitcoinTest,
     finality_delay: u64,
+    fed: &FederationTest,
 ) -> anyhow::Result<(BoxStream<'a, Amount>, bitcoin::Transaction)> {
     let mut balance_sub = client.subscribe_balance_changes().await;
     let initial_balance = balance_sub.ok().await?;
 
-    await_consensus_upgrade(client).await;
+    await_consensus_upgrade(client, fed).await;
 
     let wallet_module = &client.get_first_module::<WalletClientModule>()?;
     let (op, address, _) = wallet_module
@@ -117,21 +119,46 @@ async fn await_consensus_to_catch_up(
     }
 }
 
-async fn await_consensus_upgrade(client: &ClientHandleArc) {
+async fn await_consensus_upgrade(client: &ClientHandleArc, fed: &FederationTest) {
     retry(
         "waiting for consensus upgrade",
         fedimint_core::util::backoff_util::aggressive_backoff(),
         || async {
             info!("inside await_consensus_upgrade");
-            let res = client
-                .get_first_module::<WalletClientModule>()?
-                .btc_tx_has_no_size_limit()
-                .await?;
+            let wallet_module_client = client.get_first_module::<WalletClientModule>()?;
+            let is_activated = wallet_module_client.btc_tx_has_no_size_limit().await?;
 
-            dbg!(res);
-            anyhow::ensure!(res);
+            dbg!(is_activated);
 
-            Ok(())
+            if is_activated {
+                Ok(())
+            } else {
+                info!("attempting to manually activate consensus version voting");
+
+                let num_peers = fed.num_peers();
+                let num_offline = fed.num_offline();
+
+                let num_online = num_peers - num_offline;
+
+                for peer_id in 0..num_online {
+                    let admin_client = fed
+                        .new_admin_client(peer_id.into(), ApiAuth("pass".to_string()))
+                        .await;
+                    let wallet_module_admin_client =
+                        admin_client.get_first_module::<WalletClientModule>()?;
+                    wallet_module_admin_client
+                        .activate_consensus_version_voting()
+                        .await?;
+                }
+
+                /*
+                wallet_module_client
+                    .activate_consensus_version_voting()
+                    .await?;
+                */
+
+                Err(anyhow::anyhow!("Consensus upgrade not yet active"))
+            }
         },
     )
     .await
@@ -198,7 +225,7 @@ async fn on_chain_peg_in_and_peg_out_happy_case() -> anyhow::Result<()> {
     let finality_delay = 10;
     bitcoin.mine_blocks(finality_delay).await;
     await_consensus_to_catch_up(&client, 1).await?;
-    await_consensus_upgrade(&client).await;
+    await_consensus_upgrade(&client, &fed).await;
 
     assert_eq!(client.get_balance().await, sats(0));
     let (op, address, _) = wallet_module
@@ -351,7 +378,7 @@ async fn on_chain_peg_in_detects_multiple() -> anyhow::Result<()> {
     let starting_balance = client.get_balance().await;
     info!(?starting_balance, "Starting balance");
 
-    await_consensus_upgrade(&client).await;
+    await_consensus_upgrade(&client, &fed).await;
 
     let wallet_module = &client.get_first_module::<WalletClientModule>()?;
     let (op, address, tweak_idx) = wallet_module
@@ -425,7 +452,7 @@ async fn peg_out_fail_refund() -> anyhow::Result<()> {
     bitcoin.mine_blocks(finality_delay).await;
     await_consensus_to_catch_up(&client, 1).await?;
 
-    let (mut balance_sub, _) = peg_in(&client, bitcoin.as_ref(), finality_delay).await?;
+    let (mut balance_sub, _) = peg_in(&client, bitcoin.as_ref(), finality_delay, &fed).await?;
 
     info!("Peg-in finished for test peg_out_fail_refund");
     // Peg-out test, requires block to recognize change UTXOs
@@ -471,7 +498,7 @@ async fn rbf_withdrawals_are_rejected() -> anyhow::Result<()> {
     bitcoin.mine_blocks(finality_delay).await;
     await_consensus_to_catch_up(&client, 1).await?;
 
-    let (mut balance_sub, _) = peg_in(&client, bitcoin.as_ref(), finality_delay).await?;
+    let (mut balance_sub, _) = peg_in(&client, bitcoin.as_ref(), finality_delay, &fed).await?;
 
     info!("Peg-in finished for test rbf_withdrawals_are_rejected");
     let address = bitcoin.get_new_address().await;
@@ -565,7 +592,7 @@ async fn peg_outs_must_wait_for_available_utxos() -> anyhow::Result<()> {
     bitcoin.mine_blocks(finality_delay).await;
     await_consensus_to_catch_up(&client, 1).await?;
 
-    let (mut balance_sub, _) = peg_in(&client, bitcoin.as_ref(), finality_delay).await?;
+    let (mut balance_sub, _) = peg_in(&client, bitcoin.as_ref(), finality_delay, &fed).await?;
 
     info!("Peg-in finished for test peg_outs_must_wait_for_available_utxos");
     let address = bitcoin.get_new_address().await;
@@ -776,6 +803,7 @@ async fn construct_wallet_summary() -> anyhow::Result<()> {
     let client = fed.new_client().await;
     let bitcoin = fixtures.bitcoin();
     let bitcoin = bitcoin.lock_exclusive().await;
+    info!("calling get_first_module");
     let wallet_module = client.get_first_module::<WalletClientModule>()?;
     info!("Starting test construct_wallet_summary");
 
@@ -791,7 +819,7 @@ async fn construct_wallet_summary() -> anyhow::Result<()> {
 
     // generate 3 peg-ins, verifying wallet summary after each
     for _ in 0..3 {
-        let (_, tx) = peg_in(&client, bitcoin.as_ref(), finality_delay).await?;
+        let (_, tx) = peg_in(&client, bitcoin.as_ref(), finality_delay, &fed).await?;
         let expected_peg_in_amount =
             PEG_IN_AMOUNT_SATS + (wallet_module.get_fee_consensus().peg_in_abs.msats / 1000);
 

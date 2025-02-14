@@ -12,6 +12,8 @@ use fedimint_meta_common::{MetaConsensusValue, MetaKey, MetaValue};
 pub trait MetaFederationApi {
     async fn get_consensus(&self, key: MetaKey) -> FederationResult<Option<MetaConsensusValue>>;
     async fn get_consensus_rev(&self, key: MetaKey) -> FederationResult<Option<u64>>;
+    // another reference
+    // probably the better to reference
     async fn get_submissions(
         &self,
         key: MetaKey,
