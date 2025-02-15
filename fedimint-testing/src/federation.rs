@@ -197,11 +197,12 @@ impl FederationTestBuilder {
         server_init: ServerModuleInitRegistry,
         client_init: ClientModuleInitRegistry,
         primary_module_kind: ModuleKind,
+        num_offline: u16,
     ) -> FederationTestBuilder {
         let num_peers = 4;
         Self {
             num_peers,
-            num_offline: 1,
+            num_offline,
             base_port: block_in_place(|| fedimint_portalloc::port_alloc(num_peers * 2))
                 .expect("Failed to allocate a port range"),
             primary_module_kind,

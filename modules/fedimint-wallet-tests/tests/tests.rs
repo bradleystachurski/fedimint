@@ -61,7 +61,7 @@ async fn peg_in<'a>(
     let mut balance_sub = client.subscribe_balance_changes().await;
     let initial_balance = balance_sub.ok().await?;
 
-    await_consensus_upgrade(client, fed).await;
+    await_consensus_upgrade(client, fed, true).await;
 
     let wallet_module = &client.get_first_module::<WalletClientModule>()?;
     let (op, address, _) = wallet_module
@@ -120,7 +120,11 @@ async fn await_consensus_to_catch_up(
     }
 }
 
-async fn await_consensus_upgrade(client: &ClientHandleArc, fed: &FederationTest) {
+async fn await_consensus_upgrade(
+    client: &ClientHandleArc,
+    fed: &FederationTest,
+    trigger_manual: bool,
+) {
     retry(
         "waiting for consensus upgrade",
         fedimint_core::util::backoff_util::aggressive_backoff(),
@@ -134,6 +138,7 @@ async fn await_consensus_upgrade(client: &ClientHandleArc, fed: &FederationTest)
             if is_activated {
                 Ok(())
             } else {
+                anyhow::ensure!(trigger_manual);
                 info!("attempting to manually activate consensus version voting");
 
                 let num_peers = fed.num_peers();
@@ -205,6 +210,15 @@ async fn await_consensus_upgrade(client: &ClientHandleArc, fed: &FederationTest)
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn verify_auto_consensus_voting() -> anyhow::Result<()> {
+    let fixtures = fixtures();
+    let fed = fixtures.new_fed_not_degraded().await;
+    let client = fed.new_client().await;
+    await_consensus_upgrade(&client, &fed, false).await;
+    Ok(())
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn sanity_check_bitcoin_blocks() -> anyhow::Result<()> {
     let fixtures = fixtures();
     info!("after fixtures");
@@ -264,7 +278,7 @@ async fn on_chain_peg_in_and_peg_out_happy_case() -> anyhow::Result<()> {
     let finality_delay = 10;
     bitcoin.mine_blocks(finality_delay).await;
     await_consensus_to_catch_up(&client, 1).await?;
-    await_consensus_upgrade(&client, &fed).await;
+    await_consensus_upgrade(&client, &fed, true).await;
 
     assert_eq!(client.get_balance().await, sats(0));
     let (op, address, _) = wallet_module
@@ -417,7 +431,7 @@ async fn on_chain_peg_in_detects_multiple() -> anyhow::Result<()> {
     let starting_balance = client.get_balance().await;
     info!(?starting_balance, "Starting balance");
 
-    await_consensus_upgrade(&client, &fed).await;
+    await_consensus_upgrade(&client, &fed, true).await;
 
     let wallet_module = &client.get_first_module::<WalletClientModule>()?;
     let (op, address, tweak_idx) = wallet_module
