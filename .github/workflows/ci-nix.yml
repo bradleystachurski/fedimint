@@ -255,6 +255,7 @@ jobs:
           nix build -L .#ci.cargoDeny
 
   cross:
+    # debug diff
     name: "Cross-compile on ${{ matrix.host }} to ${{ matrix.toolchain }}"
     needs: [lint, shell]
 
