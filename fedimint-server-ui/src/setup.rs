@@ -9,9 +9,8 @@ use maud::{DOCTYPE, Markup, html};
 use serde::Deserialize;
 
 use crate::assets::WithStaticRoutesExt as _;
-use crate::auth::UserAuth;
 use crate::{
-    LOGIN_ROUTE, LoginInput, ROOT_ROUTE, UiState, common_head, login_form_response,
+    AuthState, LOGIN_ROUTE, LoginInput, ROOT_ROUTE, check_auth, common_head, login_form_response,
     login_submit_response,
 };
 
@@ -65,7 +64,7 @@ pub fn setup_layout(title: &str, content: Markup) -> Markup {
 }
 
 // GET handler for the /setup route (display the setup form)
-async fn setup_form(State(state): State<UiState<DynSetupApi>>) -> impl IntoResponse {
+async fn setup_form(State(state): State<AuthState<DynSetupApi>>) -> impl IntoResponse {
     if state.api.setup_code().await.is_some() {
         return Redirect::to(FEDERATION_SETUP_ROUTE).into_response();
     }
@@ -117,7 +116,7 @@ async fn setup_form(State(state): State<UiState<DynSetupApi>>) -> impl IntoRespo
 
 // POST handler for the /setup route (process the password setup form)
 async fn setup_submit(
-    State(state): State<UiState<DynSetupApi>>,
+    State(state): State<AuthState<DynSetupApi>>,
     Form(input): Form<SetupInput>,
 ) -> impl IntoResponse {
     // Only use federation_name if is_lead is true
@@ -147,7 +146,7 @@ async fn setup_submit(
 }
 
 // GET handler for the /login route (display the login form)
-async fn login_form(State(state): State<UiState<DynSetupApi>>) -> impl IntoResponse {
+async fn login_form(State(state): State<AuthState<DynSetupApi>>) -> impl IntoResponse {
     if state.api.setup_code().await.is_none() {
         return Redirect::to(ROOT_ROUTE).into_response();
     }
@@ -157,7 +156,7 @@ async fn login_form(State(state): State<UiState<DynSetupApi>>) -> impl IntoRespo
 
 // POST handler for the /login route (authenticate and set session cookie)
 async fn login_submit(
-    State(state): State<UiState<DynSetupApi>>,
+    State(state): State<AuthState<DynSetupApi>>,
     jar: CookieJar,
     Form(input): Form<LoginInput>,
 ) -> impl IntoResponse {
@@ -178,9 +177,13 @@ async fn login_submit(
 
 // GET handler for the /federation-setup route (main federation management page)
 async fn federation_setup(
-    State(state): State<UiState<DynSetupApi>>,
-    _auth: UserAuth,
+    State(state): State<AuthState<DynSetupApi>>,
+    jar: CookieJar,
 ) -> impl IntoResponse {
+    if !check_auth(&state.auth_cookie_name, &state.auth_cookie_value, &jar).await {
+        return Redirect::to(LOGIN_ROUTE).into_response();
+    }
+
     let our_connection_info = state
         .api
         .setup_code()
@@ -256,10 +259,14 @@ async fn federation_setup(
 
 // POST handler for adding peer connection info
 async fn post_add_setup_code(
-    State(state): State<UiState<DynSetupApi>>,
-    _auth: UserAuth,
+    State(state): State<AuthState<DynSetupApi>>,
+    jar: CookieJar,
     Form(input): Form<PeerInfoInput>,
 ) -> impl IntoResponse {
+    if !check_auth(&state.auth_cookie_name, &state.auth_cookie_value, &jar).await {
+        return Redirect::to(LOGIN_ROUTE).into_response();
+    }
+
     match state.api.add_peer_setup_code(input.peer_info).await {
         Ok(..) => Redirect::to(FEDERATION_SETUP_ROUTE).into_response(),
         Err(e) => {
@@ -277,9 +284,13 @@ async fn post_add_setup_code(
 
 // POST handler for starting the DKG process
 async fn post_start_dkg(
-    State(state): State<UiState<DynSetupApi>>,
-    _auth: UserAuth,
+    State(state): State<AuthState<DynSetupApi>>,
+    jar: CookieJar,
 ) -> impl IntoResponse {
+    if !check_auth(&state.auth_cookie_name, &state.auth_cookie_value, &jar).await {
+        return Redirect::to(LOGIN_ROUTE).into_response();
+    }
+
     match state.api.start_dkg().await {
         Ok(()) => {
             // Show simple DKG success page
@@ -314,9 +325,13 @@ async fn post_start_dkg(
 
 // POST handler for resetting peer connection info
 async fn post_reset_setup_codes(
-    State(state): State<UiState<DynSetupApi>>,
-    _auth: UserAuth,
+    State(state): State<AuthState<DynSetupApi>>,
+    jar: CookieJar,
 ) -> impl IntoResponse {
+    if !check_auth(&state.auth_cookie_name, &state.auth_cookie_value, &jar).await {
+        return Redirect::to(LOGIN_ROUTE).into_response();
+    }
+
     state.api.reset_setup_codes().await;
 
     Redirect::to(FEDERATION_SETUP_ROUTE).into_response()
@@ -331,5 +346,5 @@ pub fn router(api: DynSetupApi) -> Router {
         .route(RESET_SETUP_CODES_ROUTE, post(post_reset_setup_codes))
         .route(START_DKG_ROUTE, post(post_start_dkg))
         .with_static_routes()
-        .with_state(UiState::new(api))
+        .with_state(AuthState::new(api))
 }
