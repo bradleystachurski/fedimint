@@ -34,6 +34,6 @@ fedimint-testing = { workspace = true }
 itertools = { workspace = true }
 lightning-invoice = { workspace = true }
 serde_json = { workspace = true }
-substring = { workspace = true }
+substring = "1.4.5"
 tokio = { workspace = true }
 tracing = { workspace = true }

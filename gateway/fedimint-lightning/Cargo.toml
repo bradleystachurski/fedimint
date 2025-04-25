@@ -23,10 +23,10 @@ fedimint-ln-common = { workspace = true }
 fedimint-logging = { workspace = true }
 futures = { workspace = true }
 hex = { workspace = true }
-ldk-node = { workspace = true }
+ldk-node = "0.4.3"
 lightning = { workspace = true }
 lightning-invoice = { workspace = true }
-lockable = { workspace = true }
+lockable = "0.1.1"
 serde = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
