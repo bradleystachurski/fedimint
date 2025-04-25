@@ -346,10 +346,19 @@ impl FromStr for OOBNotes {
 }
 
 impl Display for OOBNotes {
+    /// Base64 encode a set of e-cash notes for out-of-band spending.
+    ///
+    /// Defaults to standard base64 for backwards compatibility.
+    /// For URL-safe base64 as alternative display use:
+    /// `format!("{:#}", oob_notes)`
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let bytes = Encodable::consensus_encode_to_vec(self);
 
-        f.write_str(&BASE64_URL_SAFE.encode(&bytes))
+        if f.alternate() {
+            f.write_str(&BASE64_URL_SAFE.encode(&bytes))
+        } else {
+            f.write_str(&base64::engine::general_purpose::STANDARD.encode(&bytes))
+        }
     }
 }
 
