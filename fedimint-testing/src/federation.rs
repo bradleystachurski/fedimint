@@ -305,7 +305,6 @@ impl FederationTestBuilder {
                     bitcoin_rpc_connection,
                     ui_bind,
                     Box::new(|_| axum::Router::new()),
-                    1,
                 ))
                 .await
                 .expect("Could not initialise consensus");
