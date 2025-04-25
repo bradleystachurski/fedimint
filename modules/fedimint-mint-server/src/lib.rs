@@ -32,7 +32,8 @@ use fedimint_core::{
 use fedimint_logging::LOG_MODULE_MINT;
 pub use fedimint_mint_common as common;
 use fedimint_mint_common::config::{
-    MintClientConfig, MintConfig, MintConfigConsensus, MintConfigPrivate, MintGenParams,
+    MintClientConfig, MintConfig, MintConfigConsensus, MintConfigLocal, MintConfigPrivate,
+    MintGenParams,
 };
 pub use fedimint_mint_common::{BackupRequest, SignedBackupRequest};
 use fedimint_mint_common::{
@@ -172,6 +173,7 @@ impl ServerModuleInit for MintInit {
             .iter()
             .map(|&peer| {
                 let config = MintConfig {
+                    local: MintConfigLocal,
                     consensus: MintConfigConsensus {
                         peer_tbs_pks: peers
                             .iter()
@@ -223,6 +225,7 @@ impl ServerModuleInit for MintInit {
         }
 
         let server = MintConfig {
+            local: MintConfigLocal,
             private: MintConfigPrivate {
                 tbs_sks: amount_keys
                     .iter()

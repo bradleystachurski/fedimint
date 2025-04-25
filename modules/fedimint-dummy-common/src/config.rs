@@ -36,6 +36,7 @@ impl Default for DummyGenParams {
 /// Contains all the configuration for the server
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct DummyConfig {
+    pub local: DummyConfigLocal,
     pub private: DummyConfigPrivate,
     pub consensus: DummyConfigConsensus,
 }
@@ -69,6 +70,7 @@ plugin_types_trait_impl_config!(
     DummyGenParamsLocal,
     DummyGenParamsConsensus,
     DummyConfig,
+    DummyConfigLocal,
     DummyConfigPrivate,
     DummyConfigConsensus,
     DummyClientConfig

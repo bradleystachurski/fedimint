@@ -32,6 +32,7 @@ impl Default for MetaGenParams {
 /// Contains all the configuration for the server
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MetaConfig {
+    pub local: MetaConfigLocal,
     pub private: MetaConfigPrivate,
     pub consensus: MetaConfigConsensus,
 }
@@ -59,6 +60,7 @@ plugin_types_trait_impl_config!(
     MetaGenParamsLocal,
     MetaGenParamsConsensus,
     MetaConfig,
+    MetaConfigLocal,
     MetaConfigPrivate,
     MetaConfigConsensus,
     MetaClientConfig

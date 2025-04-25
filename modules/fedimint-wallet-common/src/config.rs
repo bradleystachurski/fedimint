@@ -67,6 +67,7 @@ pub struct WalletGenParamsConsensus {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct WalletConfig {
+    pub local: WalletConfigLocal,
     pub private: WalletConfigPrivate,
     pub consensus: WalletConfigConsensus,
 }
@@ -158,6 +159,7 @@ impl WalletConfig {
         threshold: usize,
         network: Network,
         finality_delay: u32,
+        bitcoin_rpc: BitcoinRpcConfig,
         client_default_bitcoin_rpc: BitcoinRpcConfig,
         fee_consensus: FeeConsensus,
     ) -> Self {
@@ -178,6 +180,7 @@ impl WalletConfig {
         };
 
         Self {
+            local: WalletConfigLocal { bitcoin_rpc },
             private: WalletConfigPrivate { peg_in_key: sk },
             consensus: WalletConfigConsensus {
                 network: NetworkLegacyEncodingWrapper(network),
@@ -198,6 +201,7 @@ plugin_types_trait_impl_config!(
     WalletGenParamsLocal,
     WalletGenParamsConsensus,
     WalletConfig,
+    WalletConfigLocal,
     WalletConfigPrivate,
     WalletConfigConsensus,
     WalletClientConfig

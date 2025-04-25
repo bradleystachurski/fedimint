@@ -32,6 +32,7 @@ impl Default for UnknownGenParams {
 /// Contains all the configuration for the server
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct UnknownConfig {
+    pub local: UnknownConfigLocal,
     pub private: UnknownConfigPrivate,
     pub consensus: UnknownConfigConsensus,
 }
@@ -59,6 +60,7 @@ plugin_types_trait_impl_config!(
     UnknownGenParamsLocal,
     UnknownGenParamsConsensus,
     UnknownConfig,
+    UnknownConfigLocal,
     UnknownConfigPrivate,
     UnknownConfigConsensus,
     UnknownClientConfig

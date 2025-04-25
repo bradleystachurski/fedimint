@@ -19,7 +19,8 @@ use fedimint_core::module::{
 };
 use fedimint_core::{InPoint, OutPoint, PeerId, push_db_pair_items};
 use fedimint_empty_common::config::{
-    EmptyClientConfig, EmptyConfig, EmptyConfigConsensus, EmptyConfigPrivate, EmptyGenParams,
+    EmptyClientConfig, EmptyConfig, EmptyConfigConsensus, EmptyConfigLocal, EmptyConfigPrivate,
+    EmptyGenParams,
 };
 use fedimint_empty_common::{
     EmptyCommonInit, EmptyConsensusItem, EmptyInput, EmptyInputError, EmptyModuleTypes,
@@ -113,6 +114,7 @@ impl ServerModuleInit for EmptyInit {
             .iter()
             .map(|&peer| {
                 let config = EmptyConfig {
+                    local: EmptyConfigLocal {},
                     private: EmptyConfigPrivate,
                     consensus: EmptyConfigConsensus {},
                 };
@@ -130,6 +132,7 @@ impl ServerModuleInit for EmptyInit {
         let _params = self.parse_params(params).unwrap();
 
         Ok(EmptyConfig {
+            local: EmptyConfigLocal {},
             private: EmptyConfigPrivate,
             consensus: EmptyConfigConsensus {},
         }

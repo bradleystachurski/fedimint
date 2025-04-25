@@ -32,7 +32,7 @@ use fedimint_core::module::{
 use fedimint_core::{InPoint, NumPeers, OutPoint, PeerId, push_db_pair_items};
 use fedimint_logging::LOG_MODULE_META;
 use fedimint_meta_common::config::{
-    MetaClientConfig, MetaConfig, MetaConfigConsensus, MetaConfigPrivate,
+    MetaClientConfig, MetaConfig, MetaConfigConsensus, MetaConfigLocal, MetaConfigPrivate,
 };
 pub use fedimint_meta_common::config::{MetaGenParams, MetaGenParamsConsensus, MetaGenParamsLocal};
 use fedimint_meta_common::endpoint::{
@@ -161,6 +161,7 @@ impl ServerModuleInit for MetaInit {
             .iter()
             .map(|&peer| {
                 let config = MetaConfig {
+                    local: MetaConfigLocal {},
                     private: MetaConfigPrivate,
                     consensus: MetaConfigConsensus {},
                 };
@@ -178,6 +179,7 @@ impl ServerModuleInit for MetaInit {
         let _params = self.parse_params(params).unwrap();
 
         Ok(MetaConfig {
+            local: MetaConfigLocal {},
             private: MetaConfigPrivate,
             consensus: MetaConfigConsensus {},
         }
