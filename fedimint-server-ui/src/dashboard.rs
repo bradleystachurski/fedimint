@@ -1,23 +1,23 @@
-pub mod audit;
-pub mod bitcoin;
-pub mod general;
-pub mod invite;
-pub mod latency;
-pub mod modules;
+use std::future::Future;
+use std::net::SocketAddr;
+use std::pin::Pin;
 
 use axum::Router;
 use axum::extract::{Form, State};
 use axum::response::{Html, IntoResponse, Redirect};
 use axum::routing::{get, post};
 use axum_extra::extract::cookie::CookieJar;
+use fedimint_core::task::TaskHandle;
 use fedimint_server_core::dashboard_ui::{DashboardApiModuleExt, DynDashboardApi};
 use maud::{DOCTYPE, Markup, html};
+use tokio::net::TcpListener;
 use {fedimint_lnv2_server, fedimint_meta_server, fedimint_wallet_server};
 
 use crate::assets::WithStaticRoutesExt as _;
-use crate::dashboard::modules::{lnv2, meta, wallet};
+use crate::layout::{self};
 use crate::{
-    AuthState, LoginInput, check_auth, common_head, login_form_response, login_submit_response,
+    AuthState, LoginInput, audit, bitcoin, check_auth, general, invite, latency, lnv2,
+    login_form_response, login_submit_response, meta, wallet,
 };
 
 pub fn dashboard_layout(content: Markup) -> Markup {
@@ -25,7 +25,7 @@ pub fn dashboard_layout(content: Markup) -> Markup {
         (DOCTYPE)
         html {
             head {
-                (common_head("Dashboard"))
+                (layout::common_head("Dashboard"))
             }
             body {
                 div class="container" {
@@ -139,13 +139,18 @@ async fn dashboard_view(
     Html(dashboard_layout(content).into_string()).into_response()
 }
 
-pub fn router(api: DynDashboardApi) -> Router {
+pub fn start(
+    api: DynDashboardApi,
+    ui_bind: SocketAddr,
+    task_handle: TaskHandle,
+) -> Pin<Box<dyn Future<Output = ()> + Send>> {
+    // Create a basic router with core routes
     let mut app = Router::new()
         .route("/", get(dashboard_view))
         .route("/login", get(login_form).post(login_submit))
         .with_static_routes();
 
-    // routeradd LNv2 gateway routes if the module exists
+    // Only add LNv2 gateway routes if the module exists
     if api
         .get_module::<fedimint_lnv2_server::Lightning>()
         .is_some()
@@ -165,5 +170,16 @@ pub fn router(api: DynDashboardApi) -> Router {
     }
 
     // Finalize the router with state
-    app.with_state(AuthState::new(api))
+    let app = app.with_state(AuthState::new(api));
+
+    Box::pin(async move {
+        let listener = TcpListener::bind(ui_bind)
+            .await
+            .expect("Failed to bind dashboard UI");
+
+        axum::serve(listener, app.into_make_service())
+            .with_graceful_shutdown(task_handle.make_shutdown_rx())
+            .await
+            .expect("Failed to serve dashboard UI");
+    })
 }
