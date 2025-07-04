@@ -170,3 +170,63 @@ diff ./tmp/v0.7-deps.txt ./tmp/v0.8-deps.txt
 # 5. Check for new large dependencies
 cargo bloat --release --package fedimint-gateway-server --crates | head -20
 ```
+
+## Investigation Results
+
+### Root Cause Identified
+The 12+ MB binary size increase is primarily due to **debug symbols not being stripped** from the release binary:
+
+- **Primary Issue**: Binary contains debug info (`file result/bin/gatewayd` shows `with debug_info, not stripped`)
+- **Configuration**: `flake.nix:245` has `dontStrip = !pkgs.stdenv.isDarwin;` (strips only on macOS)
+- **Profile**: `Cargo.toml` release profile includes `debug = "line-tables-only"`
+- **Impact**: 83MB text section due to debug symbols in 203MB binary
+
+### Secondary Contributors
+- **New dependency**: `fedimint-cursed-redb` added in commit 33236603da
+- **Version bumps**: `axum` 0.7.9→0.8.4, `lightning-invoice` 0.32.0→0.33.2, etc.
+
+### Recommended Fix
+Enable stripping in Nix build by changing `flake.nix:245` from:
+```nix
+dontStrip = !pkgs.stdenv.isDarwin;
+```
+to:
+```nix
+dontStrip = false;
+```
+
+This should reduce binary size by ~40-50MB, bringing it well below the 200MB threshold.
+
+### Reproduction Steps
+To independently reproduce this investigation:
+
+```bash
+# 1. Clone and setup
+git clone https://github.com/fedimint/fedimint.git
+cd fedimint
+git checkout 2025-07-04-debug-release-size
+mkdir -p ./tmp
+
+# 2. Compare dependency trees between versions
+git checkout upstream/releases/v0.7
+cargo tree --package fedimint-gateway-server > ./tmp/v0.7-deps.txt
+git checkout upstream/releases/v0.8
+cargo tree --package fedimint-gateway-server > ./tmp/v0.8-deps.txt
+diff ./tmp/v0.7-deps.txt ./tmp/v0.8-deps.txt
+
+# 3. Analyze binary size and debug info
+git checkout 2025-07-04-debug-release-size
+nix build .#gatewayd
+ls -lh result/bin/gatewayd         # Check file size
+file result/bin/gatewayd           # Check if stripped
+size result/bin/gatewayd           # Check section sizes
+
+# 4. Analyze Nix closure components
+nix path-info -rS .#gatewayd | sort -k2 -n | tail -20
+
+# 5. Check duplicate dependencies
+cargo tree --duplicates --package fedimint-gateway-server
+
+# 6. Review gateway-specific commits
+git log --oneline upstream/releases/v0.7..upstream/releases/v0.8 -- gateway/
+```

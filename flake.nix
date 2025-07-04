@@ -242,7 +242,7 @@
             pname = name;
 
             dontUnpack = true;
-            dontStrip = !pkgs.stdenv.isDarwin;
+            dontStrip = false;
 
             installPhase = ''
               cp -a ${package} $out
