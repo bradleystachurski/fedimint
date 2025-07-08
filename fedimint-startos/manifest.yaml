@@ -1,6 +1,6 @@
 id: fedimintd-mutinynet
 title: "Fedimint - Mutinynet"
-version: 0.7.0
+version: 0.8.0
 release-notes: |
   https://github.com/fedimint/fedimint/releases/tag/v0.7.0
   This release includes support for sideloading fedimintd that runs on Mutinynet.

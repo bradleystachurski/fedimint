@@ -14,6 +14,7 @@ export FM_ENABLE_IROH=true
 export FM_BITCOIN_NETWORK=signet
 export FM_BITCOIN_RPC_KIND=esplora
 export FM_BITCOIN_RPC_URL=https://mutinynet.com/api
+export FM_ESPLORA_URL=https://mutinynet.com/api
 export FM_DEFAULT_ESPLORA_API=https://mutinynet.com/api
 export FM_BIND_UI=0.0.0.0:8175
 export FM_DATA_DIR=/fedimintd

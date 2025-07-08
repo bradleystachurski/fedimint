@@ -1,4 +1,4 @@
-FROM fedimint/fedimintd:v0.7.0
+FROM fedimint/fedimintd:v0.8.0-beta.0-x86_64-linux
 
 ADD ./docker_entrypoint.sh /docker_entrypoint.sh
 ADD ./check-web.sh /usr/local/bin/check-web.sh
