@@ -27,3 +27,7 @@
 
 .aider.*
 .aider*
+
+# Start9 build files
+fedimint-startos/docker-images
+fedimint-startos/fedimintd-mutinynet.s9pk
