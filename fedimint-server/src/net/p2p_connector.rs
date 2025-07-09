@@ -358,6 +358,7 @@ pub(crate) async fn build_iroh_endpoint(
     };
 
     let mut builder = Endpoint::builder();
+    builder = builder.discovery_n0();
 
     for iroh_dns in iroh_dns_servers {
         builder = builder

@@ -80,6 +80,7 @@ impl IrohConnector {
 
         let endpoint_stable = {
             let mut builder = Endpoint::builder();
+            builder = builder.discovery_n0();
 
             for iroh_dns in iroh_dns_servers {
                 builder = builder
