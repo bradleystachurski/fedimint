@@ -96,7 +96,8 @@ Restart=always
 WantedBy=multi-user.target
 EOF
 
-scp -r docker-compose.yaml "root@$ssh_host:/root/fedimint-docker"
+ssh -q "root@$ssh_host" "mkdir -p $host_dir"
+scp docker-compose.yaml "root@$ssh_host:$host_dir/"
 
 echo >&2 '### Setting up...'
 
