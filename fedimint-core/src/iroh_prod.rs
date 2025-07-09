@@ -1,6 +1,5 @@
 /// The Iroh/Pkarr DNS server hosted by Fedimint project
-pub const FM_DNS_PKARR_RELAY_PROD: [&str; 2] = [
-    "https://dns.irohdns-eu-01.dev.fedimint.org/pkarr",
+pub const FM_DNS_PKARR_RELAY_PROD: [&str; 1] = [
     "https://dns.irohdns-us-01.dev.fedimint.org/pkarr",
 ];
 
