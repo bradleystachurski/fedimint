@@ -359,16 +359,17 @@ pub(crate) async fn build_iroh_endpoint(
 
     let mut builder = Endpoint::builder();
 
-    for iroh_dns in iroh_dns_servers {
-        builder = builder
-            .add_discovery({
-                let iroh_dns = iroh_dns.clone();
-                move |sk: &SecretKey| Some(PkarrPublisher::new(sk.clone(), iroh_dns))
-            })
-            .add_discovery(|_| Some(PkarrResolver::new(iroh_dns)));
-    }
+    // for iroh_dns in iroh_dns_servers {
+    //     builder = builder
+    //         .add_discovery({
+    //             let iroh_dns = iroh_dns.clone();
+    //             move |sk: &SecretKey| Some(PkarrPublisher::new(sk.clone(), iroh_dns))
+    //         })
+    //         .add_discovery(|_| Some(PkarrResolver::new(iroh_dns)));
+    // }
 
     builder = builder
+        .discovery_n0()
         .discovery_dht()
         .relay_mode(relay_mode)
         .secret_key(secret_key)

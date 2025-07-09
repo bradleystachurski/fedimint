@@ -80,15 +80,16 @@ impl IrohConnector {
 
         let endpoint_stable = {
             let mut builder = Endpoint::builder();
+            builder = builder.discovery_n0();
 
-            for iroh_dns in iroh_dns_servers {
-                builder = builder
-                    .add_discovery({
-                        let iroh_dns = iroh_dns.clone();
-                        move |sk: &SecretKey| Some(PkarrPublisher::new(sk.clone(), iroh_dns))
-                    })
-                    .add_discovery(|_| Some(PkarrResolver::new(iroh_dns)));
-            }
+            // for iroh_dns in iroh_dns_servers {
+            //     builder = builder
+            //         .add_discovery({
+            //             let iroh_dns = iroh_dns.clone();
+            //             move |sk: &SecretKey| Some(PkarrPublisher::new(sk.clone(), iroh_dns))
+            //         })
+            //         .add_discovery(|_| Some(PkarrResolver::new(iroh_dns)));
+            // }
 
             #[cfg(not(target_family = "wasm"))]
             let builder = builder.discovery_dht();
