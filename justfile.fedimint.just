@@ -296,7 +296,7 @@ deploy-docker-demo HOST:
   #!/usr/bin/env bash
 
   set -euo pipefail
-  cd docker/deploy-fedimintd
+  cd docker/iroh-fedimintd
   ./deploy.sh {{HOST}}
 
 deploy-docker-demo-all:
