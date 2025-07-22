@@ -2,22 +2,20 @@
 
 set -e
 
-echo "=== Debugging: Let's see what config files exist ==="
-find /data -name "*.yaml" -o -name "*.json" 2>/dev/null | head -20
+echo "=== Container starting for debugging ==="
+echo "Container will stay running. Use podman exec to inspect."
+echo ""
+echo "Commands to try:"
+echo "  sudo podman exec -it fedimintd-mutinynet.embassy /bin/bash"
+echo ""
+echo "Then inside the container:"
+echo "  find / -name '*.yaml' 2>/dev/null"
+echo "  ls -la /data/"
+echo "  ls -la /data/start9/"
+echo "  cat /data/start9/config.yaml"
+echo ""
 
-echo -e "\n=== Checking if config file exists ==="
-if [ -f /data/start9/config.yaml ]; then
-    echo "Config file found at /data/start9/config.yaml"
-    echo "First 50 lines:"
-    head -50 /data/start9/config.yaml
-else
-    echo "No config file at /data/start9/config.yaml"
-fi
-
-echo -e "\n=== Let's also check Bitcoin Core's exported config ==="
-# Sometimes Start9 exports config to environment or files
-find /mnt -name "*bitcoin*" -type f 2>/dev/null | head -10
-
-# Keep container running for inspection
-echo -e "\n=== Container will stay running for debugging ==="
-sleep 3600
+# Keep container running
+while true; do
+    sleep 3600
+done
