@@ -5,9 +5,9 @@ export const getConfig = async () => {
       "subtype": "package",
       "package-id": "bitcoind",
       "target": "config",
-      "interface": "rpc",
-      "name": "Bitcoin Core",
-      "description": "The Bitcoin Core node to connect to"
+      "selector": "rpc",
+      "name": "Bitcoin Core RPC",
+      "description": "The Bitcoin Core RPC credentials"
     }
   };
 };
