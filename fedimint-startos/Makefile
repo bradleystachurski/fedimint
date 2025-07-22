@@ -20,6 +20,7 @@ install:
 clean:
 	rm -rf docker-images
 	rm -f $(PKG_ID).s9pk
+	rm -rf scripts
 
 clean-manifest:
 	@sed -i '' '/^[[:blank:]]*#/d' manifest.yaml
@@ -33,21 +34,26 @@ x86:
 	@rm -f docker-images/aarch64.tar
 	ARCH=x86_64 $(MAKE)
 
-docker-images/aarch64.tar: Dockerfile docker_entrypoint.sh
+scripts/embassy.js:
+	mkdir -p scripts
+	echo 'export const getConfig = { type: "script" };' > scripts/embassy.js
+	echo 'export const setConfig = { type: "script" };' >> scripts/embassy.js
+
+docker-images/aarch64.tar: Dockerfile docker_entrypoint.sh config_get.sh config_set.sh
 ifeq ($(ARCH),x86_64)
 else
 	mkdir -p docker-images
 	docker buildx build --tag start9/$(PKG_ID)/main:$(PKG_VERSION) --build-arg ARCH=aarch64 --platform=linux/arm64 -o type=docker,dest=docker-images/aarch64.tar .
 endif
 
-docker-images/x86_64.tar: Dockerfile docker_entrypoint.sh
+docker-images/x86_64.tar: Dockerfile docker_entrypoint.sh config_get.sh config_set.sh
 ifeq ($(ARCH),aarch64)
 else
 	mkdir -p docker-images
 	docker buildx build --tag start9/$(PKG_ID)/main:$(PKG_VERSION) --build-arg ARCH=x86_64 --platform=linux/amd64 -o type=docker,dest=docker-images/x86_64.tar .
 endif
 
-$(PKG_ID).s9pk: manifest.yaml instructions.md icon.png LICENSE docker-images/aarch64.tar docker-images/x86_64.tar
+$(PKG_ID).s9pk: manifest.yaml instructions.md icon.png LICENSE scripts/embassy.js docker-images/aarch64.tar docker-images/x86_64.tar
 ifeq ($(ARCH),aarch64)
 	@echo "start-sdk: Preparing aarch64 package ..."
 else ifeq ($(ARCH),x86_64)
