@@ -2,42 +2,22 @@
 
 set -e
 
-# Find the entrypoint script dynamically
-ENTRYPOINT_SCRIPT=$(find /nix/store -type f -name '*-fedimintd-container-entrypoint.sh' | head -n 1)
+echo "=== Debugging: Let's see what config files exist ==="
+find /data -name "*.yaml" -o -name "*.json" 2>/dev/null | head -20
 
-if [[ -z "$ENTRYPOINT_SCRIPT" ]]; then
-    echo "Error: fedimintd-container-entrypoint.sh not found in /nix/store" >&2
-    exit 1
+echo -e "\n=== Checking if config file exists ==="
+if [ -f /data/start9/config.yaml ]; then
+    echo "Config file found at /data/start9/config.yaml"
+    echo "First 50 lines:"
+    head -50 /data/start9/config.yaml
+else
+    echo "No config file at /data/start9/config.yaml"
 fi
 
-# Wait for Start9 to create the config file
-# Based on FM_DATA_DIR=/data, the config should be at /data/start9/config.yaml
-echo "Waiting for Start9 config..."
-while [ ! -f /data/start9/config.yaml ]; do
-    sleep 1
-done
+echo -e "\n=== Let's also check Bitcoin Core's exported config ==="
+# Sometimes Start9 exports config to environment or files
+find /mnt -name "*bitcoin*" -type f 2>/dev/null | head -10
 
-echo "Config file found at /data/start9/config.yaml, parsing Bitcoin RPC credentials..."
-
-# Parse the YAML manually - it's now nested under bitcoind.internal
-BITCOIN_USER=$(grep -A20 "bitcoind:" /data/start9/config.yaml | grep -A10 "internal:" | grep "user:" | sed 's/.*user: *//; s/"//g' | tr -d ' ')
-BITCOIN_PASS=$(grep -A20 "bitcoind:" /data/start9/config.yaml | grep -A10 "internal:" | grep "password:" | sed 's/.*password: *//; s/"//g' | tr -d ' ')
-
-if [ -z "$BITCOIN_USER" ] || [ -z "$BITCOIN_PASS" ]; then
-    echo "ERROR: Could not parse Bitcoin RPC credentials from config"
-    exit 1
-fi
-
-echo "Got Bitcoin RPC credentials: user=$BITCOIN_USER"
-
-# Set environment variables that fedimintd expects
-export FM_BITCOIN_NETWORK=bitcoin
-export FM_BIND_UI=0.0.0.0:8175
-export FM_ENABLE_IROH=true
-
-# Bitcoin Core connection with actual credentials
-export FM_BITCOIND_URL="http://${BITCOIN_USER}:${BITCOIN_PASS}@bitcoind.embassy:8332"
-
-echo "Starting Fedimint with Bitcoin Core at bitcoind.embassy:8332"
-
-exec bash "$ENTRYPOINT_SCRIPT" "$@"
+# Keep container running for inspection
+echo -e "\n=== Container will stay running for debugging ==="
+sleep 3600
