@@ -10,21 +10,17 @@ if [[ -z "$ENTRYPOINT_SCRIPT" ]]; then
     exit 1
 fi
 
-# Bitcoin Core connection - Start9 convention
-# When Bitcoin Core is a dependency, it's available at bitcoind.embassy
-export FM_BITCOIN_NETWORK=bitcoin
-export FM_BITCOIN_RPC_KIND=bitcoind
-
-# Default RPC credentials for Start9 Bitcoin Core
-# These are typically 'bitcoin' and a generated password
-# For now, we'll use the standard defaults that most Start9 services use
-export FM_BITCOIN_RPC_URL="http://bitcoin:password@bitcoind.embassy:8332"
-
-# Other Fedimint settings
-export FM_ENABLE_IROH=true
-export FM_BIND_UI=0.0.0.0:8175
+# Set the arguments that fedimintd expects
 export FM_DATA_DIR=/fedimintd
+export FM_BITCOIN_NETWORK=bitcoin
+export FM_BIND_UI=0.0.0.0:8175
+export FM_ENABLE_IROH=true
+
+# Bitcoin Core connection
+# When Bitcoin Core is a dependency, it's available at bitcoind.embassy
+export FM_BITCOIND_URL="http://bitcoin:password@bitcoind.embassy:8332"
 
 echo "Starting Fedimint with Bitcoin Core at bitcoind.embassy:8332"
 
+# The entrypoint script should handle converting these FM_ env vars to command line args
 exec bash "$ENTRYPOINT_SCRIPT" "$@"
