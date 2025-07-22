@@ -10,17 +10,25 @@ if [[ -z "$ENTRYPOINT_SCRIPT" ]]; then
     exit 1
 fi
 
-# Debug: Check what's available
-echo "=== Checking for Bitcoin RPC info ==="
-echo "Environment variables with BITCOIN:"
-env | grep -i bitcoin || echo "No BITCOIN env vars found"
+# Wait for Start9 to create the config file in the start9 subdirectory
+echo "Waiting for Start9 config..."
+while [ ! -f /start-os/start9/config.yaml ]; do
+    sleep 1
+done
 
-echo "Checking mounted volumes:"
-ls -la /mnt/ 2>/dev/null || echo "No /mnt directory"
-ls -la /start-os/ 2>/dev/null || echo "No /start-os directory"
+echo "Config file found at /start-os/start9/config.yaml, parsing Bitcoin RPC credentials..."
 
-# For now, let's see if Start9 sets any standard env vars
-# Otherwise we'll need to implement proper config
+# Since we don't have yq in the Nix image, we need to parse the YAML manually
+# This is a bit hacky but should work for simple cases
+BITCOIN_USER=$(grep -A10 "bitcoin:" /start-os/start9/config.yaml | grep "user:" | sed 's/.*user: *//; s/"//g' | tr -d ' ')
+BITCOIN_PASS=$(grep -A10 "bitcoin:" /start-os/start9/config.yaml | grep "password:" | sed 's/.*password: *//; s/"//g' | tr -d ' ')
+
+if [ -z "$BITCOIN_USER" ] || [ -z "$BITCOIN_PASS" ]; then
+    echo "ERROR: Could not parse Bitcoin RPC credentials from config"
+    exit 1
+fi
+
+echo "Got Bitcoin RPC credentials: user=$BITCOIN_USER"
 
 # Set environment variables that fedimintd expects
 export FM_DATA_DIR=/fedimintd
@@ -28,11 +36,9 @@ export FM_BITCOIN_NETWORK=bitcoin
 export FM_BIND_UI=0.0.0.0:8175
 export FM_ENABLE_IROH=true
 
-# Bitcoin Core connection - we need the real credentials
-# This is a placeholder that won't work
-export FM_BITCOIND_URL="http://bitcoin:password@bitcoind.embassy:8332"
+# Bitcoin Core connection with actual credentials
+export FM_BITCOIND_URL="http://${BITCOIN_USER}:${BITCOIN_PASS}@bitcoind.embassy:8332"
 
 echo "Starting Fedimint with Bitcoin Core at bitcoind.embassy:8332"
-echo "WARNING: Using placeholder credentials - this will fail!"
 
 exec bash "$ENTRYPOINT_SCRIPT" "$@"
