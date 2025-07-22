@@ -1,0 +1,10 @@
+bitcoin:
+  type: pointer
+  name: "Bitcoin Core"
+  description: "Select Bitcoin Core RPC credentials"
+  subtype: package
+  package-id: bitcoind
+  target: config
+  interface: rpc
+  selector:
+    multi: false

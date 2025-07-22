@@ -43,7 +43,11 @@ health-checks:
     inject: true
     system: false
     io-format: json
-config: ~
+config:
+  get:
+    type: script
+  set:
+    type: script
 properties: ~
 volumes:
   main:
@@ -65,8 +69,12 @@ interfaces:
     protocols:
       - http
       - tcp
-dependencies: {}
-# TODO: backup/restore is not tested for mutinynet, however it will be prior to mainnet release
+dependencies:
+  bitcoind:
+    version: ">=0.21.0.0 <29.0.0"
+    requirement:
+      type: "required"
+    description: "Fedimint requires Bitcoin Core for blockchain operations"
 backup:
   create:
     type: docker
