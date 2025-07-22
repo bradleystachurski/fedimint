@@ -19,9 +19,9 @@ done
 
 echo "Config file found at /data/start9/config.yaml, parsing Bitcoin RPC credentials..."
 
-# Parse the YAML manually
-BITCOIN_USER=$(grep -A10 "bitcoin:" /data/start9/config.yaml | grep "user:" | sed 's/.*user: *//; s/"//g' | tr -d ' ')
-BITCOIN_PASS=$(grep -A10 "bitcoin:" /data/start9/config.yaml | grep "password:" | sed 's/.*password: *//; s/"//g' | tr -d ' ')
+# Parse the YAML manually - it's now nested under bitcoind.internal
+BITCOIN_USER=$(grep -A20 "bitcoind:" /data/start9/config.yaml | grep -A10 "internal:" | grep "user:" | sed 's/.*user: *//; s/"//g' | tr -d ' ')
+BITCOIN_PASS=$(grep -A20 "bitcoind:" /data/start9/config.yaml | grep -A10 "internal:" | grep "password:" | sed 's/.*password: *//; s/"//g' | tr -d ' ')
 
 if [ -z "$BITCOIN_USER" ] || [ -z "$BITCOIN_PASS" ]; then
     echo "ERROR: Could not parse Bitcoin RPC credentials from config"

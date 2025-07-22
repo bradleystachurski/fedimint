@@ -1,14 +1,14 @@
 export const getConfig = async () => {
   return {
-    "bitcoin": {
+    "bitcoind": {
       "type": "union",
       "name": "Bitcoin Core",
       "description": "The Bitcoin Core node to connect to",
       "tag": {
         "id": "type",
-        "name": "Type",
+        "name": "Bitcoin Node Type",
         "variant-names": {
-          "internal": "Internal (Bitcoin Core)"
+          "internal": "Bitcoin Core"
         }
       },
       "default": "internal",
@@ -17,20 +17,22 @@ export const getConfig = async () => {
           "user": {
             "type": "pointer",
             "name": "RPC Username",
-            "description": "The username for Bitcoin Core RPC",
+            "description": "The username for Bitcoin Core's RPC interface",
             "subtype": "package",
             "package-id": "bitcoind",
             "target": "config",
-            "selector": "rpc.username"
+            "multi": false,
+            "selector": "$.rpc.username"
           },
           "password": {
             "type": "pointer",
             "name": "RPC Password",
-            "description": "The password for Bitcoin Core RPC",
+            "description": "The password for Bitcoin Core's RPC interface",
             "subtype": "package",
             "package-id": "bitcoind",
             "target": "config",
-            "selector": "rpc.password"
+            "multi": false,
+            "selector": "$.rpc.password"
           }
         }
       }
