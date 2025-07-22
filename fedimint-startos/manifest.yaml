@@ -43,11 +43,7 @@ health-checks:
     inject: true
     system: false
     io-format: json
-config:
-  get:
-    type: script
-  set:
-    type: script
+config: ~
 properties: ~
 volumes:
   main:
