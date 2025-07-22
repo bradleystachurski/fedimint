@@ -10,17 +10,29 @@ if [[ -z "$ENTRYPOINT_SCRIPT" ]]; then
     exit 1
 fi
 
-# Set the arguments that fedimintd expects
+# Debug: Check what's available
+echo "=== Checking for Bitcoin RPC info ==="
+echo "Environment variables with BITCOIN:"
+env | grep -i bitcoin || echo "No BITCOIN env vars found"
+
+echo "Checking mounted volumes:"
+ls -la /mnt/ 2>/dev/null || echo "No /mnt directory"
+ls -la /start-os/ 2>/dev/null || echo "No /start-os directory"
+
+# For now, let's see if Start9 sets any standard env vars
+# Otherwise we'll need to implement proper config
+
+# Set environment variables that fedimintd expects
 export FM_DATA_DIR=/fedimintd
 export FM_BITCOIN_NETWORK=bitcoin
 export FM_BIND_UI=0.0.0.0:8175
 export FM_ENABLE_IROH=true
 
-# Bitcoin Core connection
-# When Bitcoin Core is a dependency, it's available at bitcoind.embassy
+# Bitcoin Core connection - we need the real credentials
+# This is a placeholder that won't work
 export FM_BITCOIND_URL="http://bitcoin:password@bitcoind.embassy:8332"
 
 echo "Starting Fedimint with Bitcoin Core at bitcoind.embassy:8332"
+echo "WARNING: Using placeholder credentials - this will fail!"
 
-# The entrypoint script should handle converting these FM_ env vars to command line args
 exec bash "$ENTRYPOINT_SCRIPT" "$@"
