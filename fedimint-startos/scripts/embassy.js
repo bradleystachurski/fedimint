@@ -1,41 +1,19 @@
 export const getConfig = async () => {
   return {
-    "bitcoind": {
-      "type": "union",
-      "name": "Bitcoin Core",
-      "description": "The Bitcoin Core node to connect to",
-      "tag": {
-        "id": "type",
-        "name": "Bitcoin Node Type",
-        "variant-names": {
-          "internal": "Bitcoin Core"
-        }
-      },
-      "default": "internal",
-      "variants": {
-        "internal": {
-          "user": {
-            "type": "pointer",
-            "name": "RPC Username",
-            "description": "The username for Bitcoin Core's RPC interface",
-            "subtype": "package",
-            "package-id": "bitcoind",
-            "target": "config",
-            "multi": false,
-            "selector": "$.rpc.username"
-          },
-          "password": {
-            "type": "pointer",
-            "name": "RPC Password",
-            "description": "The password for Bitcoin Core's RPC interface",
-            "subtype": "package",
-            "package-id": "bitcoind",
-            "target": "config",
-            "multi": false,
-            "selector": "$.rpc.password"
-          }
-        }
-      }
+    "bitcoin-rpc-user": {
+      "type": "string",
+      "name": "Bitcoin RPC Username",
+      "description": "Enter the RPC username from your Bitcoin Core config (found in Bitcoin Core > Config > RPC Settings > Username)",
+      "nullable": false,
+      "default": "bitcoin"
+    },
+    "bitcoin-rpc-password": {
+      "type": "string",
+      "name": "Bitcoin RPC Password",
+      "description": "Enter the RPC password from your Bitcoin Core config (found in Bitcoin Core > Config > RPC Settings > RPC Password)",
+      "nullable": false,
+      "default": "",
+      "masked": true
     }
   };
 };
