@@ -1,5 +1,3 @@
-import { types as T } from "../deps.ts";
+import { compat, types as T } from "../deps.ts";
 
-export const setConfig: T.ExpectedExports.setConfig = async (effects, newConfig) => {
-  return { result: {} };
-};
+export const setConfig: T.ExpectedExports.setConfig = compat.setConfig;
