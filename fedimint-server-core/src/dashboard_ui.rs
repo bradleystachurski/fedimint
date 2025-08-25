@@ -54,6 +54,9 @@ pub trait IDashboardApi {
     /// Get the status of the bitcoin backend
     async fn bitcoin_rpc_status(&self) -> Option<ServerBitcoinRpcStatus>;
 
+    /// Get a backup of the guardian configuration
+    async fn guardian_config_backup(&self, password: &str) -> Vec<u8>;
+
     /// Get reference to a server module instance by module kind
     fn get_module_by_kind(&self, kind: ModuleKind) -> Option<&DynServerModule>;
 

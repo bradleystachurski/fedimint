@@ -12,7 +12,12 @@ pub fn render(
 ) -> Markup {
     html! {
         div class="card h-100" {
-            div class="card-header dashboard-header" { (federation_name) }
+            div class="card-header dashboard-header d-flex justify-content-between align-items-center" {
+                span { (federation_name) }
+                a href="/download-backup" class="btn btn-sm btn-primary" {
+                    "Download Backup"
+                }
+            }
             div class="card-body" {
                 div id="session-count" class="alert alert-info" {
                     "Session Count: " strong { (session_count) }

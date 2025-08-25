@@ -603,6 +603,12 @@ impl IDashboardApi for ConsensusApi {
         self.bitcoin_rpc_connection.status()
     }
 
+    async fn guardian_config_backup(&self, password: &str) -> Vec<u8> {
+        let token = GuardianAuthToken::new_authenticated();
+        self.get_guardian_config_backup(password, &token)
+            .tar_archive_bytes
+    }
+
     fn get_module_by_kind(&self, kind: ModuleKind) -> Option<&DynServerModule> {
         self.modules
             .iter_modules()

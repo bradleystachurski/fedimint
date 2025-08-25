@@ -8,6 +8,7 @@ pub mod modules;
 
 use axum::Router;
 use axum::extract::{Form, State};
+use axum::http::header;
 use axum::response::{Html, IntoResponse};
 use axum::routing::{get, post};
 use axum_extra::extract::cookie::CookieJar;
@@ -139,10 +140,39 @@ async fn dashboard_view(
     Html(dashboard_layout(content).into_string()).into_response()
 }
 
+// Download backup route
+const DOWNLOAD_BACKUP_ROUTE: &str = "/download-backup";
+
+async fn download_backup(
+    State(state): State<UiState<DynDashboardApi>>,
+    _auth: UserAuth,
+) -> impl IntoResponse {
+    use axum::response::Response;
+    use axum::body::Body;
+    
+    // Get the password from the API auth
+    let auth = state.api.auth().await;
+    let backup_bytes = state.api.guardian_config_backup(&auth.0).await;
+    
+    // Get current timestamp for filename
+    let timestamp = chrono::Utc::now().format("%Y-%m-%d-%H%M%S");
+    let filename = format!("guardian-backup-{}.tar.gz", timestamp);
+    
+    Response::builder()
+        .header(header::CONTENT_TYPE, "application/gzip")
+        .header(
+            header::CONTENT_DISPOSITION,
+            format!("attachment; filename=\"{}\"", filename),
+        )
+        .body(Body::from(backup_bytes))
+        .unwrap()
+}
+
 pub fn router(api: DynDashboardApi) -> Router {
     let mut app = Router::new()
         .route(ROOT_ROUTE, get(dashboard_view))
         .route(LOGIN_ROUTE, get(login_form).post(login_submit))
+        .route(DOWNLOAD_BACKUP_ROUTE, get(download_backup))
         .route(EXPLORER_ROUTE, get(consensus_explorer_view))
         .route(EXPLORER_IDX_ROUTE, get(consensus_explorer_view))
         .with_static_routes();
