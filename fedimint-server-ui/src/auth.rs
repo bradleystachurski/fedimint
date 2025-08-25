@@ -2,11 +2,18 @@ use axum::extract::FromRequestParts;
 use axum::http::request::Parts;
 use axum::response::Redirect;
 use axum_extra::extract::CookieJar;
+use fedimint_server_core::net::AuthenticationProof;
 
 use crate::{LOGIN_ROUTE, UiState};
 
 /// Extractor that validates user authentication
 pub struct UserAuth;
+
+impl AuthenticationProof for UserAuth {
+    fn is_authenticated(&self) -> bool {
+        true // UserAuth only exists if authentication succeeded
+    }
+}
 
 impl<Api> FromRequestParts<UiState<Api>> for UserAuth
 where

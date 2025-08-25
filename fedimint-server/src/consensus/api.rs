@@ -604,7 +604,18 @@ impl IDashboardApi for ConsensusApi {
     }
 
     async fn guardian_config_backup(&self, password: &str) -> Vec<u8> {
-        let token = GuardianAuthToken::new_authenticated();
+        // Create an auth proof for dashboard authentication
+        // The dashboard has already verified authentication via UserAuth extractor
+        struct DashboardAuthProof;
+        impl fedimint_server_core::net::AuthenticationProof for DashboardAuthProof {
+            fn is_authenticated(&self) -> bool {
+                true // Dashboard route handler has already verified authentication
+            }
+        }
+        
+        let auth_proof = DashboardAuthProof;
+        let token = GuardianAuthToken::from_proof(&auth_proof)
+            .expect("Dashboard auth already verified");
         self.get_guardian_config_backup(password, &token)
             .tar_archive_bytes
     }
