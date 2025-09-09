@@ -90,10 +90,12 @@ impl IrohConnector {
                     .add_discovery(|_| Some(PkarrResolver::new(iroh_dns)));
             }
 
-            #[cfg(not(target_family = "wasm"))]
+            #[cfg(all(not(target_family = "wasm"), not(target_os = "android")))]
             let builder = builder.discovery_dht().discovery_n0();
 
-            let endpoint = builder.discovery_n0().bind().await?;
+            #[cfg(any(target_family = "wasm", target_os = "android"))]
+            let builder = builder.discovery_n0();
+            let endpoint = builder.bind().await?;
             debug!(
                 target: LOG_NET_IROH,
                 node_id = %endpoint.node_id(),
@@ -103,9 +105,13 @@ impl IrohConnector {
             endpoint
         };
         let endpoint_next = {
+            #[cfg(all(not(target_family = "wasm"), not(target_os = "android")))]
+            let builder = iroh_next::Endpoint::builder()
+                .discovery_n0()
+                .discovery_dht();
+
+            #[cfg(any(target_family = "wasm", target_os = "android"))]
             let builder = iroh_next::Endpoint::builder().discovery_n0();
-            #[cfg(not(target_family = "wasm"))]
-            let builder = builder.discovery_dht();
             let endpoint = builder.bind().await?;
             debug!(
                 target: LOG_NET_IROH,
