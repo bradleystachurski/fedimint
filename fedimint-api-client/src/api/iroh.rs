@@ -155,38 +155,113 @@ impl IClientConnector for IrohConnector {
         let endpoint_stable = self.endpoint_stable.clone();
         let endpoint_next = self.endpoint_next.clone();
 
+        #[cfg(target_os = "android")]
+        const ANDROID_CONNECT_TIMEOUT: tokio::time::Duration = tokio::time::Duration::from_secs(10);
+        #[cfg(target_os = "android")]
+        const ANDROID_MAX_RETRIES: u32 = 5;
+
         futures.push(Box::pin({
             let connection_override = connection_override.clone();
             async move {
-                match connection_override {
-                    Some(node_addr) => {
-                        trace!(target: LOG_NET_IROH, %node_id, "Using a connectivity override for connection");
-                        endpoint_stable
-                            .connect(node_addr.clone(), FEDIMINT_API_ALPN)
-                            .await
+                #[cfg(target_os = "android")]
+                {
+                    use tokio::time::timeout;
+                    
+                    for attempt in 0..ANDROID_MAX_RETRIES {
+                        let result = match connection_override.as_ref() {
+                            Some(node_addr) => {
+                                trace!(target: LOG_NET_IROH, %node_id, "Using a connectivity override for connection");
+                                timeout(ANDROID_CONNECT_TIMEOUT, endpoint_stable.connect(node_addr.clone(), FEDIMINT_API_ALPN)).await
+                            }
+                            None => {
+                                timeout(ANDROID_CONNECT_TIMEOUT, endpoint_stable.connect(node_id, FEDIMINT_API_ALPN)).await
+                            }
+                        };
+                        
+                        match result {
+                            Ok(Ok(conn)) => {
+                                debug!(target: LOG_NET_IROH, "Android: Connected successfully on attempt {}", attempt + 1);
+                                return Ok(super::IClientConnection::into_dyn(conn));
+                            }
+                            _ if attempt < ANDROID_MAX_RETRIES - 1 => {
+                                warn!(target: LOG_NET_IROH, "Android: Connection attempt {} failed/timed out, retrying...", attempt + 1);
+                                tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+                            }
+                            Ok(Err(e)) => return Err(PeerError::Connection(e)),
+                            Err(_) => return Err(PeerError::Connection(anyhow::anyhow!("Connection timed out after {} attempts", ANDROID_MAX_RETRIES))),
+                        }
                     }
-                    None => endpoint_stable.connect(node_id, FEDIMINT_API_ALPN).await,
-                }.map_err(PeerError::Connection)
-                .map(super::IClientConnection::into_dyn)
+                    unreachable!()
+                }
+                
+                #[cfg(not(target_os = "android"))]
+                {
+                    match connection_override {
+                        Some(node_addr) => {
+                            trace!(target: LOG_NET_IROH, %node_id, "Using a connectivity override for connection");
+                            endpoint_stable.connect(node_addr.clone(), FEDIMINT_API_ALPN).await
+                        }
+                        None => endpoint_stable.connect(node_id, FEDIMINT_API_ALPN).await,
+                    }
+                    .map_err(PeerError::Connection)
+                    .map(super::IClientConnection::into_dyn)
+                }
             }
         }));
 
         futures.push(Box::pin(async move {
-            match connection_override {
-                Some(node_addr) => {
-                    trace!(target: LOG_NET_IROH, %node_id, "Using a connectivity override for connection");
-                    endpoint_next
-                        .connect(node_addr_stable_to_next(&node_addr), FEDIMINT_API_ALPN)
-                        .await
+            #[cfg(target_os = "android")]
+            {
+                use tokio::time::timeout;
+                
+                for attempt in 0..ANDROID_MAX_RETRIES {
+                    let result = match connection_override.as_ref() {
+                        Some(node_addr) => {
+                            trace!(target: LOG_NET_IROH, %node_id, "Using a connectivity override for connection");
+                            timeout(ANDROID_CONNECT_TIMEOUT, endpoint_next.connect(node_addr_stable_to_next(&node_addr), FEDIMINT_API_ALPN)).await
+                        }
+                        None => {
+                            timeout(ANDROID_CONNECT_TIMEOUT, endpoint_next.connect(
+                                iroh_next::NodeId::from_bytes(node_id.as_bytes()).expect("Can't fail"),
+                                FEDIMINT_API_ALPN
+                            )).await
+                        }
+                    };
+                    
+                    match result {
+                        Ok(Ok(conn)) => {
+                            debug!(target: LOG_NET_IROH, "Android (next): Connected successfully on attempt {}", attempt + 1);
+                            return Ok(super::IClientConnection::into_dyn(conn));
+                        }
+                        _ if attempt < ANDROID_MAX_RETRIES - 1 => {
+                            warn!(target: LOG_NET_IROH, "Android (next): Connection attempt {} failed/timed out, retrying...", attempt + 1);
+                            tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+                        }
+                        Ok(Err(e)) => return Err(PeerError::Connection(e.into())),
+                        Err(_) => return Err(PeerError::Connection(anyhow::anyhow!("Connection timed out after {} attempts", ANDROID_MAX_RETRIES))),
+                    }
                 }
-                None => endpoint_next.connect(
-                        iroh_next::NodeId::from_bytes(node_id.as_bytes()).expect("Can't fail"),
-                        FEDIMINT_API_ALPN
-                    ).await,
-                }
-                .map_err(Into::into)
-                .map_err(PeerError::Connection)
-                .map(super::IClientConnection::into_dyn)
+                unreachable!()
+            }
+            
+            #[cfg(not(target_os = "android"))]
+            {
+                match connection_override {
+                    Some(node_addr) => {
+                        trace!(target: LOG_NET_IROH, %node_id, "Using a connectivity override for connection");
+                        endpoint_next
+                            .connect(node_addr_stable_to_next(&node_addr), FEDIMINT_API_ALPN)
+                            .await
+                    }
+                    None => endpoint_next.connect(
+                            iroh_next::NodeId::from_bytes(node_id.as_bytes()).expect("Can't fail"),
+                            FEDIMINT_API_ALPN
+                        ).await,
+                    }
+                    .map_err(Into::into)
+                    .map_err(PeerError::Connection)
+                    .map(super::IClientConnection::into_dyn)
+            }
         }));
 
         // Remember last error, so we have something to return if
