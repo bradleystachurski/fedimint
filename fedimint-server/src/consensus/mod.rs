@@ -204,7 +204,17 @@ pub async fn run(
 
     info!(target: LOG_CONSENSUS, "Starting Consensus Api...");
 
-    let api_handler = if let Some(iroh_api_sk) = cfg.private.iroh_api_sk.clone() {
+    // Always start WebSocket API for browser-based admin access
+    let api_handler = start_consensus_api(
+        &cfg.local,
+        consensus_api.clone(),
+        force_api_secrets.clone(),
+        api_bind,
+    )
+    .await;
+
+    // Additionally start Iroh API if configured
+    if let Some(iroh_api_sk) = cfg.private.iroh_api_sk.clone() {
         Box::pin(start_iroh_api(
             iroh_api_sk,
             api_bind,
@@ -215,19 +225,7 @@ pub async fn run(
             iroh_api_limits,
         ))
         .await?;
-
-        None
-    } else {
-        let handler = start_consensus_api(
-            &cfg.local,
-            consensus_api.clone(),
-            force_api_secrets.clone(),
-            api_bind,
-        )
-        .await;
-
-        Some(handler)
-    };
+    }
 
     info!(target: LOG_CONSENSUS, "Starting Submission of Module CI proposals...");
 
@@ -281,13 +279,12 @@ pub async fn run(
     .run()
     .await?;
 
-    if let Some(api_handler) = api_handler {
-        api_handler
-            .stop()
-            .expect("Consensus api should still be running");
+    // Always shutdown WebSocket API (now it's always running)
+    api_handler
+        .stop()
+        .expect("Consensus api should still be running");
 
-        api_handler.stopped().await;
-    }
+    api_handler.stopped().await;
 
     Ok(())
 }
