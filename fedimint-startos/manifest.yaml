@@ -69,7 +69,7 @@ interfaces:
       - tcp
 dependencies:
   bitcoind:
-    version: ">=0.21.0.0 <30.0.0"
+    version: ">=0.21.0.0 <31.0.0"
     requirement:
       type: "opt-in"
       how: "Install Bitcoin Core from the Start9 marketplace and select it in Fedimint's config"
