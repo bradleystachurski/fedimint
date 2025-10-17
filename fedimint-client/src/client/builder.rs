@@ -35,6 +35,7 @@ use fedimint_core::envs::is_running_in_test_env;
 use fedimint_core::invite_code::InviteCode;
 use fedimint_core::module::registry::ModuleDecoderRegistry;
 use fedimint_core::module::{ApiRequestErased, ApiVersion, SupportedApiVersionsSummary};
+use fedimint_core::rustls::install_crypto_provider;
 use fedimint_core::task::TaskGroup;
 use fedimint_core::task::jit::{Jit, JitTry, JitTryAnyhow};
 use fedimint_core::util::{FmtCompact as _, FmtCompactAnyhow as _};
@@ -369,6 +370,7 @@ impl ClientBuilder {
         }
 
         Client::run_core_migrations(&db_no_decoders).await?;
+        install_crypto_provider().await;
 
         // Note: It's important all client initialization is performed as one big
         // transaction to avoid half-initialized client state.
@@ -500,6 +502,7 @@ impl ClientBuilder {
         pre_root_secret: RootSecret,
     ) -> anyhow::Result<ClientHandle> {
         Client::run_core_migrations(&db_no_decoders).await?;
+        install_crypto_provider().await;
 
         // Check for pending config and migrate if present
         Self::migrate_pending_config_if_present(&db_no_decoders).await;
