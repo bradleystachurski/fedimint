@@ -725,7 +725,7 @@ impl WebsocketConnector {
 
                 #[cfg(not(target_family = "wasm"))]
                 let mut client = {
-                    install_crypto_provider().await;
+                    install_crypto_provider();
                     let webpki_roots = webpki_roots::TLS_SERVER_ROOTS.iter().cloned();
                     let mut root_certs = RootCertStore::empty();
                     root_certs.extend(webpki_roots);

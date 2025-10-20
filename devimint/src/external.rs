@@ -481,7 +481,7 @@ impl Lnd {
         })
         .await?;
 
-        install_crypto_provider().await;
+        install_crypto_provider();
 
         let client = poll("lnd_connect", || async {
             tonic_lnd::connect(

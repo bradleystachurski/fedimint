@@ -11,7 +11,6 @@ use fedimint_core::iroh_prod::FM_IROH_DNS_FEDIMINT_PROD;
 use fedimint_core::module::{
     ApiError, ApiMethod, ApiRequestErased, FEDIMINT_API_ALPN, IrohApiRequest,
 };
-use fedimint_core::rustls::install_crypto_provider;
 use fedimint_core::task::spawn;
 use fedimint_core::util::{FmtCompact as _, SafeUrl};
 use fedimint_logging::LOG_NET_IROH;
@@ -265,10 +264,6 @@ impl IrohConnector {
         let conn = entry_arc
             .get_or_try_init(|| async {
                 trace!(target: LOG_NET_IROH, %node_id, "Creating new stable connection");
-
-                #[cfg(not(target_family = "wasm"))]
-                install_crypto_provider().await;
-
                 let conn = match node_addr.clone() {
                     Some(node_addr) => {
                         trace!(target: LOG_NET_IROH, %node_id, "Using a connectivity override for connection");
@@ -323,10 +318,6 @@ impl IrohConnector {
         let conn = entry_arc
             .get_or_try_init(|| async move {
                 trace!(target: LOG_NET_IROH, %node_id, "Creating new next connection");
-
-                #[cfg(not(target_family = "wasm"))]
-                install_crypto_provider().await;
-
                 let conn = match node_addr.clone() {
                     Some(node_addr) => {
                         trace!(target: LOG_NET_IROH, %node_id, "Using a connectivity override for connection");

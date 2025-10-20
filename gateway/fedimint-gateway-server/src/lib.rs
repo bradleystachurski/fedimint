@@ -480,7 +480,7 @@ impl Gateway {
         self,
         runtime: Arc<tokio::runtime::Runtime>,
     ) -> anyhow::Result<TaskShutdownToken> {
-        install_crypto_provider().await;
+        install_crypto_provider();
         self.register_clients_timer();
         self.load_clients().await?;
         self.start_gateway(runtime);

@@ -242,7 +242,7 @@ impl FederationTestBuilder {
 
     #[allow(clippy::too_many_lines)]
     pub async fn build(self) -> FederationTest {
-        install_crypto_provider().await;
+        install_crypto_provider();
         let num_offline = self.num_offline;
         assert!(
             self.num_peers > 3 * self.num_offline,

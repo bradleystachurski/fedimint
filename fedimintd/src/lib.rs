@@ -371,7 +371,7 @@ pub async fn run(
 
     root_task_group.install_kill_handler();
 
-    install_crypto_provider().await;
+    install_crypto_provider();
 
     let task_group = root_task_group.clone();
     root_task_group.spawn_cancellable("main", async move {
