@@ -55,6 +55,7 @@ export const getConfig: T.ExpectedExports.getConfig = compat.getConfig({
     name: "Advanced Settings",
     description: "Optional configuration for debugging and development",
     nullable: true,
+    default: {},
     spec: {
       "rust-log-level": {
         type: "string",
