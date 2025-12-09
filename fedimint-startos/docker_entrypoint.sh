@@ -64,13 +64,25 @@ else
 fi
 
 # Read and set RUST_LOG from config
-RUST_LOG_LEVEL=$(yq '.advanced.rust-log-level' /start-os/start9/config.yaml)
+# Config structure:
+# advanced:
+#   mode: default
+# or:
+# advanced:
+#   mode: custom
+#   rust-log-level: "info,..."
 DEFAULT_RUST_LOG="info,jsonrpsee_core::client::async_client=off,hyper=off,h2=off,jsonrpsee_server=warn,jsonrpsee_server::transport=off,AlephBFT-=error,iroh=error"
+ADVANCED_MODE=$(yq '.advanced.mode' /start-os/start9/config.yaml)
 
-if [ -z "$RUST_LOG_LEVEL" ] || [ "$RUST_LOG_LEVEL" = "null" ]; then
-    export RUST_LOG="${DEFAULT_RUST_LOG}"
+if [ "$ADVANCED_MODE" = "custom" ]; then
+    RUST_LOG_LEVEL=$(yq '.advanced.rust-log-level' /start-os/start9/config.yaml)
+    if [ -n "$RUST_LOG_LEVEL" ] && [ "$RUST_LOG_LEVEL" != "null" ]; then
+        export RUST_LOG="${RUST_LOG_LEVEL}"
+    else
+        export RUST_LOG="${DEFAULT_RUST_LOG}"
+    fi
 else
-    export RUST_LOG="${RUST_LOG_LEVEL}"
+    export RUST_LOG="${DEFAULT_RUST_LOG}"
 fi
 echo "Setting RUST_LOG=${RUST_LOG}"
 
