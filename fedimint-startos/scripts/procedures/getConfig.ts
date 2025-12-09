@@ -60,7 +60,7 @@ export const getConfig: T.ExpectedExports.getConfig = compat.getConfig({
         type: "string",
         name: "Rust Log Directives",
         description: "Rust logging directives (e.g., 'info,fm=debug'). Only modify if debugging.",
-        nullable: false,
+        nullable: true,
         default: "info,jsonrpsee_core::client::async_client=off,hyper=off,h2=off,jsonrpsee_server=warn,jsonrpsee_server::transport=off,AlephBFT-=error,iroh=error",
         pattern: ".*",
         "pattern-description": "Any valid Rust log directive string"
