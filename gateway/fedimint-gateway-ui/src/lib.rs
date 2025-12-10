@@ -23,8 +23,10 @@ use fedimint_core::secp256k1::serde::Deserialize;
 use fedimint_gateway_common::{
     ChainSource, CloseChannelsWithPeerRequest, CloseChannelsWithPeerResponse, ConnectFedPayload,
     DepositAddressPayload, FederationInfo, GatewayBalances, GatewayInfo, LeaveFedPayload,
-    LightningMode, MnemonicResponse, OpenChannelRequest, PaymentSummaryPayload,
-    PaymentSummaryResponse, SendOnchainRequest, SetFeesPayload,
+    LightningMode, MaxWithdrawablePayload, MaxWithdrawableResponse, MnemonicResponse,
+    OpenChannelRequest, PaymentSummaryPayload, PaymentSummaryResponse, SendOnchainRequest,
+    SetFeesPayload, WithdrawPayload, WithdrawPreviewPayload, WithdrawPreviewResponse,
+    WithdrawResponse,
 };
 use fedimint_ui_common::assets::WithStaticRoutesExt;
 use fedimint_ui_common::auth::UserAuth;
@@ -35,7 +37,10 @@ use fedimint_ui_common::{
 use maud::html;
 
 use crate::connect_fed::connect_federation_handler;
-use crate::federation::{deposit_address_handler, leave_federation_handler, set_fees_handler};
+use crate::federation::{
+    deposit_address_handler, leave_federation_handler, set_fees_handler, withdraw_confirm_handler,
+    withdraw_handler, withdraw_preview_handler,
+};
 use crate::lightning::{
     channels_fragment_handler, close_channel_handler, generate_receive_address_handler,
     open_channel_handler, send_onchain_handler, wallet_fragment_handler,
@@ -53,6 +58,9 @@ pub(crate) const SEND_ONCHAIN_ROUTE: &str = "/ui/wallet/send";
 pub(crate) const WALLET_FRAGMENT_ROUTE: &str = "/ui/wallet/fragment";
 pub(crate) const LN_ONCHAIN_ADDRESS_ROUTE: &str = "/ui/wallet/receive";
 pub(crate) const DEPOSIT_ADDRESS_ROUTE: &str = "/ui/federations/deposit-address";
+pub(crate) const WITHDRAW_ROUTE: &str = "/ui/federations/withdraw";
+pub(crate) const WITHDRAW_PREVIEW_ROUTE: &str = "/ui/federations/withdraw-preview";
+pub(crate) const WITHDRAW_CONFIRM_ROUTE: &str = "/ui/federations/withdraw-confirm";
 
 #[derive(Default, Deserialize)]
 pub struct DashboardQuery {
@@ -125,6 +133,21 @@ pub trait IAdminGateway {
         &self,
         payload: DepositAddressPayload,
     ) -> Result<Address, Self::Error>;
+
+    async fn handle_withdraw_msg(
+        &self,
+        payload: WithdrawPayload,
+    ) -> Result<WithdrawResponse, Self::Error>;
+
+    async fn handle_withdraw_preview_msg(
+        &self,
+        payload: WithdrawPreviewPayload,
+    ) -> Result<WithdrawPreviewResponse, Self::Error>;
+
+    async fn handle_max_withdrawable_msg(
+        &self,
+        payload: MaxWithdrawablePayload,
+    ) -> Result<MaxWithdrawableResponse, Self::Error>;
 
     fn get_password_hash(&self) -> String;
 
@@ -273,6 +296,9 @@ pub fn router<E: Display + Send + Sync + 'static>(api: DynGatewayApi<E>) -> Rout
             get(generate_receive_address_handler),
         )
         .route(DEPOSIT_ADDRESS_ROUTE, post(deposit_address_handler))
+        .route(WITHDRAW_ROUTE, post(withdraw_handler))
+        .route(WITHDRAW_PREVIEW_ROUTE, post(withdraw_preview_handler))
+        .route(WITHDRAW_CONFIRM_ROUTE, post(withdraw_confirm_handler))
         .with_static_routes();
 
     app.with_state(UiState::new(api))

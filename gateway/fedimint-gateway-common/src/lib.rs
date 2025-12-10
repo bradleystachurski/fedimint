@@ -97,12 +97,54 @@ pub struct WithdrawPayload {
     pub federation_id: FederationId,
     pub amount: BitcoinAmountOrAll,
     pub address: Address<NetworkUnchecked>,
+    /// Fee rate in sats per kvB (optional for UI confirm flow, backwards
+    /// compatible with CLI)
+    #[serde(default)]
+    pub fee_rate_sats_per_kvb: Option<u64>,
+    /// Total transaction weight (optional for UI confirm flow, backwards
+    /// compatible with CLI)
+    #[serde(default)]
+    pub total_weight: Option<u64>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct WithdrawResponse {
     pub txid: bitcoin::Txid,
     pub fees: PegOutFees,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct WithdrawPreviewPayload {
+    pub federation_id: FederationId,
+    pub amount: BitcoinAmountOrAll,
+    pub address: Address<NetworkUnchecked>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct WithdrawPreviewResponse {
+    pub amount_sats: u64,
+    pub address: String,
+    pub fee_sats: u64,
+    /// Mint fee for spending e-cash notes (only set for "max" withdrawals)
+    #[serde(default)]
+    pub mint_fee_sats: u64,
+    pub total_sats: u64,
+    pub fee_rate_sats_per_kvb: u64,
+    pub total_weight: u64,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct MaxWithdrawablePayload {
+    pub federation_id: FederationId,
+    pub address: Address<NetworkUnchecked>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct MaxWithdrawableResponse {
+    pub max_withdrawable_sats: u64,
+    /// Estimated mint fees for spending all e-cash notes
+    #[serde(default)]
+    pub mint_fee_sats: u64,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Encodable, Decodable, Serialize, Deserialize)]

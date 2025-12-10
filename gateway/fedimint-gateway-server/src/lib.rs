@@ -74,11 +74,12 @@ use fedimint_gateway_common::{
     DepositAddressPayload, DepositAddressRecheckPayload, FederationBalanceInfo, FederationConfig,
     FederationInfo, GatewayBalances, GatewayFedConfig, GatewayInfo, GetInvoiceRequest,
     GetInvoiceResponse, LeaveFedPayload, LightningInfo, LightningMode, ListTransactionsPayload,
-    ListTransactionsResponse, MnemonicResponse, OpenChannelRequest, PayInvoiceForOperatorPayload,
-    PayOfferPayload, PayOfferResponse, PaymentLogPayload, PaymentLogResponse, PaymentStats,
-    PaymentSummaryPayload, PaymentSummaryResponse, ReceiveEcashPayload, ReceiveEcashResponse,
-    SendOnchainRequest, SetFeesPayload, SpendEcashPayload, SpendEcashResponse, V1_API_ENDPOINT,
-    WithdrawPayload, WithdrawResponse,
+    ListTransactionsResponse, MaxWithdrawablePayload, MaxWithdrawableResponse, MnemonicResponse,
+    OpenChannelRequest, PayInvoiceForOperatorPayload, PayOfferPayload, PayOfferResponse,
+    PaymentLogPayload, PaymentLogResponse, PaymentStats, PaymentSummaryPayload,
+    PaymentSummaryResponse, ReceiveEcashPayload, ReceiveEcashResponse, SendOnchainRequest,
+    SetFeesPayload, SpendEcashPayload, SpendEcashResponse, V1_API_ENDPOINT, WithdrawPayload,
+    WithdrawPreviewPayload, WithdrawPreviewResponse, WithdrawResponse,
 };
 use fedimint_gateway_server_db::{GatewayDbtxNcExt as _, get_gatewayd_database_migrations};
 pub use fedimint_gateway_ui::IAdminGateway;
@@ -110,10 +111,11 @@ use fedimint_lnv2_common::gateway_api::{
 };
 use fedimint_lnv2_common::lnurl::VerifyResponse;
 use fedimint_logging::LOG_GATEWAY;
+use fedimint_mint_client::config::MintClientConfig;
 use fedimint_mint_client::{
     MintClientInit, MintClientModule, SelectNotesWithAtleastAmount, SelectNotesWithExactAmount,
 };
-use fedimint_wallet_client::{WalletClientInit, WalletClientModule, WithdrawState};
+use fedimint_wallet_client::{PegOutFees, WalletClientInit, WalletClientModule, WithdrawState};
 use futures::stream::StreamExt;
 use lightning_invoice::{Bolt11Invoice, RoutingFees};
 use rand::rngs::OsRng;
@@ -951,6 +953,159 @@ impl Gateway {
         Ok(address)
     }
 
+    /// Returns a preview of the withdrawal fees without executing the
+    /// withdrawal. Used by the UI for two-step withdrawal confirmation.
+    pub async fn handle_withdraw_preview_msg(
+        &self,
+        payload: WithdrawPreviewPayload,
+    ) -> AdminResult<WithdrawPreviewResponse> {
+        let WithdrawPreviewPayload {
+            federation_id,
+            amount,
+            address,
+        } = payload;
+
+        let gateway_network = self.network;
+        let address_checked = address
+            .clone()
+            .require_network(gateway_network)
+            .map_err(|_| AdminGatewayError::WithdrawError {
+                failure_reason: "Address network mismatch".to_string(),
+            })?;
+
+        let client = self.select_client(federation_id).await?;
+        let wallet_module = client.value().get_first_module::<WalletClientModule>()?;
+
+        // Resolve "all" to actual amount
+        let amount_sats = match amount {
+            BitcoinAmountOrAll::All => {
+                client
+                    .value()
+                    .get_balance_for_btc()
+                    .await
+                    .map_err(|err| {
+                        AdminGatewayError::Unexpected(anyhow!(
+                            "Balance not available: {}",
+                            err.fmt_compact_anyhow()
+                        ))
+                    })?
+                    .msats
+                    / 1000
+            }
+            BitcoinAmountOrAll::Amount(amt) => amt.to_sat(),
+        };
+
+        let btc_amount = bitcoin::Amount::from_sat(amount_sats);
+        let fees = wallet_module
+            .get_withdraw_fees(&address_checked, btc_amount)
+            .await?;
+
+        let fee_sats = fees.amount().to_sat();
+
+        // For "all", subtract fees from amount; for specific amount, add fees to total
+        let (final_amount_sats, total_sats) = match amount {
+            BitcoinAmountOrAll::All => (amount_sats.saturating_sub(fee_sats), amount_sats),
+            BitcoinAmountOrAll::Amount(_) => (amount_sats, amount_sats + fee_sats),
+        };
+
+        Ok(WithdrawPreviewResponse {
+            amount_sats: final_amount_sats,
+            address: address.assume_checked().to_string(),
+            fee_sats,
+            mint_fee_sats: 0, // Calculated by UI when resolving "all" amount
+            total_sats,
+            fee_rate_sats_per_kvb: fees.fee_rate.sats_per_kvb,
+            total_weight: fees.total_weight,
+        })
+    }
+
+    /// Returns the maximum withdrawable amount after accounting for fees.
+    /// Used by the UI to resolve "all" to a specific amount before preview.
+    pub async fn handle_max_withdrawable_msg(
+        &self,
+        payload: MaxWithdrawablePayload,
+    ) -> AdminResult<MaxWithdrawableResponse> {
+        let MaxWithdrawablePayload {
+            federation_id,
+            address,
+        } = payload;
+
+        let gateway_network = self.network;
+        let address_checked = address.require_network(gateway_network).map_err(|_| {
+            AdminGatewayError::WithdrawError {
+                failure_reason: "Address network mismatch".to_string(),
+            }
+        })?;
+
+        let client = self.select_client(federation_id).await?;
+        let wallet_module = client.value().get_first_module::<WalletClientModule>()?;
+
+        // Get balance truncated to sats
+        let balance_sats = client
+            .value()
+            .get_balance_for_btc()
+            .await
+            .map_err(|err| {
+                AdminGatewayError::Unexpected(anyhow!(
+                    "Balance not available: {}",
+                    err.fmt_compact_anyhow()
+                ))
+            })?
+            .msats
+            / 1000;
+
+        let balance = bitcoin::Amount::from_sat(balance_sats);
+
+        // Calculate fees for withdrawing the full balance
+        let fees = wallet_module
+            .get_withdraw_fees(&address_checked, balance)
+            .await?;
+
+        let max_withdrawable_before_mint_fees = balance_sats
+            .checked_sub(fees.amount().to_sat())
+            .ok_or_else(|| AdminGatewayError::WithdrawError {
+                failure_reason: "Insufficient balance to cover peg-out fees".to_string(),
+            })?;
+
+        // Calculate mint fees for spending all notes
+        let mint_module = client.value().get_first_module::<MintClientModule>()?;
+        let mut dbtx = mint_module
+            .client_ctx
+            .module_db()
+            .begin_transaction_nc()
+            .await;
+        let note_counts = mint_module
+            .get_note_counts_by_denomination(&mut dbtx.to_ref_nc())
+            .await;
+
+        // Get fee consensus from client config
+        let config = client.value().config().await;
+        let mint_client_config: &MintClientConfig = config
+            .get_first_module_by_kind("mint")
+            .map_err(|e| AdminGatewayError::Unexpected(anyhow!("Mint module not found: {}", e)))?
+            .1;
+
+        // Calculate mint fees: base fee per note + percentage of value
+        let mint_fees_msat: u64 = note_counts
+            .iter()
+            .map(|(amount, count)| {
+                let fee_per_note = mint_client_config.fee_consensus.fee(amount);
+                fee_per_note.msats * (count as u64)
+            })
+            .sum();
+
+        // Round up to sats
+        let mint_fees_sats = (mint_fees_msat + 999) / 1000;
+
+        let max_withdrawable_sats =
+            max_withdrawable_before_mint_fees.saturating_sub(mint_fees_sats);
+
+        Ok(MaxWithdrawableResponse {
+            max_withdrawable_sats,
+            mint_fee_sats: mint_fees_sats,
+        })
+    }
+
     /// Returns a Bitcoin TXID from a peg-out transaction for a specific
     /// connected federation.
     pub async fn handle_withdraw_msg(
@@ -961,6 +1116,8 @@ impl Gateway {
             amount,
             address,
             federation_id,
+            fee_rate_sats_per_kvb,
+            total_weight,
         } = payload;
 
         let address_network = get_network_for_address(&address);
@@ -976,40 +1133,73 @@ impl Gateway {
         let client = self.select_client(federation_id).await?;
         let wallet_module = client.value().get_first_module::<WalletClientModule>()?;
 
-        // TODO: Fees should probably be passed in as a parameter
-        let (amount, fees) = match amount {
-            // If the amount is "all", then we need to subtract the fees from
-            // the amount we are withdrawing
-            BitcoinAmountOrAll::All => {
-                let balance = bitcoin::Amount::from_sat(
-                    client
-                        .value()
-                        .get_balance_for_btc()
-                        .await
-                        .map_err(|err| {
-                            AdminGatewayError::Unexpected(anyhow!(
-                                "Balance not available: {}",
-                                err.fmt_compact_anyhow()
-                            ))
+        // If fees are provided (from UI preview flow), use them directly
+        // Otherwise fetch fees (CLI backwards compatibility)
+        let (amount, fees) = match (fee_rate_sats_per_kvb, total_weight) {
+            // UI flow: use provided fees from preview
+            (Some(fee_rate), Some(weight)) => {
+                let fees = PegOutFees::new(fee_rate, weight);
+                let amt = match amount {
+                    BitcoinAmountOrAll::All => {
+                        let balance = bitcoin::Amount::from_sat(
+                            client
+                                .value()
+                                .get_balance_for_btc()
+                                .await
+                                .map_err(|err| {
+                                    AdminGatewayError::Unexpected(anyhow!(
+                                        "Balance not available: {}",
+                                        err.fmt_compact_anyhow()
+                                    ))
+                                })?
+                                .msats
+                                / 1000,
+                        );
+                        balance.checked_sub(fees.amount()).ok_or_else(|| {
+                            AdminGatewayError::WithdrawError {
+                                failure_reason: "Insufficient balance for fees".to_string(),
+                            }
                         })?
-                        .msats
-                        / 1000,
-                );
-                let fees = wallet_module.get_withdraw_fees(&address, balance).await?;
-                let withdraw_amount = balance.checked_sub(fees.amount());
-                if withdraw_amount.is_none() {
-                    return Err(AdminGatewayError::WithdrawError {
-                        failure_reason: format!(
-                            "Insufficient funds. Balance: {balance} Fees: {fees:?}"
-                        ),
-                    });
-                }
-                (withdraw_amount.unwrap(), fees)
+                    }
+                    BitcoinAmountOrAll::Amount(amt) => amt,
+                };
+                (amt, fees)
             }
-            BitcoinAmountOrAll::Amount(amount) => (
-                amount,
-                wallet_module.get_withdraw_fees(&address, amount).await?,
-            ),
+            // CLI flow: fetch fees (existing behavior)
+            _ => match amount {
+                // If the amount is "all", then we need to subtract the fees from
+                // the amount we are withdrawing
+                BitcoinAmountOrAll::All => {
+                    let balance = bitcoin::Amount::from_sat(
+                        client
+                            .value()
+                            .get_balance_for_btc()
+                            .await
+                            .map_err(|err| {
+                                AdminGatewayError::Unexpected(anyhow!(
+                                    "Balance not available: {}",
+                                    err.fmt_compact_anyhow()
+                                ))
+                            })?
+                            .msats
+                            / 1000,
+                    );
+                    let fees = wallet_module.get_withdraw_fees(&address, balance).await?;
+                    let withdraw_amount = balance.checked_sub(fees.amount());
+                    if withdraw_amount.is_none() {
+                        return Err(AdminGatewayError::WithdrawError {
+                            failure_reason: format!(
+                                "Insufficient funds. Balance: {balance} Fees: {fees:?}"
+                            ),
+                        });
+                    }
+                    (withdraw_amount.expect("checked above"), fees)
+                }
+                BitcoinAmountOrAll::Amount(amount) => (
+                    amount,
+                    wallet_module.get_withdraw_fees(&address, amount).await?,
+                ),
+            },
         };
 
         let operation_id = wallet_module.withdraw(&address, amount, fees, ()).await?;
@@ -2224,6 +2414,24 @@ impl IAdminGateway for Gateway {
         payload: DepositAddressPayload,
     ) -> AdminResult<Address> {
         self.handle_address_msg(payload).await
+    }
+
+    async fn handle_withdraw_msg(&self, payload: WithdrawPayload) -> AdminResult<WithdrawResponse> {
+        Gateway::handle_withdraw_msg(self, payload).await
+    }
+
+    async fn handle_withdraw_preview_msg(
+        &self,
+        payload: WithdrawPreviewPayload,
+    ) -> AdminResult<WithdrawPreviewResponse> {
+        Gateway::handle_withdraw_preview_msg(self, payload).await
+    }
+
+    async fn handle_max_withdrawable_msg(
+        &self,
+        payload: MaxWithdrawablePayload,
+    ) -> AdminResult<MaxWithdrawableResponse> {
+        Gateway::handle_max_withdrawable_msg(self, payload).await
     }
 
     fn get_password_hash(&self) -> String {

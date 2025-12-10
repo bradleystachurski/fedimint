@@ -5,10 +5,13 @@ use std::time::{Duration, SystemTime};
 use axum::Form;
 use axum::extract::{Path, State};
 use axum::response::{Html, IntoResponse};
-use fedimint_core::Amount;
+use bitcoin::Address;
+use bitcoin::address::NetworkUnchecked;
 use fedimint_core::config::FederationId;
+use fedimint_core::{Amount, BitcoinAmountOrAll};
 use fedimint_gateway_common::{
-    DepositAddressPayload, FederationInfo, LeaveFedPayload, SetFeesPayload,
+    DepositAddressPayload, FederationInfo, LeaveFedPayload, MaxWithdrawablePayload, SetFeesPayload,
+    WithdrawPayload, WithdrawPreviewPayload,
 };
 use fedimint_ui_common::UiState;
 use fedimint_ui_common::auth::UserAuth;
@@ -17,7 +20,8 @@ use qrcode::QrCode;
 use qrcode::render::svg;
 
 use crate::{
-    DEPOSIT_ADDRESS_ROUTE, DynGatewayApi, SET_FEES_ROUTE, redirect_error, redirect_success,
+    DEPOSIT_ADDRESS_ROUTE, DynGatewayApi, SET_FEES_ROUTE, WITHDRAW_CONFIRM_ROUTE,
+    WITHDRAW_PREVIEW_ROUTE, redirect_error, redirect_success,
 };
 
 pub fn scripts() -> Markup {
@@ -76,7 +80,7 @@ pub fn render(fed: &FederationInfo) -> Markup {
                         }
                     }
                     div class="card-body" {
-                        div id="balance" class=(balance_class) {
+                        div id=(format!("balance-{}", fed.federation_id)) class=(balance_class) {
                             "Balance: " strong { (fed.balance_msat) }
                         }
                         div class="alert alert-secondary py-1 px-2 small" {
@@ -102,6 +106,15 @@ pub fn render(fed: &FederationInfo) -> Markup {
                                     type="button"
                                     role="tab"
                                 { "Deposit" }
+                            }
+                            li class="nav-item" role="presentation" {
+                                button class="nav-link"
+                                    id={(format!("withdraw-tab-{}", fed.federation_id))}
+                                    data-bs-toggle="tab"
+                                    data-bs-target={(format!("#withdraw-tab-pane-{}", fed.federation_id))}
+                                    type="button"
+                                    role="tab"
+                                { "Withdraw" }
                             }
                         }
 
@@ -229,6 +242,48 @@ pub fn render(fed: &FederationInfo) -> Markup {
 
                                 div id=(format!("deposit-result-{}", fed.federation_id)) {}
                             }
+
+                            // ──────────────────────────────────────────
+                            //   TAB: WITHDRAW
+                            // ──────────────────────────────────────────
+                            div class="tab-pane fade"
+                                id={(format!("withdraw-tab-pane-{}", fed.federation_id))}
+                                role="tabpanel"
+                                aria-labelledby={(format!("withdraw-tab-{}", fed.federation_id))} {
+
+                                form hx-post=(WITHDRAW_PREVIEW_ROUTE)
+                                     hx-target={(format!("#withdraw-result-{}", fed.federation_id))}
+                                     hx-swap="innerHTML"
+                                     class="mt-3"
+                                     id=(format!("withdraw-form-{}", fed.federation_id))
+                                {
+                                    input type="hidden" name="federation_id" value=(fed.federation_id.to_string());
+
+                                    div class="mb-3" {
+                                        label class="form-label" for=(format!("withdraw-amount-{}", fed.federation_id)) { "Amount (sats or 'all')" }
+                                        input type="text"
+                                            class="form-control"
+                                            id=(format!("withdraw-amount-{}", fed.federation_id))
+                                            name="amount"
+                                            placeholder="e.g. 100000 or all"
+                                            required;
+                                    }
+
+                                    div class="mb-3" {
+                                        label class="form-label" for=(format!("withdraw-address-{}", fed.federation_id)) { "Bitcoin Address" }
+                                        input type="text"
+                                            class="form-control"
+                                            id=(format!("withdraw-address-{}", fed.federation_id))
+                                            name="address"
+                                            placeholder="bc1q..."
+                                            required;
+                                    }
+
+                                    button type="submit" class="btn btn-primary" { "Preview" }
+                                }
+
+                                div id=(format!("withdraw-result-{}", fed.federation_id)) class="mt-3" {}
+                            }
                         }
                     }
                 }
@@ -343,6 +398,266 @@ pub async fn deposit_address_handler<E: Display>(
             html! {
                 div class="alert alert-danger mt-2" {
                     "Failed to generate deposit address: " (err)
+                }
+            }
+        }
+    };
+    Html(markup.into_string())
+}
+
+/// Legacy withdraw handler - kept for backwards compatibility
+pub async fn withdraw_handler<E: Display>(
+    State(state): State<UiState<DynGatewayApi<E>>>,
+    _auth: UserAuth,
+    Form(payload): Form<WithdrawPayload>,
+) -> impl IntoResponse {
+    let markup = match state.api.handle_withdraw_msg(payload).await {
+        Ok(response) => {
+            html! {
+                div class="alert alert-success" {
+                    p { strong { "Withdrawal successful!" } }
+                    p { "Transaction ID: " code { (response.txid) } }
+                    p { "Fees: " code { (format!("{:?}", response.fees)) } }
+                }
+            }
+        }
+        Err(err) => {
+            html! {
+                div class="alert alert-danger" {
+                    "Error: " (err.to_string())
+                }
+            }
+        }
+    };
+    Html(markup.into_string())
+}
+
+/// Preview handler for two-step withdrawal flow - shows fee breakdown before
+/// confirmation
+pub async fn withdraw_preview_handler<E: Display>(
+    State(state): State<UiState<DynGatewayApi<E>>>,
+    _auth: UserAuth,
+    Form(payload): Form<WithdrawPreviewPayload>,
+) -> impl IntoResponse {
+    let federation_id = payload.federation_id;
+
+    // If amount is "all", resolve it to a specific amount first using
+    // max_withdrawable This ensures the fee calculation is accurate and avoids
+    // race conditions
+    let (preview_payload, mint_fee_sats, is_max) = match &payload.amount {
+        BitcoinAmountOrAll::All => {
+            // Get max withdrawable first
+            let max_payload = MaxWithdrawablePayload {
+                federation_id: payload.federation_id,
+                address: payload.address.clone(),
+            };
+            match state.api.handle_max_withdrawable_msg(max_payload).await {
+                Ok(max_response) => {
+                    // Now call preview with the resolved specific amount
+                    let resolved_payload = WithdrawPreviewPayload {
+                        federation_id: payload.federation_id,
+                        amount: BitcoinAmountOrAll::Amount(bitcoin::Amount::from_sat(
+                            max_response.max_withdrawable_sats,
+                        )),
+                        address: payload.address,
+                    };
+                    (resolved_payload, max_response.mint_fee_sats, true)
+                }
+                Err(err) => {
+                    return Html(
+                        html! {
+                            div class="alert alert-danger" {
+                                "Error calculating max withdrawable: " (err.to_string())
+                            }
+                        }
+                        .into_string(),
+                    );
+                }
+            }
+        }
+        _ => (payload, 0, false),
+    };
+
+    let markup = match state.api.handle_withdraw_preview_msg(preview_payload).await {
+        Ok(response) => {
+            let amount_label = if is_max {
+                format!("{} sats (max)", response.amount_sats)
+            } else {
+                format!("{} sats", response.amount_sats)
+            };
+
+            // For max withdrawals, total includes mint fees
+            let total_deducted = if is_max {
+                response.amount_sats + response.fee_sats + mint_fee_sats
+            } else {
+                response.total_sats
+            };
+
+            html! {
+                div class="card" {
+                    div class="card-body" {
+                        h6 class="card-title" { "Withdrawal Preview" }
+
+                        table class="table table-sm" {
+                            tbody {
+                                tr {
+                                    td { "Amount" }
+                                    td { (amount_label) }
+                                }
+                                tr {
+                                    td { "Address" }
+                                    td class="text-break" style="font-family: monospace; font-size: 0.85em;" {
+                                        (response.address.clone())
+                                    }
+                                }
+                                tr {
+                                    td { "Fee Rate" }
+                                    td { (format!("{} sats/kvB", response.fee_rate_sats_per_kvb)) }
+                                }
+                                tr {
+                                    td { "Transaction Size" }
+                                    td { (format!("{} weight units", response.total_weight)) }
+                                }
+                                tr {
+                                    td { "Peg-out Fee" }
+                                    td { (format!("{} sats", response.fee_sats)) }
+                                }
+                                @if mint_fee_sats > 0 {
+                                    tr {
+                                        td { "Mint Fee" }
+                                        td { (format!("~{} sats", mint_fee_sats)) }
+                                    }
+                                }
+                                tr {
+                                    td { strong { "Total Deducted" } }
+                                    td { strong { (format!("{} sats", total_deducted)) } }
+                                }
+                            }
+                        }
+
+                        div class="d-flex gap-2 mt-3" {
+                            // Confirm form with hidden fields
+                            form hx-post=(WITHDRAW_CONFIRM_ROUTE)
+                                 hx-target=(format!("#withdraw-result-{}", federation_id))
+                                 hx-swap="innerHTML"
+                            {
+                                input type="hidden" name="federation_id" value=(federation_id.to_string());
+                                input type="hidden" name="amount" value=(response.amount_sats.to_string());
+                                input type="hidden" name="address" value=(response.address);
+                                input type="hidden" name="fee_rate_sats_per_kvb" value=(response.fee_rate_sats_per_kvb.to_string());
+                                input type="hidden" name="total_weight" value=(response.total_weight.to_string());
+
+                                button type="submit" class="btn btn-success" { "Confirm Withdrawal" }
+                            }
+
+                            // Cancel button - clears the result area
+                            button type="button"
+                                   class="btn btn-outline-secondary"
+                                   onclick=(format!("document.getElementById('withdraw-result-{}').innerHTML = ''", federation_id))
+                            { "Cancel" }
+                        }
+                    }
+                }
+            }
+        }
+        Err(err) => {
+            html! {
+                div class="alert alert-danger" {
+                    "Error: " (err.to_string())
+                }
+            }
+        }
+    };
+    Html(markup.into_string())
+}
+
+/// Payload for withdraw confirmation from the UI
+#[derive(Debug, serde::Deserialize)]
+pub struct WithdrawConfirmPayload {
+    pub federation_id: FederationId,
+    pub amount: u64,
+    pub address: String,
+    pub fee_rate_sats_per_kvb: u64,
+    pub total_weight: u64,
+}
+
+/// Confirm handler for two-step withdrawal flow - executes withdrawal with
+/// quoted fees
+pub async fn withdraw_confirm_handler<E: Display>(
+    State(state): State<UiState<DynGatewayApi<E>>>,
+    _auth: UserAuth,
+    Form(payload): Form<WithdrawConfirmPayload>,
+) -> impl IntoResponse {
+    let federation_id = payload.federation_id;
+
+    // Parse the address - it should already be validated from the preview step
+    let address: Address<NetworkUnchecked> = match payload.address.parse() {
+        Ok(addr) => addr,
+        Err(err) => {
+            return Html(
+                html! {
+                    div class="alert alert-danger" {
+                        "Error parsing address: " (err.to_string())
+                    }
+                }
+                .into_string(),
+            );
+        }
+    };
+
+    // Build the WithdrawPayload with the quoted fees
+    let withdraw_payload = WithdrawPayload {
+        federation_id,
+        amount: BitcoinAmountOrAll::Amount(bitcoin::Amount::from_sat(payload.amount)),
+        address,
+        fee_rate_sats_per_kvb: Some(payload.fee_rate_sats_per_kvb),
+        total_weight: Some(payload.total_weight),
+    };
+
+    let markup = match state.api.handle_withdraw_msg(withdraw_payload).await {
+        Ok(response) => {
+            // Fetch updated balance for the out-of-band swap
+            let updated_balance = state
+                .api
+                .handle_get_balances_msg()
+                .await
+                .ok()
+                .and_then(|balances| {
+                    balances
+                        .ecash_balances
+                        .into_iter()
+                        .find(|b| b.federation_id == federation_id)
+                        .map(|b| b.ecash_balance_msats)
+                })
+                .unwrap_or(Amount::ZERO);
+
+            let balance_class = if updated_balance == Amount::ZERO {
+                "alert alert-danger"
+            } else {
+                "alert alert-success"
+            };
+
+            html! {
+                // Success message (swaps into result div)
+                div class="alert alert-success" {
+                    p { strong { "Withdrawal successful!" } }
+                    p { "Transaction ID: " code { (response.txid) } }
+                    p { "Fees: " (format!("{} sats", response.fees.amount().to_sat())) }
+                }
+
+                // Out-of-band swap to update balance banner
+                div id=(format!("balance-{}", federation_id))
+                    class=(balance_class)
+                    hx-swap-oob="true"
+                {
+                    "Balance: " strong { (updated_balance) }
+                }
+            }
+        }
+        Err(err) => {
+            html! {
+                div class="alert alert-danger" {
+                    "Error: " (err.to_string())
                 }
             }
         }

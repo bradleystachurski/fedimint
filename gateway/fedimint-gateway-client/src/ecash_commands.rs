@@ -108,6 +108,8 @@ impl EcashCommands {
                         federation_id,
                         amount,
                         address,
+                        fee_rate_sats_per_kvb: None,
+                        total_weight: None,
                     },
                 )
                 .await?;
