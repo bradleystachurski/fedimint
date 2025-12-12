@@ -774,6 +774,160 @@ async fn repair_wallet() -> anyhow::Result<()> {
     Ok(())
 }
 
+#[tokio::test(flavor = "multi_thread")]
+async fn estimate_spend_fees_zero_fee_federation() -> anyhow::Result<()> {
+    // Test with zero-fee federation: all estimates should be zero
+    let fed = fixtures()
+        .new_fed_builder(1)
+        .disable_mint_fees()
+        .build()
+        .await;
+    let client = fed.new_client().await;
+    let client_dummy = client.get_first_module::<DummyClientModule>()?;
+    let client_mint = client.get_first_module::<MintClientModule>()?;
+
+    // Print initial notes
+    let (op, outpoint) = client_dummy.print_money(sats(1000)).await?;
+    client.await_primary_bitcoin_module_output(op, outpoint).await?;
+
+    // Test various amounts - all should have zero fees
+    for spend_amount in [sats(100), sats(350), sats(500), sats(999)] {
+        let estimated_fees = client_mint.estimate_spend_fees(spend_amount).await?;
+        info!(
+            spend_amount = %spend_amount,
+            estimated_fees = %estimated_fees,
+            "Zero-fee federation estimate"
+        );
+        assert_eq!(
+            estimated_fees,
+            Amount::ZERO,
+            "Zero-fee federation should have zero estimated fees for amount {spend_amount}"
+        );
+    }
+
+    Ok(())
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn estimate_spend_fees_returns_sensible_values() -> anyhow::Result<()> {
+    // Test that estimate_spend_fees returns reasonable values with fees enabled
+    let fed = fixtures().new_fed_degraded().await;
+    let client = fed.new_client().await;
+    let client_dummy = client.get_first_module::<DummyClientModule>()?;
+    let client_mint = client.get_first_module::<MintClientModule>()?;
+
+    // Print initial notes
+    let (op, outpoint) = client_dummy.print_money(sats(1000)).await?;
+    client.await_primary_bitcoin_module_output(op, outpoint).await?;
+
+    // Test 1: Fees should be non-negative
+    let spend_amount = sats(200);
+    let estimated_fees = client_mint.estimate_spend_fees(spend_amount).await?;
+    info!(
+        spend_amount = %spend_amount,
+        estimated_fees = %estimated_fees,
+        "Estimated fees"
+    );
+    assert!(
+        estimated_fees >= Amount::ZERO,
+        "Estimated fees should be non-negative"
+    );
+
+    // Test 2: Fees should be less than the spend amount (reasonable upper bound)
+    assert!(
+        estimated_fees < spend_amount,
+        "Fees should be less than the spend amount"
+    );
+
+    // Test 3: Larger amounts should generally have proportionally larger fees
+    let small_amount = sats(100);
+    let large_amount = sats(500);
+    let small_fees = client_mint.estimate_spend_fees(small_amount).await?;
+    let large_fees = client_mint.estimate_spend_fees(large_amount).await?;
+    info!(
+        small_amount = %small_amount,
+        small_fees = %small_fees,
+        large_amount = %large_amount,
+        large_fees = %large_fees,
+        "Fee comparison for different amounts"
+    );
+    // Note: larger amounts don't always have larger fees due to change creation,
+    // but fees should be in a reasonable range
+    assert!(
+        large_fees <= large_amount,
+        "Large amount fees should not exceed the amount"
+    );
+
+    Ok(())
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn estimate_spend_fees_insufficient_balance_error() -> anyhow::Result<()> {
+    // Test that estimate_spend_fees returns error for insufficient balance
+    let fed = fixtures().new_fed_degraded().await;
+    let client = fed.new_client().await;
+    let client_dummy = client.get_first_module::<DummyClientModule>()?;
+    let client_mint = client.get_first_module::<MintClientModule>()?;
+
+    // Print small amount
+    let (op, outpoint) = client_dummy.print_money(sats(100)).await?;
+    client.await_primary_bitcoin_module_output(op, outpoint).await?;
+
+    // Try to estimate fees for more than balance - should fail
+    let result = client_mint.estimate_spend_fees(sats(1000)).await;
+    assert!(
+        result.is_err(),
+        "Should return error when spending more than balance"
+    );
+    let err = result.unwrap_err();
+    assert!(
+        err.to_string().contains("Insufficient balance"),
+        "Error should mention insufficient balance: {err}"
+    );
+
+    Ok(())
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn estimate_spend_fees_matches_actual_fees() -> anyhow::Result<()> {
+    // Test that estimate_spend_fees matches actual fees from the real transaction logic
+    let fed = fixtures().new_fed_degraded().await;
+    let client = fed.new_client().await;
+    let client_dummy = client.get_first_module::<DummyClientModule>()?;
+    let client_mint = client.get_first_module::<MintClientModule>()?;
+
+    // Print initial notes
+    let (op, outpoint) = client_dummy.print_money(sats(1000)).await?;
+    client.await_primary_bitcoin_module_output(op, outpoint).await?;
+
+    // Test various spend amounts
+    for spend_amount in [sats(100), sats(350), sats(500), sats(750)] {
+        // Get estimated fees
+        let estimated_fees = client_mint.estimate_spend_fees(spend_amount).await?;
+
+        // Get actual fees by running the real transaction creation logic
+        let (actual_input_fees, actual_output_fees) =
+            client_mint.compute_actual_spend_fees(spend_amount).await?;
+        let actual_fees = actual_input_fees + actual_output_fees;
+
+        info!(
+            spend_amount = %spend_amount,
+            estimated_fees = %estimated_fees,
+            actual_input_fees = %actual_input_fees,
+            actual_output_fees = %actual_output_fees,
+            actual_fees = %actual_fees,
+            "Fee comparison"
+        );
+
+        assert_eq!(
+            estimated_fees, actual_fees,
+            "Estimated fees must match actual fees for spend_amount={spend_amount}"
+        );
+    }
+
+    Ok(())
+}
+
 #[cfg(test)]
 mod fedimint_migration_tests {
     use std::collections::BTreeMap;

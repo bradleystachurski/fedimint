@@ -763,58 +763,22 @@ impl ClientModule for MintClientModule {
         dbtx: &mut DatabaseTransaction<'_>,
         operation_id: OperationId,
         unit: AmountUnit,
-        mut input_amount: Amount,
-        mut output_amount: Amount,
+        input_amount: Amount,
+        output_amount: Amount,
     ) -> anyhow::Result<(
         ClientInputBundle<MintInput, MintClientStateMachines>,
         ClientOutputBundle<MintOutput, MintClientStateMachines>,
     )> {
-        let consolidation_inputs = self.consolidate_notes(dbtx).await?;
-
-        if unit != AmountUnit::BITCOIN {
-            bail!("Module can only handle Bitcoin");
-        }
-
-        input_amount += consolidation_inputs
-            .iter()
-            .map(|input| input.0.amounts.get_bitcoin())
-            .sum();
-
-        output_amount += consolidation_inputs
-            .iter()
-            .map(|input| self.cfg.fee_consensus.fee(input.0.amounts.get_bitcoin()))
-            .sum();
-
-        let additional_inputs = self
-            .create_sufficient_input(dbtx, output_amount.saturating_sub(input_amount))
-            .await?;
-
-        input_amount += additional_inputs
-            .iter()
-            .map(|input| input.0.amounts.get_bitcoin())
-            .sum();
-
-        output_amount += additional_inputs
-            .iter()
-            .map(|input| self.cfg.fee_consensus.fee(input.0.amounts.get_bitcoin()))
-            .sum();
-
-        let outputs = self
-            .create_output(
+        let (inputs, outputs, _input_fees, _output_fees) = self
+            .create_final_inputs_and_outputs_with_fees(
                 dbtx,
                 operation_id,
-                2,
-                input_amount.saturating_sub(output_amount),
+                unit,
+                input_amount,
+                output_amount,
             )
-            .await;
-
-        Ok((
-            create_bundle_for_inputs(
-                [consolidation_inputs, additional_inputs].concat(),
-                operation_id,
-            ),
-            outputs,
-        ))
+            .await?;
+        Ok((inputs, outputs))
     }
 
     async fn await_primary_module_output(
@@ -1202,6 +1166,35 @@ impl MintClientModule {
             .expect("fee sum overflow"))
     }
 
+    /// Computes actual fees that would be charged for spending the requested
+    /// amount by running the real transaction creation logic.
+    ///
+    /// This is useful for testing that [`Self::estimate_spend_fees`] matches
+    /// the actual fee computation in [`Self::create_final_inputs_and_outputs_with_fees`].
+    ///
+    /// Uses a non-committing transaction so no state changes are persisted.
+    ///
+    /// Returns `(input_fees, output_fees)` or an error if insufficient balance.
+    pub async fn compute_actual_spend_fees(
+        &self,
+        amount: Amount,
+    ) -> anyhow::Result<(Amount, Amount)> {
+        let mut dbtx = self.client_ctx.module_db().begin_transaction_nc().await;
+        let operation_id = OperationId::new_random();
+
+        let (_inputs, _outputs, input_fees, output_fees) = self
+            .create_final_inputs_and_outputs_with_fees(
+                &mut dbtx.to_ref_nc(),
+                operation_id,
+                AmountUnit::BITCOIN,
+                Amount::ZERO,
+                amount,
+            )
+            .await?;
+
+        Ok((input_fees, output_fees))
+    }
+
     /// Wait for the e-cash notes to be retrieved. If this is not possible
     /// because another terminal state was reached an error describing the
     /// failure is returned.
@@ -1242,6 +1235,84 @@ impl MintClientModule {
         pin_mut!(stream);
 
         stream.next_or_pending().await
+    }
+
+    /// Creates inputs and outputs to balance a transaction, returning fee
+    /// breakdown.
+    ///
+    /// This is like [`ClientModule::create_final_inputs_and_outputs`] but also
+    /// returns the computed input and output fees, useful for testing and
+    /// verification.
+    ///
+    /// Returns `(input_bundle, output_bundle, input_fees, output_fees)`.
+    pub async fn create_final_inputs_and_outputs_with_fees(
+        &self,
+        dbtx: &mut DatabaseTransaction<'_>,
+        operation_id: OperationId,
+        unit: AmountUnit,
+        mut input_amount: Amount,
+        mut output_amount: Amount,
+    ) -> anyhow::Result<(
+        ClientInputBundle<MintInput, MintClientStateMachines>,
+        ClientOutputBundle<MintOutput, MintClientStateMachines>,
+        Amount,
+        Amount,
+    )> {
+        let consolidation_inputs = self.consolidate_notes(dbtx).await?;
+
+        if unit != AmountUnit::BITCOIN {
+            bail!("Module can only handle Bitcoin");
+        }
+
+        input_amount += consolidation_inputs
+            .iter()
+            .map(|input| input.0.amounts.get_bitcoin())
+            .sum();
+
+        let consolidation_fees: Amount = consolidation_inputs
+            .iter()
+            .map(|input| self.cfg.fee_consensus.fee(input.0.amounts.get_bitcoin()))
+            .sum();
+        output_amount += consolidation_fees;
+
+        let additional_inputs = self
+            .create_sufficient_input(dbtx, output_amount.saturating_sub(input_amount))
+            .await?;
+
+        input_amount += additional_inputs
+            .iter()
+            .map(|input| input.0.amounts.get_bitcoin())
+            .sum();
+
+        let additional_fees: Amount = additional_inputs
+            .iter()
+            .map(|input| self.cfg.fee_consensus.fee(input.0.amounts.get_bitcoin()))
+            .sum();
+        output_amount += additional_fees;
+
+        let input_fees = consolidation_fees + additional_fees;
+
+        let change_amount = input_amount.saturating_sub(output_amount);
+        let outputs = self
+            .create_output(dbtx, operation_id, 2, change_amount)
+            .await;
+
+        // Calculate output fees from the change outputs created
+        let output_fees: Amount = outputs
+            .outputs()
+            .iter()
+            .map(|output| self.cfg.fee_consensus.fee(output.amounts.get_bitcoin()))
+            .sum();
+
+        Ok((
+            create_bundle_for_inputs(
+                [consolidation_inputs, additional_inputs].concat(),
+                operation_id,
+            ),
+            outputs,
+            input_fees,
+            output_fees,
+        ))
     }
 
     /// Provisional implementation of note consolidation
