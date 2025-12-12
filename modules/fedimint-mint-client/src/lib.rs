@@ -1432,6 +1432,72 @@ fn calculate_output_fees(
         .sum()
 }
 
+/// Estimates total fees for spending a given amount.
+/// Returns (input_fees, output_fees) or error if insufficient balance.
+fn estimate_spend_fees_inner(
+    requested_amount: Amount,
+    counts: &TieredCounts,
+    tiers: &Tiered<()>,
+    fee_consensus: &FeeConsensus,
+) -> Result<(Amount, Amount), InsufficientBalanceError> {
+    let mut working_counts = counts.clone();
+
+    // Step 1: Simulate consolidation
+    let consolidated = simulate_consolidation(&working_counts);
+    let consolidation_value: Amount = consolidated
+        .iter()
+        .map(|(tier, count)| tier * (count as u64))
+        .sum();
+    let consolidation_fees: Amount = consolidated
+        .iter()
+        .map(|(tier, count)| fee_consensus.fee(tier) * (count as u64))
+        .sum();
+
+    // Subtract consolidated notes from working counts
+    for (tier, count) in consolidated.iter() {
+        for _ in 0..count {
+            working_counts.dec(tier);
+        }
+    }
+
+    // Step 2: Calculate initial amounts
+    let mut input_amount = consolidation_value;
+    let mut output_amount = requested_amount + consolidation_fees;
+    let shortfall = output_amount.saturating_sub(input_amount);
+
+    // Step 3: If shortfall > 0, simulate additional input selection
+    let mut additional_fees = Amount::ZERO;
+    if shortfall > Amount::ZERO {
+        let additional = simulate_input_selection(&working_counts, shortfall, fee_consensus)?;
+        let additional_value: Amount = additional
+            .iter()
+            .map(|(tier, count)| tier * (count as u64))
+            .sum();
+        additional_fees = additional
+            .iter()
+            .map(|(tier, count)| fee_consensus.fee(tier) * (count as u64))
+            .sum();
+
+        // Subtract additional notes from working counts
+        for (tier, count) in additional.iter() {
+            for _ in 0..count {
+                working_counts.dec(tier);
+            }
+        }
+
+        input_amount += additional_value;
+        output_amount += additional_fees;
+    }
+
+    // Step 4: Calculate change
+    let change = input_amount.saturating_sub(output_amount);
+
+    // Step 5: Calculate output fees for change
+    let output_fees = calculate_output_fees(change, &working_counts, tiers, fee_consensus);
+
+    Ok((consolidation_fees + additional_fees, output_fees))
+}
+
 impl MintClientModule {
     /// Create a mint input from external, potentially untrusted notes
     #[allow(clippy::type_complexity)]
@@ -3769,6 +3835,500 @@ mod tests {
             // Verify this is different from zero amount - the amount is non-zero
             // but still insufficient to create any notes
             assert!(Amount::from_msats(150) > Amount::ZERO);
+        }
+    }
+
+    mod estimate_spend_fees {
+        use fedimint_core::{Amount, Tiered, TieredCounts};
+        use fedimint_mint_common::config::FeeConsensus;
+
+        use crate::estimate_spend_fees_inner;
+
+        fn counts_from_vec(items: Vec<(u64, usize)>) -> TieredCounts {
+            items
+                .into_iter()
+                .map(|(msats, count)| (Amount::from_msats(msats), count))
+                .collect()
+        }
+
+        fn tiers_from_vec(tiers: Vec<u64>) -> Tiered<()> {
+            tiers
+                .into_iter()
+                .map(|msats| (Amount::from_msats(msats), ()))
+                .collect()
+        }
+
+        #[test]
+        fn simple_spend_no_consolidation() {
+            // 5 notes of 1000 msat (below consolidation threshold of 8)
+            // Spend 500 msat with zero fees
+            let counts = counts_from_vec(vec![(1000, 5)]);
+            let tiers = tiers_from_vec(vec![1000, 100]);
+            let fee_consensus = FeeConsensus::zero();
+
+            let (input_fees, output_fees) = estimate_spend_fees_inner(
+                Amount::from_msats(500),
+                &counts,
+                &tiers,
+                &fee_consensus,
+            )
+            .expect("should succeed");
+
+            // No consolidation (5 <= 8), select 1x1000 note for 500 request
+            // Input fees = 0 (zero fee consensus)
+            // Change = 1000 - 500 = 500, output fees = 0 (zero fee consensus)
+            assert_eq!(input_fees, Amount::ZERO);
+            assert_eq!(output_fees, Amount::ZERO);
+        }
+
+        #[test]
+        fn spend_with_change() {
+            // 3 notes of 1000 msat
+            // Spend 500 msat with base fee 100 msat
+            let counts = counts_from_vec(vec![(1000, 3)]);
+            let tiers = tiers_from_vec(vec![1000, 100]);
+            let fee_consensus = FeeConsensus::new(0).expect("valid fee");
+
+            let (input_fees, output_fees) = estimate_spend_fees_inner(
+                Amount::from_msats(500),
+                &counts,
+                &tiers,
+                &fee_consensus,
+            )
+            .expect("should succeed");
+
+            // No consolidation (3 <= 8)
+            // Select 1x1000 note, input_fee = 100 msat
+            // Change = 1000 - 500 - 100 = 400 msat
+            // Output: 400 / 200 = 2 notes of 100, output_fees = 2 * 100 = 200 msat
+            assert_eq!(input_fees, Amount::from_msats(100));
+            assert_eq!(output_fees, Amount::from_msats(200));
+        }
+
+        #[test]
+        fn spend_triggers_consolidation() {
+            // 10 notes of 1000 msat (above threshold of 8, triggers consolidation)
+            // Spend 500 msat with zero fees
+            let counts = counts_from_vec(vec![(1000, 10)]);
+            let tiers = tiers_from_vec(vec![1000, 100]);
+            let fee_consensus = FeeConsensus::zero();
+
+            let (input_fees, output_fees) = estimate_spend_fees_inner(
+                Amount::from_msats(500),
+                &counts,
+                &tiers,
+                &fee_consensus,
+            )
+            .expect("should succeed");
+
+            // Consolidation: 10 - 4 = 6 notes consolidated
+            // Consolidation value = 6 * 1000 = 6000 msat
+            // Consolidation fees = 0 (zero fee)
+            // input_amount = 6000, output_amount = 500 + 0 = 500
+            // shortfall = 0, no additional selection
+            // Change = 6000 - 500 = 5500 msat
+            // Output fees = 0 (zero fee)
+            assert_eq!(input_fees, Amount::ZERO);
+            assert_eq!(output_fees, Amount::ZERO);
+        }
+
+        #[test]
+        fn insufficient_balance_returns_error() {
+            // Only 1 note of 1000 msat
+            // Try to spend 2000 msat
+            let counts = counts_from_vec(vec![(1000, 1)]);
+            let tiers = tiers_from_vec(vec![1000, 100]);
+            let fee_consensus = FeeConsensus::zero();
+
+            let result = estimate_spend_fees_inner(
+                Amount::from_msats(2000),
+                &counts,
+                &tiers,
+                &fee_consensus,
+            );
+
+            assert!(result.is_err());
+            let err = result.unwrap_err();
+            assert_eq!(err.requested_amount, Amount::from_msats(2000));
+        }
+
+        #[test]
+        fn consolidation_covers_requested_amount() {
+            // 12 notes of 1000 msat (triggers consolidation)
+            // Spend 1000 msat with zero fees
+            // Consolidation alone should cover it
+            let counts = counts_from_vec(vec![(1000, 12)]);
+            let tiers = tiers_from_vec(vec![1000, 100]);
+            let fee_consensus = FeeConsensus::zero();
+
+            let (input_fees, output_fees) = estimate_spend_fees_inner(
+                Amount::from_msats(1000),
+                &counts,
+                &tiers,
+                &fee_consensus,
+            )
+            .expect("should succeed");
+
+            // Consolidation: 12 - 4 = 8 notes consolidated
+            // Consolidation value = 8 * 1000 = 8000 msat
+            // input_amount = 8000, output_amount = 1000
+            // shortfall = 0, no additional selection needed
+            // Change = 8000 - 1000 = 7000 msat
+            // With zero fees, output_fees = 0
+            assert_eq!(input_fees, Amount::ZERO);
+            assert_eq!(output_fees, Amount::ZERO);
+        }
+
+        #[test]
+        fn consolidation_with_nonzero_fees() {
+            // 10 notes of 1000 msat (triggers consolidation), spend 500 msat
+            // FeeConsensus::new(0) = 100 msat base fee
+            let counts = counts_from_vec(vec![(1000, 10)]);
+            let tiers = tiers_from_vec(vec![1000, 100]);
+            let fee_consensus = FeeConsensus::new(0).expect("valid fee");
+
+            let (input_fees, output_fees) = estimate_spend_fees_inner(
+                Amount::from_msats(500),
+                &counts,
+                &tiers,
+                &fee_consensus,
+            )
+            .expect("should succeed");
+
+            // Step 1: Consolidation
+            // 10 - 4 = 6 notes consolidated
+            // consolidation_value = 6 × 1000 = 6000 msat
+            // consolidation_fees = 6 × 100 = 600 msat
+
+            // Step 2: Initial amounts
+            // input_amount = 6000 msat
+            // output_amount = 500 + 600 = 1100 msat
+            // shortfall = 1100 - 6000 = 0 (no additional selection needed)
+
+            // Step 3: Change
+            // change = 6000 - 1100 = 4900 msat
+
+            // Step 4: Output fees for 4900 msat change
+            // remaining working_counts = {1000: 4}
+            // represent_amount(4900, {1000: 4}, tiers, 2, fee_consensus):
+            //   First pass ascending:
+            //   - 100 tier: missing=2, possible=4900/200=24, add=2, remaining=4500
+            //   - 1000 tier: notes=4, missing=0, skip (already has ≥2)
+            //   Second pass descending:
+            //   - 1000 tier: 4500/1100=4, remaining=4500-4400=100
+            //   - 100 tier: 100/200=0
+            //   Result: 2×100 + 4×1000 = 6 notes
+            //   output_fees = 2×100 + 4×100 = 600 msat
+
+            assert_eq!(input_fees, Amount::from_msats(600));
+            assert_eq!(output_fees, Amount::from_msats(600));
+        }
+
+        #[test]
+        fn consolidation_plus_additional_selection_with_fees() {
+            // 10 notes of 100 msat (triggers consolidation), 2 notes of 1000 msat
+            // Spend 1500 msat with 100 msat base fee
+            let counts = counts_from_vec(vec![(100, 10), (1000, 2)]);
+            let tiers = tiers_from_vec(vec![1000, 100]);
+            let fee_consensus = FeeConsensus::new(0).expect("valid fee");
+
+            let (input_fees, output_fees) = estimate_spend_fees_inner(
+                Amount::from_msats(1500),
+                &counts,
+                &tiers,
+                &fee_consensus,
+            )
+            .expect("should succeed");
+
+            // Step 1: Consolidation
+            // Only 100 tier triggers (10 > 8), 1000 tier doesn't (2 <= 8)
+            // consolidated = 10 - 4 = 6 notes of 100
+            // consolidation_value = 6 × 100 = 600 msat
+            // consolidation_fees = 6 × 100 = 600 msat
+            // working_counts after = {100: 4, 1000: 2}
+
+            // Step 2: Initial amounts
+            // input_amount = 600 msat
+            // output_amount = 1500 + 600 = 2100 msat
+            // shortfall = 2100 - 600 = 1500 msat
+
+            // Step 3: Additional selection for 1500 msat shortfall
+            // From working_counts = {100: 4, 1000: 2}, descending order
+            // - 1000 tier: 1000 vs (1500 + 100) = 1600 → Less, select it
+            //   pending = 1500 + 100 - 1000 = 600
+            // - 1000 tier (2nd): 1000 vs (600 + 100) = 700 → Greater, checkpoint
+            // - 100 tier: 100 vs (600 + 100) = 700 → Less, select it
+            //   pending = 600 + 100 - 100 = 600
+            // - 100 tier (2nd): 100 vs (600 + 100) = 700 → Less, select it
+            //   pending = 600 + 100 - 100 = 600
+            // - 100 tier (3rd): 100 vs (600 + 100) = 700 → Less, select it
+            //   pending = 600 + 100 - 100 = 600
+            // - 100 tier (4th): 100 vs (600 + 100) = 700 → Less, select it
+            //   pending = 600 + 100 - 100 = 600
+            // Stream exhausted, pending > 0, fall back to checkpoint
+            // Checkpoint = {1000: 2}
+            // additional = {1000: 2}
+            // additional_value = 2 × 1000 = 2000 msat
+            // additional_fees = 2 × 100 = 200 msat
+            // working_counts after = {100: 4}
+
+            // Step 4: Updated amounts
+            // input_amount = 600 + 2000 = 2600 msat
+            // output_amount = 2100 + 200 = 2300 msat
+
+            // Step 5: Change
+            // change = 2600 - 2300 = 300 msat
+
+            // Step 6: Output fees for 300 msat change
+            // working_counts = {100: 4}
+            // represent_amount(300, {100: 4}, tiers, 2, fee_consensus):
+            //   First pass ascending:
+            //   - 100 tier: notes=4, missing=0, skip (already has ≥2)
+            //   - 1000 tier: missing=2, possible=300/1100=0, add=0
+            //   Second pass descending:
+            //   - 1000 tier: 300/1100=0
+            //   - 100 tier: 300/200=1
+            //   Result: 1×100 note
+            //   output_fees = 1×100 = 100 msat
+
+            // Total input_fees = consolidation_fees + additional_fees = 600 + 200 = 800 msat
+            assert_eq!(input_fees, Amount::from_msats(800));
+            assert_eq!(output_fees, Amount::from_msats(100));
+        }
+
+        #[test]
+        fn proportional_fees_in_full_flow() {
+            // FeeConsensus::new(1000) = 100 msat base + 0.1% proportional
+            // fee(10000) = 100 + 10 = 110 msat
+            // fee(1000) = 100 + 1 = 101 msat
+            // fee(100) = 100 + 0 = 100 msat
+            let counts = counts_from_vec(vec![(10000, 5)]);
+            let tiers = tiers_from_vec(vec![10000, 1000, 100]);
+            let fee_consensus = FeeConsensus::new(1000).expect("valid fee");
+
+            let (input_fees, output_fees) = estimate_spend_fees_inner(
+                Amount::from_msats(5000),
+                &counts,
+                &tiers,
+                &fee_consensus,
+            )
+            .expect("should succeed");
+
+            // Step 1: Consolidation
+            // 5 notes <= 8, no consolidation
+            // consolidation_value = 0, consolidation_fees = 0
+            // working_counts = {10000: 5}
+
+            // Step 2: Initial amounts
+            // input_amount = 0
+            // output_amount = 5000 + 0 = 5000 msat
+            // shortfall = 5000 msat
+
+            // Step 3: Additional selection for 5000 msat
+            // From working_counts = {10000: 5}, descending order
+            // - 10000 tier: 10000 vs (5000 + 110) = 5110 → Greater, checkpoint
+            // Stream exhausted with pending > 0, fall back to checkpoint
+            // additional = {10000: 1}
+            // additional_value = 10000 msat
+            // additional_fees = 110 msat
+            // working_counts after = {10000: 4}
+
+            // Step 4: Updated amounts
+            // input_amount = 0 + 10000 = 10000 msat
+            // output_amount = 5000 + 110 = 5110 msat
+
+            // Step 5: Change
+            // change = 10000 - 5110 = 4890 msat
+
+            // Step 6: Output fees for 4890 msat change
+            // working_counts = {10000: 4}
+            // represent_amount(4890, {10000: 4}, tiers, 2, fee_consensus):
+            //   First pass ascending:
+            //   - 100 tier: missing=2, possible=4890/200=24, add=2, remaining=4490
+            //   - 1000 tier: missing=2, possible=4490/1101=4, add=2, remaining=2288
+            //   - 10000 tier: notes=4, missing=0, skip
+            //   Second pass descending:
+            //   - 10000 tier: 2288/10110=0
+            //   - 1000 tier: 2288/1101=2, remaining=2288-2202=86
+            //   - 100 tier: 86/200=0
+            //   Result: 2×100 + 4×1000 = 6 notes
+            //   output_fees = 2×100 + 4×101 = 200 + 404 = 604 msat
+
+            assert_eq!(input_fees, Amount::from_msats(110));
+            assert_eq!(output_fees, Amount::from_msats(604));
+        }
+
+        #[test]
+        fn zero_requested_amount() {
+            // Request 0 msat with no consolidation
+            let counts = counts_from_vec(vec![(1000, 5)]);
+            let tiers = tiers_from_vec(vec![1000, 100]);
+            let fee_consensus = FeeConsensus::zero();
+
+            let (input_fees, output_fees) = estimate_spend_fees_inner(
+                Amount::ZERO,
+                &counts,
+                &tiers,
+                &fee_consensus,
+            )
+            .expect("should succeed");
+
+            // No consolidation (5 <= 8)
+            // input_amount = 0, output_amount = 0
+            // shortfall = 0, no additional selection
+            // change = 0, output_fees = 0
+            assert_eq!(input_fees, Amount::ZERO);
+            assert_eq!(output_fees, Amount::ZERO);
+        }
+
+        #[test]
+        fn zero_requested_amount_with_consolidation() {
+            // Request 0 msat but trigger consolidation
+            let counts = counts_from_vec(vec![(1000, 10)]);
+            let tiers = tiers_from_vec(vec![1000, 100]);
+            let fee_consensus = FeeConsensus::new(0).expect("valid fee");
+
+            let (input_fees, output_fees) = estimate_spend_fees_inner(
+                Amount::ZERO,
+                &counts,
+                &tiers,
+                &fee_consensus,
+            )
+            .expect("should succeed");
+
+            // Step 1: Consolidation
+            // 10 - 4 = 6 notes consolidated
+            // consolidation_value = 6000 msat
+            // consolidation_fees = 6 × 100 = 600 msat
+            // working_counts = {1000: 4}
+
+            // Step 2: Initial amounts
+            // input_amount = 6000
+            // output_amount = 0 + 600 = 600 msat
+            // shortfall = 0 (6000 > 600)
+
+            // Step 3: Change
+            // change = 6000 - 600 = 5400 msat
+
+            // Step 4: Output fees for 5400 msat
+            // working_counts = {1000: 4}
+            // represent_amount(5400, {1000: 4}, tiers, 2, fee_consensus):
+            //   First pass ascending:
+            //   - 100 tier: missing=2, possible=5400/200=27, add=2, remaining=5000
+            //   - 1000 tier: notes=4, missing=0, skip
+            //   Second pass descending:
+            //   - 1000 tier: 5000/1100=4, remaining=600
+            //   - 100 tier: 600/200=3
+            //   Result: 5×100 + 4×1000 = 9 notes
+            //   output_fees = 9 × 100 = 900 msat
+
+            assert_eq!(input_fees, Amount::from_msats(600));
+            assert_eq!(output_fees, Amount::from_msats(900));
+        }
+
+        #[test]
+        fn dust_change_in_full_flow() {
+            // Construct scenario where change is too small to create any notes
+            // With base fee 100, minimum note cost is 200 msat (100 tier + 100 fee)
+            // Need change between 0 and 200 msat
+            let counts = counts_from_vec(vec![(1000, 3)]);
+            let tiers = tiers_from_vec(vec![1000, 100]);
+            let fee_consensus = FeeConsensus::new(0).expect("valid fee");
+
+            // Spend 800 msat
+            // Select 1×1000, input_fee = 100
+            // change = 1000 - 800 - 100 = 100 msat (dust!)
+            let (input_fees, output_fees) = estimate_spend_fees_inner(
+                Amount::from_msats(800),
+                &counts,
+                &tiers,
+                &fee_consensus,
+            )
+            .expect("should succeed");
+
+            // Step 1: No consolidation (3 <= 8)
+
+            // Step 2: Initial amounts
+            // input_amount = 0, output_amount = 800
+            // shortfall = 800
+
+            // Step 3: Additional selection for 800 msat
+            // - 1000 tier: 1000 vs (800 + 100) = 900 → Greater, checkpoint
+            // Stream exhausted, fall back to checkpoint
+            // additional = {1000: 1}, additional_value = 1000, additional_fees = 100
+
+            // Step 4: Updated amounts
+            // input_amount = 1000, output_amount = 900
+
+            // Step 5: Change
+            // change = 1000 - 900 = 100 msat
+
+            // Step 6: Output fees for 100 msat change
+            // 100 / 200 = 0 notes (too small)
+            // output_fees = 0
+
+            assert_eq!(input_fees, Amount::from_msats(100));
+            assert_eq!(output_fees, Amount::ZERO);
+        }
+
+        #[test]
+        fn working_counts_evolution_affects_output() {
+            // 10 notes of 100 msat (triggers consolidation), 1 note of 1000 msat
+            // After consolidation: 4 notes of 100 remain
+            // Then additional selection takes the 1000 note
+            // Output should see working_counts = {100: 4} only
+            let counts = counts_from_vec(vec![(100, 10), (1000, 1)]);
+            let tiers = tiers_from_vec(vec![1000, 100]);
+            let fee_consensus = FeeConsensus::new(0).expect("valid fee");
+
+            // Spend 800 msat to force additional selection of the 1000 note
+            let (input_fees, output_fees) = estimate_spend_fees_inner(
+                Amount::from_msats(800),
+                &counts,
+                &tiers,
+                &fee_consensus,
+            )
+            .expect("should succeed");
+
+            // Step 1: Consolidation
+            // 100 tier: 10 - 4 = 6 consolidated
+            // consolidation_value = 600 msat
+            // consolidation_fees = 600 msat
+            // working_counts = {100: 4, 1000: 1}
+
+            // Step 2: Initial amounts
+            // input_amount = 600
+            // output_amount = 800 + 600 = 1400 msat
+            // shortfall = 800 msat
+
+            // Step 3: Additional selection for 800 msat
+            // From {100: 4, 1000: 1}, descending order
+            // - 1000 tier: 1000 vs (800 + 100) = 900 → Greater, checkpoint {1000: 1}
+            // - 100 tier × 4: each 100 vs (800 + 100) = 900 → Less
+            //   After all 4: pending = 800 + 400 - 400 = 800 (still > 0)
+            // Stream exhausted, fall back to checkpoint
+            // additional = {1000: 1}
+            // additional_value = 1000, additional_fees = 100
+            // working_counts after = {100: 4}
+
+            // Step 4: Updated amounts
+            // input_amount = 600 + 1000 = 1600
+            // output_amount = 1400 + 100 = 1500
+
+            // Step 5: Change
+            // change = 1600 - 1500 = 100 msat (dust!)
+
+            // Step 6: Output fees for 100 msat
+            // working_counts = {100: 4}
+            // 100 msat / 200 = 0 notes (too small)
+            // output_fees = 0
+
+            // Key verification: working_counts evolved correctly
+            // If we had the original 1000 note still, output_fees might differ
+
+            // Total input_fees = 600 + 100 = 700
+            assert_eq!(input_fees, Amount::from_msats(700));
+            assert_eq!(output_fees, Amount::ZERO);
         }
     }
 }
