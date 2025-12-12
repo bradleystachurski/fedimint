@@ -1181,6 +1181,27 @@ impl MintClientModule {
             })
     }
 
+    /// Estimates the total fees to spend the requested amount.
+    ///
+    /// This simulates the note selection and change creation to predict fees
+    /// before executing the actual spend. Useful for fee previews in UIs.
+    ///
+    /// Returns the total fees (input fees + output fees) or an error if
+    /// insufficient balance.
+    pub async fn estimate_spend_fees(&self, amount: Amount) -> anyhow::Result<Amount> {
+        let mut dbtx = self.client_ctx.module_db().begin_transaction_nc().await;
+        let counts = self.get_note_counts_by_denomination(&mut dbtx).await;
+        let tiers: Tiered<()> = self.cfg.tbs_pks.iter().map(|(k, _)| (k, ())).collect();
+        let fee_consensus = &self.cfg.fee_consensus;
+
+        let (input_fees, output_fees) =
+            estimate_spend_fees_inner(amount, &counts, &tiers, fee_consensus)?;
+
+        Ok(input_fees
+            .checked_add(output_fees)
+            .expect("fee sum overflow"))
+    }
+
     /// Wait for the e-cash notes to be retrieved. If this is not possible
     /// because another terminal state was reached an error describing the
     /// failure is returned.
