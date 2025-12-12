@@ -1296,7 +1296,40 @@ impl MintClientModule {
 
         self.create_input_from_notes(selected_notes_decoded.into_iter().collect())
     }
+}
 
+/// Simulates which notes would be consolidated, returning the counts that would
+/// be spent. Does not modify any state - pure calculation for fee estimation.
+fn simulate_consolidation(counts: &TieredCounts) -> TieredCounts {
+    /// At how many notes of the same denomination should we try to consolidate
+    const MAX_NOTES_PER_TIER_TRIGGER: usize = 8;
+    /// Number of notes per tier to leave after threshold was crossed
+    const MIN_NOTES_PER_TIER: usize = 4;
+    /// Maximum number of notes to consolidate per one tx,
+    /// to limit the size of a transaction produced.
+    const MAX_NOTES_TO_CONSOLIDATE_IN_TX: usize = 20;
+
+    let should_consolidate = counts
+        .iter()
+        .any(|(_, count)| MAX_NOTES_PER_TIER_TRIGGER < count);
+
+    if !should_consolidate {
+        return TieredCounts::default();
+    }
+
+    let mut max_count = MAX_NOTES_TO_CONSOLIDATE_IN_TX;
+
+    counts
+        .iter()
+        .map(|(amount, count)| {
+            let take = (count.saturating_sub(MIN_NOTES_PER_TIER)).min(max_count);
+            max_count -= take;
+            (amount, take)
+        })
+        .collect()
+}
+
+impl MintClientModule {
     /// Create a mint input from external, potentially untrusted notes
     #[allow(clippy::type_complexity)]
     pub fn create_input_from_notes(
@@ -3041,5 +3074,154 @@ mod tests {
                 }
             })
         );
+    }
+
+    mod consolidation {
+        use fedimint_core::{Amount, TieredCounts};
+
+        use crate::simulate_consolidation;
+
+        fn counts_from_vec(items: Vec<(u64, usize)>) -> TieredCounts {
+            items
+                .into_iter()
+                .map(|(msats, count)| (Amount::from_msats(msats), count))
+                .collect()
+        }
+
+        #[test]
+        fn no_consolidation_when_all_tiers_at_or_below_threshold() {
+            // All tiers at or below 8 notes - no consolidation needed
+            let counts = counts_from_vec(vec![
+                (1000, 8),
+                (2000, 5),
+                (4000, 3),
+            ]);
+
+            let result = simulate_consolidation(&counts);
+
+            assert_eq!(result.count_items(), 0, "Should not consolidate when all tiers <= 8");
+        }
+
+        #[test]
+        fn single_tier_triggers_consolidation() {
+            // 12 notes in one tier (> 8 threshold)
+            // Should consolidate down to 4, so 12 - 4 = 8 notes taken
+            let counts = counts_from_vec(vec![
+                (1000, 12),
+                (2000, 5),
+            ]);
+
+            let result = simulate_consolidation(&counts);
+
+            assert_eq!(result.count_items(), 9, "Should consolidate 9 notes total");
+            assert_eq!(
+                result.get(Amount::from_msats(1000)),
+                8,
+                "First tier should contribute 8 notes"
+            );
+            assert_eq!(
+                result.get(Amount::from_msats(2000)),
+                1,
+                "Second tier should contribute 1 note (5 - 4 = 1)"
+            );
+        }
+
+        #[test]
+        fn multiple_tiers_over_threshold() {
+            // Multiple tiers over 8
+            let counts = counts_from_vec(vec![
+                (1000, 10), // 10 - 4 = 6 to consolidate
+                (2000, 15), // 15 - 4 = 11 to consolidate
+                (4000, 12), // 12 - 4 = 8 to consolidate
+            ]);
+
+            let result = simulate_consolidation(&counts);
+
+            // All tiers contribute (6 + 11 + 8 = 25, but capped at 20)
+            assert!(result.count_items() > 0, "Should consolidate notes from multiple tiers");
+            assert_eq!(
+                result.get(Amount::from_msats(1000)),
+                6,
+                "First tier should contribute 6"
+            );
+            assert_eq!(
+                result.get(Amount::from_msats(2000)),
+                11,
+                "Second tier should contribute 11"
+            );
+            // Third tier gets capped: 20 - 6 - 11 = 3
+            assert_eq!(
+                result.get(Amount::from_msats(4000)),
+                3,
+                "Third tier should be capped to fit within max 20"
+            );
+        }
+
+        #[test]
+        fn max_20_cap_is_respected() {
+            // Many notes in many tiers
+            let counts = counts_from_vec(vec![
+                (1000, 30), // 30 - 4 = 26 available, but limited by cap
+                (2000, 30), // would have 26 available too
+            ]);
+
+            let result = simulate_consolidation(&counts);
+
+            assert_eq!(result.count_items(), 20, "Should cap total consolidation at 20");
+            // First tier takes min(26, 20) = 20
+            assert_eq!(
+                result.get(Amount::from_msats(1000)),
+                20,
+                "First tier takes all 20"
+            );
+            // Second tier gets nothing because cap is exhausted
+            assert_eq!(
+                result.get(Amount::from_msats(2000)),
+                0,
+                "Second tier gets 0 due to cap"
+            );
+        }
+
+        #[test]
+        fn threshold_boundary_at_nine_notes() {
+            // 9 notes is the minimum to trigger consolidation (> 8, not >= 8)
+            // Should consolidate 9 - 4 = 5 notes
+            let counts = counts_from_vec(vec![(1000, 9)]);
+
+            let result = simulate_consolidation(&counts);
+
+            assert_eq!(
+                result.count_items(),
+                5,
+                "9 notes should trigger consolidation, leaving 4"
+            );
+            assert_eq!(
+                result.get(Amount::from_msats(1000)),
+                5,
+                "Should consolidate 5 notes (9 - 4)"
+            );
+        }
+
+        #[test]
+        fn tier_at_four_notes_contributes_nothing() {
+            // When consolidation triggers, a tier with exactly 4 notes contributes 0
+            let counts = counts_from_vec(vec![
+                (1000, 12), // triggers consolidation, contributes 12 - 4 = 8
+                (2000, 4),  // exactly at MIN_NOTES_PER_TIER, contributes 0
+            ]);
+
+            let result = simulate_consolidation(&counts);
+
+            assert_eq!(
+                result.get(Amount::from_msats(1000)),
+                8,
+                "First tier contributes 8"
+            );
+            assert_eq!(
+                result.get(Amount::from_msats(2000)),
+                0,
+                "Tier with exactly 4 notes contributes nothing (4 - 4 = 0)"
+            );
+        }
     }
 }
