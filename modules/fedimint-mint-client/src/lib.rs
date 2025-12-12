@@ -1329,6 +1329,76 @@ fn simulate_consolidation(counts: &TieredCounts) -> TieredCounts {
         .collect()
 }
 
+/// Simulates which notes would be selected to cover the requested amount.
+/// Returns the counts of notes that would be spent.
+fn simulate_input_selection(
+    counts: &TieredCounts,
+    requested_amount: Amount,
+    fee_consensus: &FeeConsensus,
+) -> Result<TieredCounts, InsufficientBalanceError> {
+    if requested_amount == Amount::ZERO {
+        return Ok(TieredCounts::default());
+    }
+
+    let mut selected = TieredCounts::default();
+    // Checkpoint: (tier, count_to_add, selected_state_at_checkpoint)
+    // We save a big note in case small notes don't sum to enough
+    let mut last_big_note_checkpoint: Option<(Amount, TieredCounts)> = None;
+    let mut pending_amount = requested_amount;
+
+    // Process tiers in descending order (largest denominations first)
+    let mut tiers: Vec<(Amount, usize)> = counts.iter().collect();
+    tiers.sort_by(|a, b| b.0.cmp(&a.0));
+
+    for (tier_amount, tier_count) in tiers {
+        // Skip uneconomical notes where fee >= note value
+        if tier_amount <= fee_consensus.fee(tier_amount) {
+            continue;
+        }
+
+        // Process each note in this tier
+        for _ in 0..tier_count {
+            let fee = fee_consensus.fee(tier_amount);
+            match tier_amount.cmp(&(pending_amount + fee)) {
+                Ordering::Less => {
+                    // Note is smaller than what we need - add it
+                    pending_amount += fee;
+                    pending_amount -= tier_amount;
+                    selected.inc(tier_amount, 1);
+                }
+                Ordering::Greater => {
+                    // Note is bigger than needed - save as checkpoint
+                    let mut checkpoint_selected = selected.clone();
+                    checkpoint_selected.inc(tier_amount, 1);
+                    last_big_note_checkpoint = Some((tier_amount, checkpoint_selected));
+                }
+                Ordering::Equal => {
+                    // Exact match
+                    selected.inc(tier_amount, 1);
+                    return Ok(selected);
+                }
+            }
+        }
+    }
+
+    // Stream exhausted with pending > 0
+    if pending_amount > Amount::ZERO {
+        if let Some((_big_note_amount, checkpoint_selected)) = last_big_note_checkpoint {
+            // Use the checkpoint (which includes the big note)
+            return Ok(checkpoint_selected);
+        }
+
+        // Not enough notes
+        let total_amount = requested_amount.saturating_sub(pending_amount);
+        return Err(InsufficientBalanceError {
+            requested_amount,
+            total_amount,
+        });
+    }
+
+    Ok(selected)
+}
+
 impl MintClientModule {
     /// Create a mint input from external, potentially untrusted notes
     #[allow(clippy::type_complexity)]
@@ -3222,6 +3292,183 @@ mod tests {
                 0,
                 "Tier with exactly 4 notes contributes nothing (4 - 4 = 0)"
             );
+        }
+    }
+
+    mod input_selection {
+        use fedimint_core::{Amount, TieredCounts};
+        use fedimint_mint_common::config::FeeConsensus;
+
+        use crate::simulate_input_selection;
+
+        fn counts_from_vec(items: Vec<(u64, usize)>) -> TieredCounts {
+            items
+                .into_iter()
+                .map(|(msats, count)| (Amount::from_msats(msats), count))
+                .collect()
+        }
+
+        #[test]
+        fn exact_match() {
+            // With zero fees: 1000 msat note exactly covers 1000 msat request
+            let counts = counts_from_vec(vec![(1000, 1)]);
+            let fee_consensus = FeeConsensus::zero();
+
+            let result = simulate_input_selection(&counts, Amount::from_msats(1000), &fee_consensus)
+                .expect("should succeed");
+
+            assert_eq!(result.count_items(), 1);
+            assert_eq!(result.get(Amount::from_msats(1000)), 1);
+        }
+
+        #[test]
+        fn overshoot_creates_change() {
+            // Request 500, only have 1000 note -> must use the 1000 note (overshoot)
+            let counts = counts_from_vec(vec![(1000, 1)]);
+            let fee_consensus = FeeConsensus::zero();
+
+            let result = simulate_input_selection(&counts, Amount::from_msats(500), &fee_consensus)
+                .expect("should succeed");
+
+            assert_eq!(result.count_items(), 1);
+            assert_eq!(result.get(Amount::from_msats(1000)), 1);
+        }
+
+        #[test]
+        fn insufficient_balance() {
+            // Request 2000, only have 1000 -> error
+            let counts = counts_from_vec(vec![(1000, 1)]);
+            let fee_consensus = FeeConsensus::zero();
+
+            let result =
+                simulate_input_selection(&counts, Amount::from_msats(2000), &fee_consensus);
+
+            assert!(result.is_err());
+            let err = result.unwrap_err();
+            assert_eq!(err.requested_amount, Amount::from_msats(2000));
+        }
+
+        #[test]
+        fn uneconomical_notes_skipped() {
+            // Fee is 100 msat base. A 100 msat note has fee >= value, so it's skipped.
+            // Only the 1000 msat note should be used.
+            let counts = counts_from_vec(vec![
+                (1000, 1), // economical
+                (100, 5),  // uneconomical: fee(100) = 100 >= 100
+            ]);
+            let fee_consensus = FeeConsensus::new(0).expect("valid fee");
+
+            let result = simulate_input_selection(&counts, Amount::from_msats(500), &fee_consensus)
+                .expect("should succeed");
+
+            // Should only use the 1000 note, not the 100 notes
+            assert_eq!(result.get(Amount::from_msats(1000)), 1);
+            assert_eq!(result.get(Amount::from_msats(100)), 0);
+        }
+
+        #[test]
+        fn checkpoint_fallback() {
+            // Have: one 10000 note, and several 100 notes (but not enough small notes)
+            // Request 5000 with zero fees
+            // Small notes (100 * 3 = 300) won't cover 5000, so fall back to big note
+            let counts = counts_from_vec(vec![
+                (10000, 1), // big note - will be checkpoint
+                (100, 3),   // small notes - won't be enough
+            ]);
+            let fee_consensus = FeeConsensus::zero();
+
+            let result =
+                simulate_input_selection(&counts, Amount::from_msats(5000), &fee_consensus)
+                    .expect("should succeed");
+
+            // Should fall back to using the 10000 note
+            assert_eq!(result.get(Amount::from_msats(10000)), 1);
+            // Small notes should NOT be included (checkpoint restores state before them)
+            assert_eq!(result.get(Amount::from_msats(100)), 0);
+        }
+
+        #[test]
+        fn multiple_big_notes_last_one_wins() {
+            // Stream [10000, 5000, 100, 100], request 3000 (zero fees)
+            // Both 10000 and 5000 are "big notes" that get checkpointed
+            // The 5000 should win since it's the last checkpoint
+            let counts = counts_from_vec(vec![
+                (10000, 1),
+                (5000, 1),
+                (100, 2),
+            ]);
+            let fee_consensus = FeeConsensus::zero();
+
+            let result =
+                simulate_input_selection(&counts, Amount::from_msats(3000), &fee_consensus)
+                    .expect("should succeed");
+
+            assert_eq!(result.get(Amount::from_msats(5000)), 1);
+            assert_eq!(result.get(Amount::from_msats(10000)), 0);
+            assert_eq!(result.get(Amount::from_msats(100)), 0);
+        }
+
+        #[test]
+        fn checkpoint_captured_after_small_notes_selected() {
+            // Stream [1000, 500, 200, 100], request 250 (zero fees)
+            // 1000 is Greater (checkpoint), 500 is Greater (checkpoint)
+            // 200 is Less (selected, pending=50), 100 is Greater relative to 50 (checkpoint includes 200)
+            // Falls back to checkpoint with {200: 1, 100: 1}
+            let counts = counts_from_vec(vec![
+                (1000, 1),
+                (500, 1),
+                (200, 1),
+                (100, 1),
+            ]);
+            let fee_consensus = FeeConsensus::zero();
+
+            let result =
+                simulate_input_selection(&counts, Amount::from_msats(250), &fee_consensus)
+                    .expect("should succeed");
+
+            assert_eq!(result.get(Amount::from_msats(200)), 1);
+            assert_eq!(result.get(Amount::from_msats(100)), 1);
+            assert_eq!(result.get(Amount::from_msats(1000)), 0);
+            assert_eq!(result.get(Amount::from_msats(500)), 0);
+        }
+
+        #[test]
+        fn same_tier_mixed_less_and_greater() {
+            // Two 1000 notes, one 100 note, request 1500 (zero fees)
+            // First 1000 is Less (selected, pending=500)
+            // Second 1000 is Greater (checkpoint includes first 1000 + this one)
+            // 100 is Less but not enough (pending=400)
+            // Falls back to checkpoint
+            let counts = counts_from_vec(vec![
+                (1000, 2),
+                (100, 1),
+            ]);
+            let fee_consensus = FeeConsensus::zero();
+
+            let result =
+                simulate_input_selection(&counts, Amount::from_msats(1500), &fee_consensus)
+                    .expect("should succeed");
+
+            assert_eq!(result.get(Amount::from_msats(1000)), 2);
+            assert_eq!(result.get(Amount::from_msats(100)), 0);
+        }
+
+        #[test]
+        fn small_notes_sufficient_checkpoint_unused() {
+            // One 1000 note, four 100 notes, request 400 (zero fees)
+            // 1000 checkpointed but four 100s exactly cover 400
+            let counts = counts_from_vec(vec![
+                (1000, 1),
+                (100, 4),
+            ]);
+            let fee_consensus = FeeConsensus::zero();
+
+            let result =
+                simulate_input_selection(&counts, Amount::from_msats(400), &fee_consensus)
+                    .expect("should succeed");
+
+            assert_eq!(result.get(Amount::from_msats(100)), 4);
+            assert_eq!(result.get(Amount::from_msats(1000)), 0);
         }
     }
 }
