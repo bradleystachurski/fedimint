@@ -1411,6 +1411,19 @@ fn calculate_output_fees(
         return Amount::ZERO;
     }
 
+    // Check if any notes can be created - if the smallest tier + its fee
+    // exceeds the output amount, no notes can be created
+    let min_cost = tiers
+        .tiers()
+        .map(|tier| *tier + fee_consensus.fee(*tier))
+        .min();
+
+    if let Some(min) = min_cost {
+        if output_amount < min {
+            return Amount::ZERO;
+        }
+    }
+
     let output_counts = represent_amount(output_amount, current_counts, tiers, 2, fee_consensus);
 
     output_counts
@@ -3685,6 +3698,77 @@ mod tests {
             // This proves proportional fees matter: the 1000 tier has fee=101 vs 100 tier fee=100
             // Using larger denominations saves on total fees (1409 vs 5500)
             assert!(fees < small_fees);
+        }
+
+        #[test]
+        fn current_counts_affects_denomination_selection() {
+            // FeeConsensus::new(0) gives base fee of 100 msat, no proportional fee
+            let tiers = tiers_from_vec(vec![1000, 100]);
+            let fee_consensus = FeeConsensus::new(0).expect("valid fee");
+
+            // With empty current_counts, output 2200 msat:
+            // First pass ascending:
+            // - 100 tier: missing=2, possible=2200/200=11, add=2, remaining=1800
+            // - 1000 tier: missing=2, possible=1800/1100=1, add=1, remaining=700
+            // Second pass descending:
+            // - 1000 tier: 700/1100=0
+            // - 100 tier: 700/200=3
+            // Result: 5×100 + 1×1000 = 6 notes, fees = 600 msat
+            let empty_counts = TieredCounts::default();
+            let fees_empty = calculate_output_fees(
+                Amount::from_msats(2200),
+                &empty_counts,
+                &tiers,
+                &fee_consensus,
+            );
+            assert_eq!(fees_empty, Amount::from_msats(600));
+
+            // With current_counts = {100: 2}, output 2200 msat:
+            // First pass ascending:
+            // - 100 tier: notes=2, missing=0, skip
+            // - 1000 tier: missing=2, possible=2200/1100=2, add=2, remaining=0
+            // Second pass: nothing left
+            // Result: 2×1000 = 2 notes, fees = 200 msat
+            let mut current_counts_with_100s = TieredCounts::default();
+            current_counts_with_100s.inc(Amount::from_msats(100), 2);
+            let fees_with_100s = calculate_output_fees(
+                Amount::from_msats(2200),
+                &current_counts_with_100s,
+                &tiers,
+                &fee_consensus,
+            );
+            assert_eq!(fees_with_100s, Amount::from_msats(200));
+
+            // Existing note counts affect denomination selection and thus fees
+            assert_ne!(fees_empty, fees_with_100s);
+            assert!(fees_with_100s < fees_empty);
+        }
+
+        #[test]
+        fn amount_too_small_for_any_notes_returns_zero_fees() {
+            // With tiers [1000, 100] and base fee 100 msat:
+            // - 1000 note costs 1000 + 100 = 1100 msat
+            // - 100 note costs 100 + 100 = 200 msat
+            let tiers = tiers_from_vec(vec![1000, 100]);
+            let current_counts = TieredCounts::default();
+            let fee_consensus = FeeConsensus::new(0).expect("valid fee");
+
+            // Output 150 msat - too small to afford any note
+            // 150 / 1100 = 0 notes of 1000
+            // 150 / 200 = 0 notes of 100
+            // Result: no notes, zero fees
+            let fees = calculate_output_fees(
+                Amount::from_msats(150),
+                &current_counts,
+                &tiers,
+                &fee_consensus,
+            );
+
+            assert_eq!(fees, Amount::ZERO);
+
+            // Verify this is different from zero amount - the amount is non-zero
+            // but still insufficient to create any notes
+            assert!(Amount::from_msats(150) > Amount::ZERO);
         }
     }
 }
