@@ -1399,6 +1399,26 @@ fn simulate_input_selection(
     Ok(selected)
 }
 
+/// Calculates the total fees for creating output notes of the given amount.
+/// Uses represent_amount to determine denomination breakdown, then sums fees.
+fn calculate_output_fees(
+    output_amount: Amount,
+    current_counts: &TieredCounts,
+    tiers: &Tiered<()>,
+    fee_consensus: &FeeConsensus,
+) -> Amount {
+    if output_amount == Amount::ZERO {
+        return Amount::ZERO;
+    }
+
+    let output_counts = represent_amount(output_amount, current_counts, tiers, 2, fee_consensus);
+
+    output_counts
+        .iter()
+        .map(|(tier, count)| fee_consensus.fee(tier) * (count as u64))
+        .sum()
+}
+
 impl MintClientModule {
     /// Create a mint input from external, potentially untrusted notes
     #[allow(clippy::type_complexity)]
@@ -3469,6 +3489,202 @@ mod tests {
 
             assert_eq!(result.get(Amount::from_msats(100)), 4);
             assert_eq!(result.get(Amount::from_msats(1000)), 0);
+        }
+    }
+
+    mod output_fees {
+        use fedimint_core::{Amount, Tiered, TieredCounts};
+        use fedimint_mint_common::config::FeeConsensus;
+
+        use crate::calculate_output_fees;
+
+        fn tiers_from_vec(tiers: Vec<u64>) -> Tiered<()> {
+            tiers
+                .into_iter()
+                .map(|msats| (Amount::from_msats(msats), ()))
+                .collect()
+        }
+
+        #[test]
+        fn zero_output_returns_zero_fees() {
+            let tiers = tiers_from_vec(vec![1000, 100]);
+            let current_counts = TieredCounts::default();
+            let fee_consensus = FeeConsensus::zero();
+
+            let fees = calculate_output_fees(
+                Amount::ZERO,
+                &current_counts,
+                &tiers,
+                &fee_consensus,
+            );
+
+            assert_eq!(fees, Amount::ZERO);
+        }
+
+        #[test]
+        fn single_denomination_output() {
+            // Output 1000 msat with zero fees and zero current counts
+            // Should create 1x1000 note
+            let tiers = tiers_from_vec(vec![1000, 100]);
+            let current_counts = TieredCounts::default();
+            let fee_consensus = FeeConsensus::zero();
+
+            let fees = calculate_output_fees(
+                Amount::from_msats(1000),
+                &current_counts,
+                &tiers,
+                &fee_consensus,
+            );
+
+            // With zero fees, output cost is zero
+            assert_eq!(fees, Amount::ZERO);
+
+            // Now with base fee of 100 msat
+            let fee_consensus_with_base = FeeConsensus::new(0).expect("valid fee");
+            let fees_with_base = calculate_output_fees(
+                Amount::from_msats(1000),
+                &current_counts,
+                &tiers,
+                &fee_consensus_with_base,
+            );
+
+            // 1000 msat output with 100 msat base fee per note
+            // possible_notes for 1000 tier = 1000 / (1000 + 100) = 0
+            // possible_notes for 100 tier = 1000 / (100 + 100) = 5
+            // So 5 notes * 100 msat = 500 msat fee
+            assert_eq!(fees_with_base, Amount::from_msats(500));
+        }
+
+        #[test]
+        fn multiple_denomination_output() {
+            // Output 2000 msat with zero fees
+            // Should create 2x1000 notes (greedy)
+            let tiers = tiers_from_vec(vec![1000, 100]);
+            let current_counts = TieredCounts::default();
+            let fee_consensus = FeeConsensus::zero();
+
+            let fees = calculate_output_fees(
+                Amount::from_msats(2000),
+                &current_counts,
+                &tiers,
+                &fee_consensus,
+            );
+
+            // With zero fees, output cost is zero
+            assert_eq!(fees, Amount::ZERO);
+
+            // Now with base fee: 2 notes * 100 msat = 200 msat
+            let fee_consensus_with_base = FeeConsensus::new(0).expect("valid fee");
+            let fees_with_base = calculate_output_fees(
+                Amount::from_msats(2000),
+                &current_counts,
+                &tiers,
+                &fee_consensus_with_base,
+            );
+
+            // 2000 / (1000 + 100) = 1 note of 1000
+            // remaining = 2000 - 1100 = 900, 900 / (100 + 100) = 4 notes of 100
+            // Total: 5 notes * 100 msat = 500 msat
+            assert_eq!(fees_with_base, Amount::from_msats(500));
+        }
+
+        #[test]
+        fn fees_scale_with_note_count_not_amount() {
+            // With zero fees, all outputs are free regardless of count
+            let tiers = tiers_from_vec(vec![1000, 100]);
+            let current_counts = TieredCounts::default();
+            let fee_consensus = FeeConsensus::zero();
+
+            let fees_1000 = calculate_output_fees(
+                Amount::from_msats(1000),
+                &current_counts,
+                &tiers,
+                &fee_consensus,
+            );
+
+            let fees_100 = calculate_output_fees(
+                Amount::from_msats(100),
+                &current_counts,
+                &tiers,
+                &fee_consensus,
+            );
+
+            assert_eq!(fees_1000, Amount::ZERO);
+            assert_eq!(fees_100, Amount::ZERO);
+
+            // With base fee, more notes = more fees
+            let fee_consensus_with_base = FeeConsensus::new(0).expect("valid fee");
+
+            // 1000 msat -> 5 notes of 100 (since 1000/1100=0, 1000/200=5)
+            let fees_1000_with_base = calculate_output_fees(
+                Amount::from_msats(1000),
+                &current_counts,
+                &tiers,
+                &fee_consensus_with_base,
+            );
+
+            // 100 msat -> can't even afford 1 note of 100 (100/200=0)
+            // So zero notes, zero fees
+            let fees_100_with_base = calculate_output_fees(
+                Amount::from_msats(100),
+                &current_counts,
+                &tiers,
+                &fee_consensus_with_base,
+            );
+
+            assert_eq!(fees_1000_with_base, Amount::from_msats(500)); // 5 notes * 100
+            assert_eq!(fees_100_with_base, Amount::ZERO); // 0 notes
+        }
+
+        #[test]
+        fn proportional_fees_scale_with_denomination() {
+            // FeeConsensus::new(1000) gives fee = 100 msat base + 0.1% of denomination
+            // fee(10000) = 100 + 10 = 110 msat
+            // fee(1000) = 100 + 1 = 101 msat
+            // fee(100) = 100 + 0 = 100 msat (truncated)
+            let tiers = tiers_from_vec(vec![10000, 1000, 100]);
+            let current_counts = TieredCounts::default();
+            let fee_consensus = FeeConsensus::new(1000).expect("valid fee");
+
+            // Output 11000 msat
+            // represent_amount first fills denomination_sets (2) in ascending order:
+            // - 100 tier: missing=2, possible=11000/200=55, add=2, remaining=10600
+            // - 1000 tier: missing=2, possible=10600/1101=9, add=2, remaining=8398
+            // - 10000 tier: missing=2, possible=8398/10110=0, add=0
+            // Then greedy in descending order:
+            // - 10000 tier: 8398/10110=0
+            // - 1000 tier: 8398/1101=7, remaining=691
+            // - 100 tier: 691/200=3
+            //
+            // Result: 5 x 100 notes + 9 x 1000 notes
+            // Fees: 5 * 100 + 9 * 101 = 500 + 909 = 1409 msat
+            let fees = calculate_output_fees(
+                Amount::from_msats(11000),
+                &current_counts,
+                &tiers,
+                &fee_consensus,
+            );
+
+            assert_eq!(fees, Amount::from_msats(1409));
+
+            // Verify that using only small denominations gives different fees
+            let small_tiers = tiers_from_vec(vec![100]);
+            let small_fees = calculate_output_fees(
+                Amount::from_msats(11000),
+                &current_counts,
+                &small_tiers,
+                &fee_consensus,
+            );
+
+            // First pass: 100 tier, missing=2, possible=11000/200=55, add=2, remaining=10600
+            // Second pass: 100 tier, 10600/200=53
+            // Total: 55 notes of 100
+            // 55 * 100 = 5500 msat fees
+            assert_eq!(small_fees, Amount::from_msats(5500));
+
+            // This proves proportional fees matter: the 1000 tier has fee=101 vs 100 tier fee=100
+            // Using larger denominations saves on total fees (1409 vs 5500)
+            assert!(fees < small_fees);
         }
     }
 }
