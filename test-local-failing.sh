@@ -6,16 +6,16 @@ set -euo pipefail
 source scripts/_common.sh
 
 echo "=== Building binaries for v0.10.0-beta.2, v0.8.0, v0.8.1 ==="
-export FM_FEDIMINTD_BASE_EXECUTABLE_v0_10_0_beta_2=$(nix_build_binary_for_version "fedimintd" "v0.10.0-beta.2")
-export FM_GATEWAYD_BASE_EXECUTABLE_v0_10_0_beta_2=$(nix_build_binary_for_version "gatewayd" "v0.10.0-beta.2")
-export FM_GATEWAY_CLI_BASE_EXECUTABLE_v0_10_0_beta_2=$(nix_build_binary_for_version "gateway-cli" "v0.10.0-beta.2")
-export FM_FEDIMINT_CLI_BASE_EXECUTABLE_v0_10_0_beta_2=$(nix_build_binary_for_version "fedimint-cli" "v0.10.0-beta.2")
+export fm_bin_fedimintd_v0_10_0_beta_2=$(nix_build_binary_for_version "fedimintd" "v0.10.0-beta.2")
+export fm_bin_gatewayd_v0_10_0_beta_2=$(nix_build_binary_for_version "gatewayd" "v0.10.0-beta.2")
+export fm_bin_gateway_cli_v0_10_0_beta_2=$(nix_build_binary_for_version "gateway-cli" "v0.10.0-beta.2")
+export fm_bin_fedimint_cli_v0_10_0_beta_2=$(nix_build_binary_for_version "fedimint-cli" "v0.10.0-beta.2")
 
-export FM_GATEWAYD_BASE_EXECUTABLE_v0_8_0=$(nix_build_binary_for_version "gatewayd" "v0.8.0")
-export FM_GATEWAY_CLI_BASE_EXECUTABLE_v0_8_0=$(nix_build_binary_for_version "gateway-cli" "v0.8.0")
+export fm_bin_gatewayd_v0_8_0=$(nix_build_binary_for_version "gatewayd" "v0.8.0")
+export fm_bin_gateway_cli_v0_8_0=$(nix_build_binary_for_version "gateway-cli" "v0.8.0")
 
-export FM_GATEWAYD_BASE_EXECUTABLE_v0_8_1=$(nix_build_binary_for_version "gatewayd" "v0.8.1")
-export FM_GATEWAY_CLI_BASE_EXECUTABLE_v0_8_1=$(nix_build_binary_for_version "gateway-cli" "v0.8.1")
+export fm_bin_gatewayd_v0_8_1=$(nix_build_binary_for_version "gatewayd" "v0.8.1")
+export fm_bin_gateway_cli_v0_8_1=$(nix_build_binary_for_version "gateway-cli" "v0.8.1")
 
 echo "=== Pre-building workspace ==="
 build_workspace
