@@ -5,6 +5,17 @@ set -euo pipefail
 
 source scripts/_common.sh
 
+# Source the test definitions
+export FM_USE_UNKNOWN_MODULE=0
+export FM_ENABLE_IROH=false
+export RUST_LOG=${RUST_LOG:-h2=off,fm=debug,info}
+
+# Define the test function we need
+function devimint_cli_test_single() {
+  fm-run-test "${FUNCNAME[0]}" ./scripts/tests/devimint-cli-test.sh
+}
+export -f devimint_cli_test_single
+
 echo "=== Building binaries for v0.10.0-beta.2, v0.8.0, v0.8.1 ==="
 export fm_bin_fedimintd_v0_10_0_beta_2=$(nix_build_binary_for_version "fedimintd" "v0.10.0-beta.2")
 export fm_bin_gatewayd_v0_10_0_beta_2=$(nix_build_binary_for_version "gatewayd" "v0.10.0-beta.2")
