@@ -89,3 +89,37 @@ impl Event for ReceivePaymentEvent {
     const KIND: EventKind = EventKind::from_static("payment-receive");
     const PERSISTENCE: EventPersistence = EventPersistence::Persistent;
 }
+
+/// Transient event emitted when a deposit is detected in the mempool.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DepositInMempool {
+    pub address: Address<NetworkUnchecked>,
+    pub txid: Txid,
+    pub out_idx: u32,
+    pub amount: Amount,
+}
+
+impl Event for DepositInMempool {
+    const MODULE: Option<ModuleKind> = Some(fedimint_wallet_common::KIND);
+    const KIND: EventKind = EventKind::from_static("deposit-in-mempool");
+    const PERSISTENCE: EventPersistence = EventPersistence::Transient;
+}
+
+/// Transient event emitted when a deposit is awaiting confirmations.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DepositAwaitingConfs {
+    pub address: Address<NetworkUnchecked>,
+    pub txid: Txid,
+    pub out_idx: u32,
+    pub amount: Amount,
+    pub confirmations: u64,
+    pub required: u64,
+    pub tx_block_height: u64,
+    pub consensus_block_height: u64,
+}
+
+impl Event for DepositAwaitingConfs {
+    const MODULE: Option<ModuleKind> = Some(fedimint_wallet_common::KIND);
+    const KIND: EventKind = EventKind::from_static("deposit-awaiting-confs");
+    const PERSISTENCE: EventPersistence = EventPersistence::Transient;
+}

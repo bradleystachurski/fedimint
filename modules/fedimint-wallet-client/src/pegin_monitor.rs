@@ -31,7 +31,9 @@ use crate::client_db::{
     ClaimedPegInData, ClaimedPegInKey, PegInTweakIndexData, PegInTweakIndexKey,
     PegInTweakIndexPrefix, TweakIdx,
 };
-use crate::events::{DepositConfirmed, ReceivePaymentEvent};
+use crate::events::{
+    DepositAwaitingConfs, DepositConfirmed, DepositInMempool, ReceivePaymentEvent,
+};
 use crate::{WalletClientModule, WalletClientModuleData};
 
 /// A helper struct meant to combined data from all addresses/records
@@ -368,6 +370,30 @@ async fn check_idx_pegins(
                     num_blocks_needed: finality_delay,
                 });
                 debug!(target:LOG_CLIENT_MODULE_WALLET, %txid, %out_idx,"In the mempool");
+                let amount = transaction.output[out_idx as usize].value.into();
+                client_ctx
+                    .module_db()
+                    .autocommit(
+                        |dbtx, _| {
+                            let address = address.as_unchecked().clone();
+                            Box::pin(async move {
+                                client_ctx
+                                    .log_event(
+                                        dbtx,
+                                        DepositInMempool {
+                                            address,
+                                            txid,
+                                            out_idx,
+                                            amount,
+                                        },
+                                    )
+                                    .await;
+                                Ok::<_, anyhow::Error>(())
+                            })
+                        },
+                        Some(1),
+                    )
+                    .await?;
                 continue;
             };
 
@@ -376,6 +402,36 @@ async fn check_idx_pegins(
         if 0 < num_blocks_needed {
             outcomes.push(CheckOutcome::Pending { num_blocks_needed });
             debug!(target: LOG_CLIENT_MODULE_WALLET, %txid, %out_idx, %num_blocks_needed, %finality_delay, %tx_block_count, %current_consensus_block_count, "Needs more confirmations");
+            let amount = transaction.output[out_idx as usize].value.into();
+            let tx_block_height = tx_block_count.saturating_sub(1);
+            let confirmations = current_consensus_block_count.saturating_sub(tx_block_height);
+            client_ctx
+                .module_db()
+                .autocommit(
+                    |dbtx, _| {
+                        let address = address.as_unchecked().clone();
+                        Box::pin(async move {
+                            client_ctx
+                                .log_event(
+                                    dbtx,
+                                    DepositAwaitingConfs {
+                                        address,
+                                        txid,
+                                        out_idx,
+                                        amount,
+                                        confirmations,
+                                        required: finality_delay,
+                                        tx_block_height,
+                                        consensus_block_height: current_consensus_block_count,
+                                    },
+                                )
+                                .await;
+                            Ok::<_, anyhow::Error>(())
+                        })
+                    },
+                    Some(1),
+                )
+                .await?;
             continue;
         }
 
