@@ -1,4 +1,5 @@
-use bitcoin::Txid;
+use bitcoin::address::NetworkUnchecked;
+use bitcoin::{Address, Txid};
 use fedimint_core::Amount;
 use fedimint_core::core::{ModuleKind, OperationId};
 use fedimint_eventlog::{Event, EventKind, EventPersistence};
@@ -79,6 +80,8 @@ pub struct ReceivePaymentEvent {
     pub operation_id: OperationId,
     pub amount: Amount,
     pub txid: Txid,
+    pub address: Address<NetworkUnchecked>,
+    pub out_idx: u32,
 }
 
 impl Event for ReceivePaymentEvent {

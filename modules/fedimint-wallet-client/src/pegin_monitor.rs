@@ -19,6 +19,7 @@ use fedimint_core::util::FmtCompactAnyhow as _;
 use fedimint_core::{BitcoinHash, TransactionId, secp256k1, time};
 use fedimint_logging::LOG_CLIENT_MODULE_WALLET;
 use fedimint_wallet_common::WalletInput;
+use fedimint_wallet_common::tweakable::Tweakable;
 use fedimint_wallet_common::txoproof::PegInProof;
 use futures::StreamExt as _;
 use secp256k1::Keypair;
@@ -461,6 +462,16 @@ async fn claim_peg_in(
             )
             .await;
 
+        let module_ref = client_ctx.self_ref();
+        let cfg = module_ref.cfg();
+        let address = cfg
+            .peg_in_descriptor
+            .tweak(&tweak_key.public_key(), bitcoin::secp256k1::SECP256K1)
+            .address(cfg.network.0)
+            .expect("Failed to derive peg-in address from descriptor")
+            .as_unchecked()
+            .clone();
+
         client_ctx
             .log_event(
                 dbtx,
@@ -468,6 +479,8 @@ async fn claim_peg_in(
                     operation_id,
                     amount,
                     txid,
+                    address,
+                    out_idx,
                 },
             )
             .await;
