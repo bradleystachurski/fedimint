@@ -80,12 +80,22 @@ use crate::api::WalletFederationApi;
 use crate::backup::WalletRecovery;
 use crate::client_db::{
     ClaimedPegInData, ClaimedPegInKey, ClaimedPegInPrefix, NextPegInTweakIndexKey,
-    PegInTweakIndexData, PegInTweakIndexPrefix, RecoveryFinalizedKey, SupportsSafeDepositPrefix,
+    PegInPollingConfig, PegInPollingConfigKey, PegInTweakIndexData, PegInTweakIndexPrefix,
+    RecoveryFinalizedKey, SupportsSafeDepositPrefix,
 };
 use crate::deposit::DepositStateMachine;
 use crate::withdraw::{CreatedWithdrawState, WithdrawStateMachine, WithdrawStates};
 
 const WALLET_TWEAK_CHILD_ID: ChildId = ChildId(0);
+
+/// Configuration for aggressive polling of a peg-in address.
+#[derive(Debug, Clone)]
+pub struct PollingConfig {
+    /// How often to check for deposits.
+    pub interval: Duration,
+    /// How long to continue aggressive polling.
+    pub timeout: Duration,
+}
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct BitcoinTransactionData {
@@ -216,6 +226,7 @@ impl ModuleInit for WalletClientInit {
                     );
                 }
                 DbKeyPrefix::RecoveryState
+                | DbKeyPrefix::PegInPollingConfig
                 | DbKeyPrefix::ExternalReservedStart
                 | DbKeyPrefix::CoreInternalReservedStart
                 | DbKeyPrefix::CoreInternalReservedEnd => {}
@@ -1157,7 +1168,7 @@ impl WalletClientModule {
     ) -> anyhow::Result<()> {
         let tweak_idx = self.find_tweak_idx_by_operation_id(operation_id).await?;
 
-        self.recheck_pegin_address(tweak_idx).await
+        self.recheck_pegin_address(tweak_idx, None).await
     }
 
     /// Schedule given address for immediate re-check for deposits
@@ -1165,15 +1176,24 @@ impl WalletClientModule {
         &self,
         address: bitcoin::Address<NetworkUnchecked>,
     ) -> anyhow::Result<()> {
-        self.recheck_pegin_address(self.find_tweak_idx_by_address(address).await?)
+        self.recheck_pegin_address(self.find_tweak_idx_by_address(address).await?, None)
             .await
     }
 
     /// Schedule given address for immediate re-check for deposits
-    pub async fn recheck_pegin_address(&self, tweak_idx: TweakIdx) -> anyhow::Result<()> {
+    ///
+    /// If `polling` is provided, the address will be checked at the specified
+    /// interval until the timeout expires. Otherwise, default polling behavior
+    /// is used.
+    pub async fn recheck_pegin_address(
+        &self,
+        tweak_idx: TweakIdx,
+        polling: Option<PollingConfig>,
+    ) -> anyhow::Result<()> {
         self.db
             .autocommit(
                 |dbtx, _| {
+                    let polling = polling.clone();
                     Box::pin(async {
                         let db_key = PegInTweakIndexKey(tweak_idx);
                         let db_val = dbtx
@@ -1189,6 +1209,19 @@ impl WalletClientModule {
                             },
                         )
                         .await;
+
+                        if let Some(polling) = polling {
+                            dbtx.insert_entry(
+                                &PegInPollingConfigKey(tweak_idx),
+                                &PegInPollingConfig {
+                                    interval: polling.interval,
+                                    timeout_at: fedimint_core::time::now() + polling.timeout,
+                                },
+                            )
+                            .await;
+                        } else {
+                            dbtx.remove_entry(&PegInPollingConfigKey(tweak_idx)).await;
+                        }
 
                         let sender = self.pegin_monitor_wakeup_sender.clone();
                         dbtx.on_commit(move || {
@@ -1245,7 +1278,7 @@ impl WalletClientModule {
 
             if pegins.len() < num_deposits {
                 debug!(target: LOG_CLIENT_MODULE_WALLET, has=pegins.len(), "Not enough deposits");
-                self.recheck_pegin_address(tweak_idx).await?;
+                self.recheck_pegin_address(tweak_idx, None).await?;
                 runtime::sleep(backoff.next().unwrap_or_default()).await;
                 receiver.changed().await?;
                 continue;

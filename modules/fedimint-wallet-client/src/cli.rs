@@ -121,7 +121,7 @@ pub(crate) async fn handle_cli_command(
                 bail!("One and only one of the selector arguments must be set")
             }
             if let Some(tweak_idx) = tweak_idx {
-                module.recheck_pegin_address(tweak_idx).await?;
+                module.recheck_pegin_address(tweak_idx, None).await?;
             } else if let Some(operation_id) = operation_id {
                 module.recheck_pegin_address_by_op_id(operation_id).await?;
             } else if let Some(addr) = addr {

@@ -1,7 +1,7 @@
 use core::fmt;
 use std::ops;
 use std::str::FromStr;
-use std::time::SystemTime;
+use std::time::{Duration, SystemTime};
 
 use fedimint_client_module::module::init::recovery::RecoveryFromHistoryCommon;
 use fedimint_core::core::OperationId;
@@ -20,6 +20,7 @@ pub enum DbKeyPrefix {
     RecoveryFinalized = 0x2f,
     RecoveryState = 0x30,
     SupportsSafeDeposit = 0x31,
+    PegInPollingConfig = 0x32,
     /// Prefixes between 0xb0..=0xcf shall all be considered allocated for
     /// historical and future external use
     ExternalReservedStart = 0xb0,
@@ -209,4 +210,19 @@ impl_db_record!(
 impl_db_lookup!(
     key = SupportsSafeDepositKey,
     query_prefix = SupportsSafeDepositPrefix
+);
+
+#[derive(Debug, Clone, Encodable, Decodable)]
+pub struct PegInPollingConfigKey(pub TweakIdx);
+
+#[derive(Debug, Clone, Encodable, Decodable)]
+pub struct PegInPollingConfig {
+    pub interval: Duration,
+    pub timeout_at: SystemTime,
+}
+
+impl_db_record!(
+    key = PegInPollingConfigKey,
+    value = PegInPollingConfig,
+    db_prefix = DbKeyPrefix::PegInPollingConfig,
 );

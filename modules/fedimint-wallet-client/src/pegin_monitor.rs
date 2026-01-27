@@ -28,8 +28,8 @@ use tracing::{debug, instrument, trace, warn};
 
 use crate::api::WalletFederationApi as _;
 use crate::client_db::{
-    ClaimedPegInData, ClaimedPegInKey, PegInTweakIndexData, PegInTweakIndexKey,
-    PegInTweakIndexPrefix, TweakIdx,
+    ClaimedPegInData, ClaimedPegInKey, PegInPollingConfigKey, PegInTweakIndexData,
+    PegInTweakIndexKey, PegInTweakIndexPrefix, TweakIdx,
 };
 use crate::events::{
     DepositAwaitingConfs, DepositConfirmed, DepositInMempool, ReceivePaymentEvent,
@@ -187,8 +187,28 @@ async fn check_and_claim_idx_pegins(
     let now = time::now();
     match check_idx_pegins(data, due_key.0, btc_rpc, module_api, db, client_ctx).await {
         Ok(outcomes) => {
-            let next_check_time = CheckOutcome::retry_delay_vec(&outcomes, due_val.creation_time)
-                .map(|duration| now + duration);
+            let next_check_time = {
+                let base_delay = CheckOutcome::retry_delay_vec(&outcomes, due_val.creation_time);
+                let base_next = base_delay.map(|duration| now + duration);
+
+                // Check for polling config override
+                if let Some(polling_config) = db
+                    .begin_transaction_nc()
+                    .await
+                    .get_value(&PegInPollingConfigKey(due_key.0))
+                    .await
+                {
+                    if now < polling_config.timeout_at {
+                        // Polling still active - use polling interval
+                        Some(now + polling_config.interval)
+                    } else {
+                        // Polling expired - use base behavior
+                        base_next
+                    }
+                } else {
+                    base_next
+                }
+            };
             db
                 .autocommit(
                     |dbtx, _| {
@@ -199,6 +219,15 @@ async fn check_and_claim_idx_pegins(
                             dbtx.on_commit(move || {
                                 claimed_sender.send_replace(());
                             });
+
+                            // Remove expired polling config
+                            if let Some(polling_config) =
+                                dbtx.get_value(&PegInPollingConfigKey(due_key.0)).await
+                            {
+                                if now >= polling_config.timeout_at {
+                                    dbtx.remove_entry(&PegInPollingConfigKey(due_key.0)).await;
+                                }
+                            }
 
                             let peg_in_tweak_index_data = PegInTweakIndexData {
                                 next_check_time,
