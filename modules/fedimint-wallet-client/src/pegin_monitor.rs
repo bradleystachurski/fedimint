@@ -410,6 +410,7 @@ async fn check_idx_pegins(
                                     .log_event(
                                         dbtx,
                                         DepositInMempool {
+                                            tweak_idx,
                                             address,
                                             txid,
                                             out_idx,
@@ -444,6 +445,7 @@ async fn check_idx_pegins(
                                 .log_event(
                                     dbtx,
                                     DepositAwaitingConfs {
+                                        tweak_idx,
                                         address,
                                         txid,
                                         out_idx,

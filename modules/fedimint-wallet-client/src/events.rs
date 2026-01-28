@@ -5,6 +5,8 @@ use fedimint_core::core::{ModuleKind, OperationId};
 use fedimint_eventlog::{Event, EventKind, EventPersistence};
 use serde::{Deserialize, Serialize};
 
+use crate::client_db::TweakIdx;
+
 /// Event that is emitted when the client pegs-out ecash onchain
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub struct WithdrawRequest {
@@ -93,6 +95,7 @@ impl Event for ReceivePaymentEvent {
 /// Transient event emitted when a deposit is detected in the mempool.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DepositInMempool {
+    pub tweak_idx: TweakIdx,
     pub address: Address<NetworkUnchecked>,
     pub txid: Txid,
     pub out_idx: u32,
@@ -108,6 +111,7 @@ impl Event for DepositInMempool {
 /// Transient event emitted when a deposit is awaiting confirmations.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DepositAwaitingConfs {
+    pub tweak_idx: TweakIdx,
     pub address: Address<NetworkUnchecked>,
     pub txid: Txid,
     pub out_idx: u32,

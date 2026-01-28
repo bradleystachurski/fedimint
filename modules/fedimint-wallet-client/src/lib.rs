@@ -1126,6 +1126,10 @@ impl WalletClientModule {
             .ok_or_else(|| anyhow::format_err!("TweakIdx not found"))
     }
 
+    pub fn get_deposit_address(&self, tweak_idx: TweakIdx) -> Address {
+        self.data.derive_deposit_address(tweak_idx).2
+    }
+
     pub async fn get_claimed_pegins(
         &self,
         dbtx: &mut DatabaseTransaction<'_>,
